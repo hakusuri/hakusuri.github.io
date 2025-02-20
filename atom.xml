@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>HakusuriのBlog</title>
+  
+  
+  <link href="http://example.com/atom.xml" rel="self"/>
+  
+  <link href="http://example.com/"/>
+  <updated>2025-02-20T16:28:31.229Z</updated>
+  <id>http://example.com/</id>
+  
+  <author>
+    <name>hakusuri</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>NUKITASHI</title>
+    <link href="http://example.com/2025/02/21/NUKITASHI/"/>
+    <id>http://example.com/2025/02/21/NUKITASHI/</id>
+    <published>2025-02-20T16:02:29.000Z</published>
+    <updated>2025-02-20T16:28:31.229Z</updated>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;NUKITASHI-拔作岛-——并非拔作的剧情向&quot;&gt;&lt;a href=&quot;#NUKITASHI-拔作岛-——并非拔作的剧情向&quot; class=&quot;headerlink&quot; title=&quot; NUKITASHI(拔作岛)——并非拔作的剧情向&quot;&gt;&lt;/a&gt;&lt;center&gt; NUKI</summary>
+      
+    
+    
+    
+    
+    <category term="galgame" scheme="http://example.com/tags/galgame/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>实验</title>
+    <link href="http://example.com/2025/02/02/%E5%AE%9E%E9%AA%8C/"/>
+    <id>http://example.com/2025/02/02/%E5%AE%9E%E9%AA%8C/</id>
+    <published>2025-02-02T03:17:41.000Z</published>
+    <updated>2025-02-20T15:49:57.972Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;实验&quot;&gt;&lt;a href=&quot;#实验&quot; class=&quot;headerlink&quot; title=&quot;实验&quot;&gt;&lt;/a&gt;实验&lt;/h1&gt;&lt;p&gt;本页面为试验 Blog 是否成功&lt;/p&gt;</summary>
+    
+    
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://example.com/2025/02/02/hello-world/"/>
+    <id>http://example.com/2025/02/02/hello-world/</id>
+    <published>2025-02-02T03:00:48.779Z</published>
+    <updated>2025-02-02T03:00:48.779Z</updated>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for</summary>
+      
+    
+    
+    
+    
+  </entry>
+  
+</feed>
