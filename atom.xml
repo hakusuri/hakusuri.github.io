@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-02-20T16:32:23.055Z</updated>
+  <updated>2025-02-22T09:45:35.494Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,11 +17,150 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>应用层</title>
+    <link href="http://example.com/2025/02/22/%E5%BA%94%E7%94%A8%E5%B1%82/"/>
+    <id>http://example.com/2025/02/22/%E5%BA%94%E7%94%A8%E5%B1%82/</id>
+    <published>2025-02-22T09:41:42.000Z</published>
+    <updated>2025-02-22T09:45:35.494Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;应用层&quot;&gt;&lt;a href=&quot;#应用层&quot; class=&quot;headerlink&quot; title=&quot;应用层&quot;&gt;&lt;/a&gt;&lt;center&gt;应用层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;应用层是计算机网络体系结构的最顶层，是设计和建立计算机网络的最终目的，也是计算机网络中发展最快的部分：
+    a、早期基于文本的应用（电子邮件、远程登录、文件传输、新闻组）
+    b、20世纪90年代将因特网带入干家万户的万维网WWW
+    c、当今流行的即时通信、P2P文件共享及各种音视频应用
+    d、计算设备的小型化和“无处不在”，宽带住宅接入和无线接入的日益普及和迅速发展，为未来更多的新型应用提供了广阔的舞台。
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>网络层</title>
+    <link href="http://example.com/2025/02/22/%E7%BD%91%E7%BB%9C%E5%B1%82/"/>
+    <id>http://example.com/2025/02/22/%E7%BD%91%E7%BB%9C%E5%B1%82/</id>
+    <published>2025-02-22T09:41:37.000Z</published>
+    <updated>2025-02-22T09:45:19.995Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;网络层&quot;&gt;&lt;a href=&quot;#网络层&quot; class=&quot;headerlink&quot; title=&quot;网络层&quot;&gt;&lt;/a&gt;&lt;center&gt;网络层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;1、主要任务：实现网络互联，进而实现数据包在各个网络之间的传输。
+2、实现网络层需要解决的问题：
+    a、网络层需向运输层提供什么样的服务：可靠传输还是不可靠传输；
+    b、网络层寻址问题：如何标识和寻找网络上的主机(接口)；
+    c、路由选择问题：源站选择怎样的路径到达目的站。
+3、因特网(Internet)是目前全世界用户数量最多的互联网，它使用TCP/IP协议栈。
+4、由于TCP/IP协议栈的网络层使用网际协议IP，它是整个协议栈的核心协议，因此在TCP/IP协议栈中网络层常称为网际层
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>运输层</title>
+    <link href="http://example.com/2025/02/22/%E8%BF%90%E8%BE%93%E5%B1%82/"/>
+    <id>http://example.com/2025/02/22/%E8%BF%90%E8%BE%93%E5%B1%82/</id>
+    <published>2025-02-22T09:41:23.000Z</published>
+    <updated>2025-02-22T09:45:06.334Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;运输层&quot;&gt;&lt;a href=&quot;#运输层&quot; class=&quot;headerlink&quot; title=&quot;运输层&quot;&gt;&lt;/a&gt;&lt;center&gt;运输层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;a、计算机网络体系结构中的物理层、数据链路层以及网络层它们共同解决了将主机通过异构网络互联起来所面临的问题，实现了主机到主机的通信。
+b、在计算机网络中进行通信的真正实体是位于通信两端主机中的进程。
+c、运输层的任务是如何为运行在不同主机上的应用进程提供直接的通信服务，运输层协议又称为端到端协议。
+d、运输层向高层用户屏蔽了下面网络核心的细节(如网络拓扑、所采用的路由选择协议等)，它使应用进程看见的就好像是在两个运输层实体之间有一条端到端的逻辑通信信道。
+e、根据应用需求的不同，因特网的运输层为应用层提供了两种不同的运输协议，即面向连接的TCP和无连接的UDP。
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据链路层</title>
+    <link href="http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/"/>
+    <id>http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/</id>
+    <published>2025-02-22T09:41:14.000Z</published>
+    <updated>2025-02-22T09:44:37.008Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;数据链路层&quot;&gt;&lt;a href=&quot;#数据链路层&quot; class=&quot;headerlink&quot; title=&quot;数据链路层&quot;&gt;&lt;/a&gt;&lt;center&gt;数据链路层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;链路(Link)：从一个结点到相邻结点的一段物理线路，中间没有其他交换结点
+数据链路(Data Link)：将实现通信协议的硬件和软件加到链路上，构成数据链路
+数据链路层以帧为单位传输和处理数据
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>物理层</title>
+    <link href="http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/"/>
+    <id>http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/</id>
+    <published>2025-02-22T09:40:59.000Z</published>
+    <updated>2025-02-22T09:44:09.142Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;物理层&quot;&gt;&lt;a href=&quot;#物理层&quot; class=&quot;headerlink&quot; title=&quot;物理层&quot;&gt;&lt;/a&gt;&lt;center&gt;物理层&lt;/h1&gt;&lt;h2 id=&quot;基本概念&quot;&gt;&lt;a href=&quot;#基本概念&quot; class=&quot;headerlink&quot; title=&quot;基本概念&quot;&gt;&lt;/a&gt;基本概念&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;任务：在链接各种计算机的传输媒体上传输数据比特流
+与数据链路层关系：屏蔽了各种传输媒体的差异，使数据链路层仅需考虑完成本层的协议和服务，而不必考虑具体的传输媒体
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>概述</title>
+    <link href="http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/"/>
+    <id>http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/</id>
+    <published>2025-02-22T09:40:30.000Z</published>
+    <updated>2025-02-22T09:43:40.451Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;因特网概述&quot;&gt;&lt;a href=&quot;#因特网概述&quot; class=&quot;headerlink&quot; title=&quot; 因特网概述&quot;&gt;&lt;/a&gt;&lt;center&gt; 因特网概述&lt;/h1&gt;&lt;h2 id=&quot;网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot;&gt;&lt;a href=&quot;#网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot; class=&quot;headerlink&quot; title=&quot;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&quot;&gt;&lt;/a&gt;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;多个网络通过路由器互联，构成互联网。
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4 id=&quot;internet-与-Internet&quot;&gt;&lt;a href=&quot;#internet-与-Internet&quot; class=&quot;headerlink&quot; title=&quot;internet 与 Internet&quot;&gt;&lt;/a&gt;internet 与 Internet&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;internet泛指计算机网络，这些网络的通信协议可以是任意的；Internet为专用名词，特指当前全球最大的、最开放的、由众多网络互相连接而成的特定计算机网络，采用TCP/IP协议族作为通信规则，其前身为美国的ARPANET。
+&lt;/code&gt;&lt;/pre&gt;</summary>
+    
+    
+    
+    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    
+    
+    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
     <title>NUKITASHI</title>
     <link href="http://example.com/2025/02/21/NUKITASHI/"/>
     <id>http://example.com/2025/02/21/NUKITASHI/</id>
     <published>2025-02-20T16:02:29.000Z</published>
-    <updated>2025-02-20T16:32:23.055Z</updated>
+    <updated>2025-02-22T08:55:53.096Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;NUKITASHI-拔作岛-——并非拔作的剧情向&quot;&gt;&lt;a href=&quot;#NUKITASHI-拔作岛-——并非拔作的剧情向&quot; class=&quot;headerlink&quot; title=&quot; NUKITASHI(拔作岛)——并非拔作的剧情向&quot;&gt;&lt;/a&gt;&lt;center&gt; NUKITASHI(拔作岛)——并非拔作的剧情向&lt;/h1&gt;&lt;p&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; 以我个人来说，比起甜甜的废萌，有一定深度剧情的作品更能吸引我。而本作拔作岛，如其名，初见可能以为是为了搞颜色而搞颜色，但游玩下来你会发现，这是一个面对社会舆论的压力，一个普通人如何抉择的故事。&lt;/p&gt;
@@ -29,41 +168,10 @@
     
     
     
-    
-    <category term="galgame" scheme="http://example.com/tags/galgame/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>实验</title>
-    <link href="http://example.com/2025/02/02/%E5%AE%9E%E9%AA%8C/"/>
-    <id>http://example.com/2025/02/02/%E5%AE%9E%E9%AA%8C/</id>
-    <published>2025-02-02T03:17:41.000Z</published>
-    <updated>2025-02-20T16:32:03.203Z</updated>
+    <category term="galgame" scheme="http://example.com/categories/galgame/"/>
     
     
-    <summary type="html">&lt;h1 id=&quot;实验&quot;&gt;&lt;a href=&quot;#实验&quot; class=&quot;headerlink&quot; title=&quot;实验&quot;&gt;&lt;/a&gt;实验&lt;/h1&gt;&lt;p&gt;本页面为试验 Blog 是否成功&lt;/p&gt;</summary>
-    
-    
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://example.com/2025/02/02/hello-world/"/>
-    <id>http://example.com/2025/02/02/hello-world/</id>
-    <published>2025-02-02T03:00:48.779Z</published>
-    <updated>2025-02-02T03:00:48.779Z</updated>
-    
-    
-      
-      
-    <summary type="html">&lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.io/docs/&quot;&gt;documentation&lt;/a&gt; for</summary>
-      
-    
-    
-    
+    <category term="nukitashi" scheme="http://example.com/tags/nukitashi/"/>
     
   </entry>
   
