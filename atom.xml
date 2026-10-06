@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-03-13T10:51:53.580Z</updated>
+  <updated>2026-10-06T15:43:50.901Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -17,21 +17,539 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>第9讲 回归问题（线性回归）</title>
+    <link href="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/"/>
+    <id>http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/</id>
+    <published>2026-10-06T12:46:41.000Z</published>
+    <updated>2026-10-06T15:43:50.901Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-9-讲-回归问题（机器学习基础-一元与多元线性回归-可视化-PyTorch-实现）&quot;&gt;&lt;a href=&quot;#第-9-讲-回归问题（机器学习基础-一元与多元线性回归-可视化-PyTorch-实现）&quot; class=&quot;headerlink&quot; title=&quot;第 9 讲 回归问题（机器学习基础 &amp;#x2F; 一元与多元线性回归 &amp;#x2F; 可视化 &amp;#x2F; PyTorch 实现）&quot;&gt;&lt;/a&gt;第 9 讲 回归问题（机器学习基础 &amp;#x2F; 一元与多元线性回归 &amp;#x2F; 可视化 &amp;#x2F; PyTorch 实现）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;9.1 机器学习基础 → 9.2 一元线性回归 → 9.3 实例：解析法实现一元线性回归 → 9.4 多元线性回归 → 9.5 实例：解析法实现多元线性回归 → 9.6.1 三维数据可视化 → 9.6.2 实例：线性回归模型可视化 → 9.7.1 &amp;#x2F; 9.7.2 PyTorch 实现（解析法）&lt;/strong&gt;。&lt;br&gt;这是&lt;strong&gt;第一个完整的机器学习项目&lt;/strong&gt;：用最经典的”商品房房价预测”把”提出模型 → 定义损失 → 求解析解 → 预测 → 可视化”整条链路走一遍。全讲围绕两条主线——&lt;strong&gt;一元线性回归&lt;/strong&gt;与&lt;strong&gt;多元线性回归&lt;/strong&gt;，每种都给出 &lt;strong&gt;TensorFlow 版&lt;/strong&gt;与 &lt;strong&gt;PyTorch 版&lt;/strong&gt;两套实现。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;9.1 机器学习基础&lt;/td&gt;
+&lt;td&gt;从数据中学习、监督&amp;#x2F;无监督&amp;#x2F;半监督学习、样本集&amp;#x2F;属性&amp;#x2F;标记、回归 vs 分类&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.2 一元线性回归&lt;/td&gt;
+&lt;td&gt;模型 y&amp;#x3D;wx+b、损失函数、均方误差、最小二乘法、w 与 b 的解析解&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.3 实例（TensorFlow）&lt;/td&gt;
+&lt;td&gt;加载样本 → 计算 w、b → 预测房价 → 可视化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.4 多元线性回归&lt;/td&gt;
+&lt;td&gt;超平面、向量&amp;#x2F;矩阵形式、损失函数的矩阵表达、正规方程 W&amp;#x3D;(XᵀX)⁻¹XᵀY&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.5 实例（NumPy）&lt;/td&gt;
+&lt;td&gt;构造增广矩阵 X、np.stack&amp;#x2F;matmul&amp;#x2F;transpose&amp;#x2F;linalg.inv 求解 W、预测房价&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.6.1 三维数据可视化&lt;/td&gt;
+&lt;td&gt;mplot3d 工具集、Axes3D、scatter&amp;#x2F;plot_surface&amp;#x2F;plot_wireframe、np.meshgrid&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.6.2 线性回归模型可视化&lt;/td&gt;
+&lt;td&gt;用 W 画回归平面、改变视角观察、散点 + 线框图&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;9.7.1 &amp;#x2F; 9.7.2&lt;/td&gt;
+&lt;td&gt;PyTorch 解析法实现一元&amp;#x2F;多元线性回归（与 TensorFlow 版对照）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="线性回归" scheme="http://example.com/tags/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第8讲 PyTorch基础（子篇）</title>
+    <link href="http://example.com/2026/10/06/%E7%AC%AC8%E8%AE%B2-PyTorch%E5%9F%BA%E7%A1%80%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/"/>
+    <id>http://example.com/2026/10/06/%E7%AC%AC8%E8%AE%B2-PyTorch%E5%9F%BA%E7%A1%80%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/</id>
+    <published>2026-10-06T12:45:27.000Z</published>
+    <updated>2026-10-06T15:43:50.842Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-8-讲-PyTorch-基础（子篇：8-7-1-8-7-6）&quot;&gt;&lt;a href=&quot;#第-8-讲-PyTorch-基础（子篇：8-7-1-8-7-6）&quot; class=&quot;headerlink&quot; title=&quot;第 8 讲 PyTorch 基础（子篇：8.7.1 ~ 8.7.6）&quot;&gt;&lt;/a&gt;第 8 讲 PyTorch 基础（子篇：8.7.1 ~ 8.7.6）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;说明（已按 8.7.1~8.7.6 抽取稿逐字符复核并修订）&lt;/strong&gt;：课件 PDF 的文字抽取存在&lt;strong&gt;换行碎片化&lt;/strong&gt;现象。经本次逐字符实测：&lt;strong&gt;8.7.1~8.7.5 的代码文字完整保留大小写&lt;/strong&gt;（代码可与抽取稿逐字符核对），&lt;strong&gt;只有 8.7.6 的代码字体丢失全部小写字母&lt;/strong&gt;（大写字母、数字、下划线、括号、运算符保留），另有一条“双星号 &lt;code&gt;**&lt;/code&gt; 常整对丢失”的字体现象。因此本笔记：8.7.1~8.7.5 的代码按抽取稿照录（仅把换行碎片并回一行），8.7.6 的代码按“保留字符 + 上下文”还原。&lt;br&gt;课件的&lt;strong&gt;函数签名与参数说明按原文照录&lt;/strong&gt;；凡由上下文推断补全的内容，均单独用 “&amp;gt; 注：” 标注；课件没有给出的运行结果，本笔记&lt;strong&gt;不补写&lt;/strong&gt;。逐节核对表与遗留不确定处见文末 &lt;strong&gt;“附：代码还原的字符级核对（复核记录）”&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;本子篇对应课件：&lt;strong&gt;8.7.1 PyTorch 简介 → 8.7.2 创建张量 → 8.7.3 维度变换 → 8.7.4 部分采样 → 8.7.5 张量运算 → 8.7.6 自动求导&lt;/strong&gt;，是《第8讲-TensorFlow2.0基础.md》中 8.1~8.6 内容的 &lt;strong&gt;PyTorch 对照实现&lt;/strong&gt;。学完 TensorFlow 再看这一篇，重点应放在“&lt;strong&gt;同一个概念，两套 API 的差异&lt;/strong&gt;”。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本子篇速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;8.7.1 PyTorch 简介&lt;/td&gt;
+&lt;td&gt;由来与优点、版本发展、三大特性（动态计算图 &amp;#x2F; 张量计算 &amp;#x2F; 自动求导）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.7.2 创建张量&lt;/td&gt;
+&lt;td&gt;Tensor 属性、tensor &amp;#x2F; from_numpy、按数值创建、按概率分布创建、未初始化张量&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.7.3 维度变换&lt;/td&gt;
+&lt;td&gt;ndim&amp;#x2F;shape&amp;#x2F;size&amp;#x2F;numel、flatten&amp;#x2F;reshape&amp;#x2F;squeeze&amp;#x2F;unsqueeze、零维张量、expand&amp;#x2F;repeat&amp;#x2F;t&amp;#x2F;transpose&amp;#x2F;permute&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.7.4 部分采样&lt;/td&gt;
+&lt;td&gt;基本索引、一维&amp;#x2F;二维&amp;#x2F;多维切片、index_select &amp;#x2F; gather &amp;#x2F; masked_select &amp;#x2F; take &amp;#x2F; take_along_dim &amp;#x2F; where、cat &amp;#x2F; stack &amp;#x2F; split &amp;#x2F; chunk&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.7.5 张量运算&lt;/td&gt;
+&lt;td&gt;加减乘除、幂指对数、取整取余、比较、广播机制、mm &amp;#x2F; bmm &amp;#x2F; matmul、统计函数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.7.6 自动求导&lt;/td&gt;
+&lt;td&gt;autograd 机制、backward &amp;#x2F; grad、与 TensorFlow 对比、梯度下降法、一元与多元线性回归&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="PyTorch" scheme="http://example.com/tags/PyTorch/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第10讲 PyTorch梯度下降实现（子篇）</title>
+    <link href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/"/>
+    <id>http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/</id>
+    <published>2026-10-06T10:10:50.000Z</published>
+    <updated>2026-10-06T15:43:51.021Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-10-讲-PyTorch-梯度下降实现（子篇：10-7-1-10-7-5）&quot;&gt;&lt;a href=&quot;#第-10-讲-PyTorch-梯度下降实现（子篇：10-7-1-10-7-5）&quot; class=&quot;headerlink&quot; title=&quot;第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5）&quot;&gt;&lt;/a&gt;第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;代码还原声明（务必先读）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;本子篇的素材来自课件 PDF 的&lt;strong&gt;文字抽取&lt;/strong&gt;，抽取结果存在两个严重问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;换行碎片化&lt;/strong&gt;——一条代码语句常被拆成好几行（例：&lt;code&gt;w = torch.randn(1,&lt;/code&gt; 与 &lt;code&gt;requires_grad=True)&lt;/code&gt; 被拆成两行；&lt;code&gt;for i in range(num_epochs+1):&lt;/code&gt; 只剩 &lt;code&gt;(num_epochs+1):&lt;/code&gt;），个别行甚至整体丢失；&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;字体缺字形映射&lt;/strong&gt;——代码字体里的&lt;strong&gt;小写字母被整体丢掉&lt;/strong&gt;（渲染成空格），只有大写字母、数字和符号（&lt;code&gt;_ . = ( ) [ ] , % * - /&lt;/code&gt;）被保留。例：&lt;code&gt;torch.manual_seed(612)&lt;/code&gt; 抽取成 &lt;code&gt;.      _    (612)&lt;/code&gt;；&lt;code&gt;requires_grad=True&lt;/code&gt; 抽取成 &lt;code&gt;_    =T   )&lt;/code&gt;；&lt;code&gt;np.stack&lt;/code&gt; 抽取成 &lt;code&gt;[2].[5]&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;因此，&lt;strong&gt;本文中的代码是按 PyTorch 语义还原后的可运行代码&lt;/strong&gt;：语句结构、超参数、API 调用、运行结果与课件一致，但&lt;strong&gt;部分变量名的拼写无法逐字还原&lt;/strong&gt;（课件里的小写变量名在抽取中全部消失）。凡属&lt;strong&gt;推断补全&lt;/strong&gt;之处，均单独用「&amp;gt; 注：」标注；&lt;strong&gt;课件没有给出的运行结果，本笔记一律不补写&lt;/strong&gt;——文中终端输出与图均直接来自课件截图。&lt;/p&gt;
+&lt;p&gt;具体哪几处无法逐字还原，集中列在文末《附录 B：本子篇未能从 PDF 还原的内容》。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本子篇对应课件&lt;/strong&gt;：&lt;strong&gt;10.7.1 PyTorch 自动求导机制 → 10.7.2 PyTorch 实现梯度下降法（一元线性回归）→ 10.7.3 PyTorch 实现梯度下降法（多元线性回归）→ 10.7.4 PyTorch 实现波士顿房价预测（一元线性回归）→ 10.7.5 PyTorch 实现波士顿房价预测（多元线性回归）&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="PyTorch" scheme="http://example.com/tags/PyTorch/"/>
+    
+    <category term="梯度下降" scheme="http://example.com/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第10讲 梯度下降法</title>
+    <link href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/"/>
+    <id>http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/</id>
+    <published>2026-10-06T10:02:31.000Z</published>
+    <updated>2026-10-06T15:43:50.968Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-10-讲-梯度下降法（原理-求解线性回归-TensorFlow-自动求导-模型评估-波士顿房价预测）&quot;&gt;&lt;a href=&quot;#第-10-讲-梯度下降法（原理-求解线性回归-TensorFlow-自动求导-模型评估-波士顿房价预测）&quot; class=&quot;headerlink&quot; title=&quot;第 10 讲 梯度下降法（原理 &amp;#x2F; 求解线性回归 &amp;#x2F; TensorFlow 自动求导 &amp;#x2F; 模型评估 &amp;#x2F; 波士顿房价预测）&quot;&gt;&lt;/a&gt;第 10 讲 梯度下降法（原理 &amp;#x2F; 求解线性回归 &amp;#x2F; TensorFlow 自动求导 &amp;#x2F; 模型评估 &amp;#x2F; 波士顿房价预测）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;10.1 梯度下降原理 → 10.2 梯度下降法求解线性回归问题 → 10.3 TensorFlow 的自动求导机制 → 10.4 TensorFlow 实现梯度下降法 → 10.5 模型评估 → 10.6 实例：波士顿房价预测&lt;/strong&gt;，以及 &lt;strong&gt;10.7.x 的 PyTorch 实现&lt;/strong&gt;（另见《第10讲-PyTorch梯度下降实现（子篇）.md》）。&lt;br&gt;第 9 讲用&lt;strong&gt;解析法&lt;/strong&gt;一步求出线性回归的精确解；本讲改用**迭代法（梯度下降）**去逼近最优解——这才是深度学习真正的训练方式。学完本讲就能理解：&lt;strong&gt;框架帮我们做的核心事情之一，就是”自动求导 + 沿梯度反方向更新参数”。&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;10.1 梯度下降原理&lt;/td&gt;
+&lt;td&gt;解析解 vs 数值解、迭代法求极值、步长（学习率）的影响、一维&amp;#x2F;二维梯度&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;10.2 梯度下降法求解线性回归&lt;/td&gt;
+&lt;td&gt;一元与多元的损失函数、参数更新公式、NumPy 实现、&lt;strong&gt;归一化&lt;/strong&gt;（数据预处理）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;10.3 TensorFlow 自动求导&lt;/td&gt;
+&lt;td&gt;可训练变量 &lt;code&gt;tf.Variable&lt;/code&gt;、&lt;code&gt;tf.GradientTape&lt;/code&gt; 求一阶&amp;#x2F;二阶导、&lt;code&gt;watch&lt;/code&gt; 与 &lt;code&gt;persistent&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;10.4 TensorFlow 实现梯度下降&lt;/td&gt;
+&lt;td&gt;一元与多元的完整训练循环对比（NumPy 手算梯度 vs TF 自动求导）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;10.5 模型评估&lt;/td&gt;
+&lt;td&gt;训练误差 &amp;#x2F; 泛化误差、过拟合 &amp;#x2F; 欠拟合、训练集与测试集&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;10.6 波士顿房价预测&lt;/td&gt;
+&lt;td&gt;一元（RM 房间数）与多元（13 个属性）建模全流程 + 4 联图可视化&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="梯度下降" scheme="http://example.com/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第8讲 TensorFlow2.0基础</title>
+    <link href="http://example.com/2026/10/05/%E7%AC%AC8%E8%AE%B2-TensorFlow2.0%E5%9F%BA%E7%A1%80/"/>
+    <id>http://example.com/2026/10/05/%E7%AC%AC8%E8%AE%B2-TensorFlow2.0%E5%9F%BA%E7%A1%80/</id>
+    <published>2026-10-05T08:31:46.000Z</published>
+    <updated>2026-10-06T15:43:50.804Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-8-讲-TensorFlow-2-0-基础（特性-创建张量-维度变换-部分采样-张量运算-使用GPU）&quot;&gt;&lt;a href=&quot;#第-8-讲-TensorFlow-2-0-基础（特性-创建张量-维度变换-部分采样-张量运算-使用GPU）&quot; class=&quot;headerlink&quot; title=&quot;第 8 讲 TensorFlow 2.0 基础（特性 &amp;#x2F; 创建张量 &amp;#x2F; 维度变换 &amp;#x2F; 部分采样 &amp;#x2F; 张量运算 &amp;#x2F; 使用GPU）&quot;&gt;&lt;/a&gt;第 8 讲 TensorFlow 2.0 基础（特性 &amp;#x2F; 创建张量 &amp;#x2F; 维度变换 &amp;#x2F; 部分采样 &amp;#x2F; 张量运算 &amp;#x2F; 使用GPU）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;8.1 TensorFlow2.0 特性 → 8.2 创建张量 → 8.3 维度变换 → 8.4 部分采样 → 8.5 张量运算 → 8.6 使用GPU&lt;/strong&gt;，以及 &lt;strong&gt;8.7.x 的 PyTorch 对照部分&lt;/strong&gt;（另见《第8讲-PyTorch基础（子篇）.md》）与两份行业拓展资料（华为昇腾、海康威视观澜）。&lt;br&gt;这是深度学习框架的第一课：&lt;strong&gt;张量（Tensor）&lt;/strong&gt; 是 TensorFlow 里一切数据与运算的基本单位。本讲把”怎么造张量 → 怎么改形状 → 怎么切数据 → 怎么算 → 怎么用 GPU 算”这条主线走完。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;8.1 TensorFlow2.0 特性&lt;/td&gt;
+&lt;td&gt;发展历程、静态图 vs 动态图（Eager Execution）、API 清理、架构与框架特性&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.2 创建张量&lt;/td&gt;
+&lt;td&gt;张量 vs 列表 vs ndarray、tf.constant、.numpy()、数据类型、全 0&amp;#x2F;全 1&amp;#x2F;fill、随机数、range、属性&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.3 维度变换&lt;/td&gt;
+&lt;td&gt;存储与视图、tf.reshape、轴 axis、expand_dims&amp;#x2F;squeeze、transpose、concat&amp;#x2F;split、stack&amp;#x2F;unstack&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.4 部分采样&lt;/td&gt;
+&lt;td&gt;索引、切片（含负步长）、二维&amp;#x2F;三维&amp;#x2F;四维切片、tf.gather、tf.gather_nd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.5 张量运算&lt;/td&gt;
+&lt;td&gt;算术&amp;#x2F;幂指对数&amp;#x2F;其他函数、运算符重载、广播机制、张量与 NumPy 互转、矩阵乘法、统计函数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;8.6 使用 GPU&lt;/td&gt;
+&lt;td&gt;查看设备、指定 CPU&amp;#x2F;GPU、CPU 与 GPU 耗时对比&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="TensorFlow" scheme="http://example.com/tags/TensorFlow/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第7讲 数字图像基础</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/</id>
+    <published>2026-10-04T10:35:35.000Z</published>
+    <updated>2026-10-06T15:43:50.743Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）&quot;&gt;&lt;a href=&quot;#第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）&quot; class=&quot;headerlink&quot; title=&quot;第 7 讲 数字图像基础（图像基本概念 &amp;#x2F; Pillow &amp;#x2F; 手写数字数据集）&quot;&gt;&lt;/a&gt;第 7 讲 数字图像基础（图像基本概念 &amp;#x2F; Pillow &amp;#x2F; 手写数字数据集）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;7.1 数字图像基本概念 → 7.2 Pillow 图像处理库 → 7.3 手写数字数据集&lt;/strong&gt;。&lt;br&gt;这是深度学习实战前的”图像数据”准备篇：先搞清数字图像在计算机里到底怎么存（像素、位深度、色彩模式、格式），再学会用 &lt;strong&gt;Pillow&lt;/strong&gt; 把图像读进来、看属性、转色彩模式、拆通道、转成 NumPy 数组、缩放旋转裁剪，最后用经典的 &lt;strong&gt;MNIST 手写数字数据集&lt;/strong&gt; 把整条链路跑通。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;7.1 数字图像基本概念&lt;/td&gt;
+&lt;td&gt;图像离散化、像素与位图、位深度、二值&amp;#x2F;灰度&amp;#x2F;RGB&amp;#x2F;RGBA&amp;#x2F;256 色图像、图像格式、色彩模式、序列图像、深度图像&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;7.2 Pillow 图像处理库&lt;/td&gt;
+&lt;td&gt;打开&amp;#x2F;保存图像、图像对象属性、显示图像、转换色彩模式、通道分离与合并、转 NumPy 数组、颜色反向、缩放旋转镜像、裁剪&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;7.3 手写数字数据集&lt;/td&gt;
+&lt;td&gt;MNIST 数据集介绍、下载、训练&amp;#x2F;测试集形状、显示单张与随机 4 张手写数字&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="数字图像" scheme="http://example.com/tags/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第3讲 Python语言基础（1）</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/</id>
+    <published>2026-10-04T08:04:23.000Z</published>
+    <updated>2026-10-06T15:43:49.638Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第3讲-Python-语言基础（1）&quot;&gt;&lt;a href=&quot;#第3讲-Python-语言基础（1）&quot; class=&quot;headerlink&quot; title=&quot;第3讲 Python 语言基础（1）&quot;&gt;&lt;/a&gt;第3讲 Python 语言基础（1）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;3.1 初识 Python → 3.2 第一个 Python 程序 → 3.3 输入和输出 → 3.4 常量、变量和表达式（3.4.1 &amp;#x2F; 3.4.2）→ 3.5 程序控制语句（3.5.1 条件分支 &amp;#x2F; 3.5.2 循环）&lt;/strong&gt;，外加补充课件 &lt;em&gt;format 格式化输出&lt;/em&gt;。&lt;br&gt;笔记按课件小节顺序整理：先讲 Python 是什么、怎么跑起来，再讲变量与数据类型、运算符，最后讲条件与循环这两类程序控制结构。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;3.1 初识 Python&lt;/td&gt;
+&lt;td&gt;自由软件&amp;#x2F;开源软件、编译型与解释型语言、Python 版本与特点&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3.2 第一个 Python 程序&lt;/td&gt;
+&lt;td&gt;注释、赋值、动态类型、缩进与语句块、PEP8、大小写敏感&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3.3 输入和输出&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;input()&lt;/code&gt; &amp;#x2F; &lt;code&gt;print()&lt;/code&gt;、格式化输出 &lt;code&gt;%&lt;/code&gt;、转义字符、&lt;code&gt;end&lt;/code&gt; 参数&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3.4 常量、变量和表达式&lt;/td&gt;
+&lt;td&gt;6 种基本数据类型、标识符、常量与变量、类型转换、各类运算符&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;3.5 程序控制语句&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;if / if-else / if-elif-else&lt;/code&gt;、条件表达式、&lt;code&gt;while / for&lt;/code&gt;、&lt;code&gt;range()&lt;/code&gt;、&lt;code&gt;break / continue&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;补充&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;%&lt;/code&gt; 格式化与 &lt;code&gt;str.format()&lt;/code&gt; 的完整用法&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="Python" scheme="http://example.com/tags/Python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第6讲 Matplotlib数据可视化</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/</id>
+    <published>2026-10-04T08:04:23.000Z</published>
+    <updated>2026-10-06T15:43:50.637Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-6-讲-Matplotlib-数据可视化&quot;&gt;&lt;a href=&quot;#第-6-讲-Matplotlib-数据可视化&quot; class=&quot;headerlink&quot; title=&quot;第 6 讲 Matplotlib 数据可视化&quot;&gt;&lt;/a&gt;第 6 讲 Matplotlib 数据可视化&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;导读&lt;/strong&gt;：本讲解决”用 Python 把数据画出来”的问题，含 5 个小节：&lt;strong&gt;6.1 Matplotlib 绘图基础&lt;/strong&gt;（画布、子图、中文字体、标题、自动布局）、&lt;strong&gt;6.2 散点图&lt;/strong&gt;（scatter()、marker、图例）、&lt;strong&gt;6.3 折线图和柱状图&lt;/strong&gt;（plot()、bar()）、&lt;strong&gt;6.4 波士顿房价数据集可视化&lt;/strong&gt;、&lt;strong&gt;6.5 鸢尾花数据集可视化&lt;/strong&gt;（下载数据集、Pandas 读 csv、按类别着色画散点图），文末为 &lt;code&gt;tight_layout()&lt;/code&gt; 参数补充说明。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="Matplotlib" scheme="http://example.com/tags/Matplotlib/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第4讲 Python语言基础（2）</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/</id>
+    <published>2026-10-04T08:04:23.000Z</published>
+    <updated>2026-10-06T15:43:49.915Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-4-讲-Python-语言基础（2）学习笔记&quot;&gt;&lt;a href=&quot;#第-4-讲-Python-语言基础（2）学习笔记&quot; class=&quot;headerlink&quot; title=&quot;第 4 讲 Python 语言基础（2）学习笔记&quot;&gt;&lt;/a&gt;第 4 讲 Python 语言基础（2）学习笔记&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;导读&lt;/strong&gt;：本讲是《神经网络与深度学习》（中国大学 MOOC · 西安科技大学 · 牟琦）第 4 讲”04 Python 语言基础（2）”的内容整理，共 6 个部分：&lt;strong&gt;4.1 内置数据结构&lt;/strong&gt;（4.1.1 序列数据结构、4.1.2 字典和集合）、&lt;strong&gt;4.2 函数和模块&lt;/strong&gt;（4.2.1 函数、4.2.2 模块、包和库）、&lt;strong&gt;4.3 Python 面向对象编程&lt;/strong&gt;、&lt;strong&gt;4.4 文件&lt;/strong&gt;、&lt;strong&gt;4.5 异常处理&lt;/strong&gt;、&lt;strong&gt;4.6 上下文管理器&lt;/strong&gt;。这些内容是后续用 Python 编写深度学习程序（数据处理、模型代码组织、文件读写、错误处理）的基础。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="Python" scheme="http://example.com/tags/Python/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第5讲 NumPy科学计算库</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC5%E8%AE%B2-NumPy%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97%E5%BA%93/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC5%E8%AE%B2-NumPy%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97%E5%BA%93/</id>
+    <published>2026-10-04T08:04:23.000Z</published>
+    <updated>2026-10-06T15:43:50.203Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-5-讲-NumPy-科学计算库&quot;&gt;&lt;a href=&quot;#第-5-讲-NumPy-科学计算库&quot; class=&quot;headerlink&quot; title=&quot;第 5 讲 NumPy 科学计算库&quot;&gt;&lt;/a&gt;第 5 讲 NumPy 科学计算库&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;导读&lt;/strong&gt;：本讲介绍 Python 科学计算的基础库 NumPy，共 4 个小节 —— &lt;strong&gt;5.1 多维数组&lt;/strong&gt;（数组、下标、形状的概念）、&lt;strong&gt;5.2 创建 NumPy 数组&lt;/strong&gt;（安装导入、数组创建与访问、数组属性、数据类型、特殊数组函数、array 与 asarray 的区别）、&lt;strong&gt;5.3 数组运算&lt;/strong&gt;（切片、改变形状、数组间运算、矩阵运算、元素间运算与 axis、数组堆叠、综合实例）、&lt;strong&gt;5.4 矩阵和随机数&lt;/strong&gt;（matrix 对象、矩阵运算、numpy.random 随机数模块、随机种子与 shuffle）。文中示例代码与运行结果均取自课件截图。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="NumPy" scheme="http://example.com/tags/NumPy/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第1讲 人工智能的起源和发展</title>
+    <link href="http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/"/>
+    <id>http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/</id>
+    <published>2026-10-04T08:04:23.000Z</published>
+    <updated>2026-10-06T15:43:49.493Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第1讲-人工智能的起源和发展&quot;&gt;&lt;a href=&quot;#第1讲-人工智能的起源和发展&quot; class=&quot;headerlink&quot; title=&quot;第1讲 人工智能的起源和发展&quot;&gt;&lt;/a&gt;第1讲 人工智能的起源和发展&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;说明：本讲课件（1.1 &amp;#x2F; 1.2 &amp;#x2F; 1.3）也已导入工作区，这里一并整理成本笔记，方便与第 3–6 讲衔接复习。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;1.1 人工智能的诞生&lt;/td&gt;
+&lt;td&gt;图灵机模型、信息科学奠基、图灵测试、达特茅斯会议&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1.2 人工智能的发展&lt;/td&gt;
+&lt;td&gt;人工智能的定义、交叉学科属性、三次浪潮&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;1.3 机智过人 or 技不如人？&lt;/td&gt;
+&lt;td&gt;人机对弈三阶段、人工智能与生活、强弱人工智能&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="人工智能" scheme="http://example.com/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/"/>
+    
+  </entry>
+  
+  <entry>
     <title>python笔记</title>
     <link href="http://example.com/2025/03/05/python%E7%AC%94%E8%AE%B0/"/>
     <id>http://example.com/2025/03/05/python%E7%AC%94%E8%AE%B0/</id>
     <published>2025-03-05T13:58:38.000Z</published>
-    <updated>2025-03-13T10:51:53.580Z</updated>
+    <updated>2026-10-06T15:43:12.397Z</updated>
     
     
     <summary type="html">&lt;p&gt;大一下学的 python，任课教师李军好像是什么院领导来着。当时课终让交笔记，当时觉得好 sb，写个笔记有什么用。现在看来，我才是 sb。该篇为个人笔记，仅做留档。&lt;br&gt;ps：翻到最后看到以前写的课后题，写的什么简直是一坨屎&lt;br&gt;change：删除了课后题，只作笔记&lt;/p&gt;</summary>
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="编程语言" scheme="http://example.com/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/"/>
+    
+    <category term="Python" scheme="http://example.com/categories/%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80/Python/"/>
     
     
-    <category term="python" scheme="http://example.com/tags/python/"/>
+    <category term="Python" scheme="http://example.com/tags/Python/"/>
     
   </entry>
   
@@ -40,17 +558,21 @@
     <link href="http://example.com/2025/02/27/%E5%90%90%E6%A7%BD%E6%97%A5%E8%AE%B0/"/>
     <id>http://example.com/2025/02/27/%E5%90%90%E6%A7%BD%E6%97%A5%E8%AE%B0/</id>
     <published>2025-02-27T13:53:08.000Z</published>
-    <updated>2025-04-30T17:23:19.178Z</updated>
+    <updated>2026-10-06T15:43:10.679Z</updated>
     
     
     <summary type="html">这是私密文章，不持支查看~</summary>
     
     
     
-    <category term="personality" scheme="http://example.com/categories/personality/"/>
+    <category term="随笔" scheme="http://example.com/categories/%E9%9A%8F%E7%AC%94/"/>
+    
+    <category term="心情记录" scheme="http://example.com/categories/%E9%9A%8F%E7%AC%94/%E5%BF%83%E6%83%85%E8%AE%B0%E5%BD%95/"/>
     
     
     <category term="纪实" scheme="http://example.com/tags/%E7%BA%AA%E5%AE%9E/"/>
+    
+    <category term="生活" scheme="http://example.com/tags/%E7%94%9F%E6%B4%BB/"/>
     
   </entry>
   
@@ -59,7 +581,7 @@
     <link href="http://example.com/2025/02/22/%E5%BA%94%E7%94%A8%E5%B1%82/"/>
     <id>http://example.com/2025/02/22/%E5%BA%94%E7%94%A8%E5%B1%82/</id>
     <published>2025-02-22T09:41:42.000Z</published>
-    <updated>2025-02-22T09:45:35.494Z</updated>
+    <updated>2026-10-06T15:43:02.341Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;应用层&quot;&gt;&lt;a href=&quot;#应用层&quot; class=&quot;headerlink&quot; title=&quot;应用层&quot;&gt;&lt;/a&gt;&lt;center&gt;应用层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;应用层是计算机网络体系结构的最顶层，是设计和建立计算机网络的最终目的，也是计算机网络中发展最快的部分：
@@ -71,7 +593,9 @@
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -83,7 +607,7 @@
     <link href="http://example.com/2025/02/22/%E7%BD%91%E7%BB%9C%E5%B1%82/"/>
     <id>http://example.com/2025/02/22/%E7%BD%91%E7%BB%9C%E5%B1%82/</id>
     <published>2025-02-22T09:41:37.000Z</published>
-    <updated>2025-02-22T09:45:19.995Z</updated>
+    <updated>2026-10-06T15:42:59.900Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;网络层&quot;&gt;&lt;a href=&quot;#网络层&quot; class=&quot;headerlink&quot; title=&quot;网络层&quot;&gt;&lt;/a&gt;&lt;center&gt;网络层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;1、主要任务：实现网络互联，进而实现数据包在各个网络之间的传输。
@@ -97,7 +621,9 @@
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -109,7 +635,7 @@
     <link href="http://example.com/2025/02/22/%E8%BF%90%E8%BE%93%E5%B1%82/"/>
     <id>http://example.com/2025/02/22/%E8%BF%90%E8%BE%93%E5%B1%82/</id>
     <published>2025-02-22T09:41:23.000Z</published>
-    <updated>2025-02-22T09:45:06.334Z</updated>
+    <updated>2026-10-06T15:43:01.181Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;运输层&quot;&gt;&lt;a href=&quot;#运输层&quot; class=&quot;headerlink&quot; title=&quot;运输层&quot;&gt;&lt;/a&gt;&lt;center&gt;运输层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;a、计算机网络体系结构中的物理层、数据链路层以及网络层它们共同解决了将主机通过异构网络互联起来所面临的问题，实现了主机到主机的通信。
@@ -121,7 +647,9 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -133,7 +661,7 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     <link href="http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/"/>
     <id>http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/</id>
     <published>2025-02-22T09:41:14.000Z</published>
-    <updated>2025-02-22T09:44:37.008Z</updated>
+    <updated>2026-10-06T15:42:58.975Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;数据链路层&quot;&gt;&lt;a href=&quot;#数据链路层&quot; class=&quot;headerlink&quot; title=&quot;数据链路层&quot;&gt;&lt;/a&gt;&lt;center&gt;数据链路层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;链路(Link)：从一个结点到相邻结点的一段物理线路，中间没有其他交换结点
@@ -143,7 +671,9 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -155,7 +685,7 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     <link href="http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/"/>
     <id>http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/</id>
     <published>2025-02-22T09:40:59.000Z</published>
-    <updated>2025-02-22T09:44:09.142Z</updated>
+    <updated>2026-10-06T15:42:57.966Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;物理层&quot;&gt;&lt;a href=&quot;#物理层&quot; class=&quot;headerlink&quot; title=&quot;物理层&quot;&gt;&lt;/a&gt;&lt;center&gt;物理层&lt;/h1&gt;&lt;h2 id=&quot;基本概念&quot;&gt;&lt;a href=&quot;#基本概念&quot; class=&quot;headerlink&quot; title=&quot;基本概念&quot;&gt;&lt;/a&gt;基本概念&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;任务：在链接各种计算机的传输媒体上传输数据比特流
@@ -164,7 +694,9 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -176,7 +708,7 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     <link href="http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/"/>
     <id>http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/</id>
     <published>2025-02-22T09:40:30.000Z</published>
-    <updated>2025-02-22T09:43:40.451Z</updated>
+    <updated>2026-10-06T15:42:56.625Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;因特网概述&quot;&gt;&lt;a href=&quot;#因特网概述&quot; class=&quot;headerlink&quot; title=&quot; 因特网概述&quot;&gt;&lt;/a&gt;&lt;center&gt; 因特网概述&lt;/h1&gt;&lt;h2 id=&quot;网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot;&gt;&lt;a href=&quot;#网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot; class=&quot;headerlink&quot; title=&quot;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&quot;&gt;&lt;/a&gt;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;多个网络通过路由器互联，构成互联网。
@@ -186,7 +718,9 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     
-    <category term="Learning Notes" scheme="http://example.com/categories/Learning-Notes/"/>
+    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
+    
+    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
@@ -198,7 +732,7 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     <link href="http://example.com/2025/02/21/NUKITASHI/"/>
     <id>http://example.com/2025/02/21/NUKITASHI/</id>
     <published>2025-02-20T16:02:29.000Z</published>
-    <updated>2025-02-22T08:55:53.096Z</updated>
+    <updated>2026-10-06T15:43:11.359Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;NUKITASHI-拔作岛-——并非拔作的剧情向&quot;&gt;&lt;a href=&quot;#NUKITASHI-拔作岛-——并非拔作的剧情向&quot; class=&quot;headerlink&quot; title=&quot; NUKITASHI(拔作岛)——并非拔作的剧情向&quot;&gt;&lt;/a&gt;&lt;center&gt; NUKITASHI(拔作岛)——并非拔作的剧情向&lt;/h1&gt;&lt;p&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; 以我个人来说，比起甜甜的废萌，有一定深度剧情的作品更能吸引我。而本作拔作岛，如其名，初见可能以为是为了搞颜色而搞颜色，但游玩下来你会发现，这是一个面对社会舆论的压力，一个普通人如何抉择的故事。&lt;/p&gt;
@@ -206,10 +740,14 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     
-    <category term="galgame" scheme="http://example.com/categories/galgame/"/>
+    <category term="娱乐" scheme="http://example.com/categories/%E5%A8%B1%E4%B9%90/"/>
+    
+    <category term="galgame" scheme="http://example.com/categories/%E5%A8%B1%E4%B9%90/galgame/"/>
     
     
-    <category term="nukitashi" scheme="http://example.com/tags/nukitashi/"/>
+    <category term="galgame" scheme="http://example.com/tags/galgame/"/>
+    
+    <category term="游戏评测" scheme="http://example.com/tags/%E6%B8%B8%E6%88%8F%E8%AF%84%E6%B5%8B/"/>
     
   </entry>
   

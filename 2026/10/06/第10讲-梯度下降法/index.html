@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 10 讲 梯度下降法（原理 &#x2F; 求解线性回归 &#x2F; TensorFlow 自动求导 &#x2F; 模型评估 &#x2F; 波士顿房价预测） 本讲对应课件：10.1 梯度下降原理 → 10.2 梯度下降法求解线性回归问题 → 10.3 TensorFlow 的自动求导机制 → 10.4 TensorFlow 实现梯度下降法 → 10.5 模型评估 → 10.6 实例：波士顿房价">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第10讲 梯度下降法">
+<meta property="og:url" content="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 10 讲 梯度下降法（原理 &#x2F; 求解线性回归 &#x2F; TensorFlow 自动求导 &#x2F; 模型评估 &#x2F; 波士顿房价预测） 本讲对应课件：10.1 梯度下降原理 → 10.2 梯度下降法求解线性回归问题 → 10.3 TensorFlow 的自动求导机制 → 10.4 TensorFlow 实现梯度下降法 → 10.5 模型评估 → 10.6 实例：波士顿房价">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p04-01_585x360.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p27-01_1004x492.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p19-01_921x363.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p24-01_778x500.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p15-01_790x423.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p07-01_1086x600.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p16-01_814x464.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-gradient/p22-01_971x555.jpg">
+<meta property="article:published_time" content="2026-10-06T10:02:31.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:50.968Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="梯度下降">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl10-gradient/p04-01_585x360.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第10讲 梯度下降法 | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第10讲 梯度下降法
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-06 18:02:31 / 修改时间：23:43:50" itemprop="dateCreated datePublished" datetime="2026-10-06T18:02:31+08:00">2026-10-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>21k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>19 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-10-讲-梯度下降法（原理-求解线性回归-TensorFlow-自动求导-模型评估-波士顿房价预测）"><a href="#第-10-讲-梯度下降法（原理-求解线性回归-TensorFlow-自动求导-模型评估-波士顿房价预测）" class="headerlink" title="第 10 讲 梯度下降法（原理 &#x2F; 求解线性回归 &#x2F; TensorFlow 自动求导 &#x2F; 模型评估 &#x2F; 波士顿房价预测）"></a>第 10 讲 梯度下降法（原理 &#x2F; 求解线性回归 &#x2F; TensorFlow 自动求导 &#x2F; 模型评估 &#x2F; 波士顿房价预测）</h1><blockquote>
+<p>本讲对应课件：<strong>10.1 梯度下降原理 → 10.2 梯度下降法求解线性回归问题 → 10.3 TensorFlow 的自动求导机制 → 10.4 TensorFlow 实现梯度下降法 → 10.5 模型评估 → 10.6 实例：波士顿房价预测</strong>，以及 <strong>10.7.x 的 PyTorch 实现</strong>（另见《第10讲-PyTorch梯度下降实现（子篇）.md》）。<br>第 9 讲用<strong>解析法</strong>一步求出线性回归的精确解；本讲改用**迭代法（梯度下降）**去逼近最优解——这才是深度学习真正的训练方式。学完本讲就能理解：<strong>框架帮我们做的核心事情之一，就是”自动求导 + 沿梯度反方向更新参数”。</strong></p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10.1 梯度下降原理</td>
+<td>解析解 vs 数值解、迭代法求极值、步长（学习率）的影响、一维&#x2F;二维梯度</td>
+</tr>
+<tr>
+<td>10.2 梯度下降法求解线性回归</td>
+<td>一元与多元的损失函数、参数更新公式、NumPy 实现、<strong>归一化</strong>（数据预处理）</td>
+</tr>
+<tr>
+<td>10.3 TensorFlow 自动求导</td>
+<td>可训练变量 <code>tf.Variable</code>、<code>tf.GradientTape</code> 求一阶&#x2F;二阶导、<code>watch</code> 与 <code>persistent</code></td>
+</tr>
+<tr>
+<td>10.4 TensorFlow 实现梯度下降</td>
+<td>一元与多元的完整训练循环对比（NumPy 手算梯度 vs TF 自动求导）</td>
+</tr>
+<tr>
+<td>10.5 模型评估</td>
+<td>训练误差 &#x2F; 泛化误差、过拟合 &#x2F; 欠拟合、训练集与测试集</td>
+</tr>
+<tr>
+<td>10.6 波士顿房价预测</td>
+<td>一元（RM 房间数）与多元（13 个属性）建模全流程 + 4 联图可视化</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="10-1-梯度下降原理"><a href="#10-1-梯度下降原理" class="headerlink" title="10.1 梯度下降原理"></a>10.1 梯度下降原理</h2><h3 id="10-1-1-解析解与数值解"><a href="#10-1-1-解析解与数值解" class="headerlink" title="10.1.1 解析解与数值解"></a>10.1.1 解析解与数值解</h3><p>求解线性回归模型本质上是<strong>函数求极值</strong>问题。课件先区分两类解法：</p>
+<table>
+<thead>
+<tr>
+<th>解法</th>
+<th>定义</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>解析解（Analytical solution）</strong></td>
+<td>根据严格的推导和计算得到的解</td>
+<td>是方程的<strong>精确解</strong>，能够在<strong>任意精度</strong>下满足方程</td>
+</tr>
+<tr>
+<td><strong>数值解</strong></td>
+<td>通过某种近似计算得到的解</td>
+<td>能够在<strong>给定的精度</strong>下满足方程</td>
+</tr>
+</tbody></table>
+<p>第 9 讲用的最小二乘法&#x2F;正规方程就是<strong>解析解</strong>；本讲的梯度下降属于<strong>数值解（迭代法）</strong>。</p>
+<h3 id="10-1-2-用迭代法逼近极小值"><a href="#10-1-2-用迭代法逼近极小值" class="headerlink" title="10.1.2 用迭代法逼近极小值"></a>10.1.2 用迭代法逼近极小值</h3><p>课件用最简单的一元凸函数 <code>y = x² + 2</code> 演示”<strong>试探 + 迭代</strong>“的过程：每次从当前点出发，看往哪个方向走、走多远，能让函数值更小。</p>
+<p><strong>迭代的核心公式</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x_(k+1) = x_k - η · df/dx |_(x_k)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>η</code> 称为<strong>学习率（步长）</strong>；</li>
+<li>它同时干了两件事：<strong>自动确定下一次更新的方向</strong>（梯度的反方向）、<strong>自动调节步长</strong>；</li>
+<li>只要 <strong>loss 能描述成凸函数</strong>，就一定能用梯度下降法以最快速度更新权值向量，找到使损失函数达到最小值点的位置。</li>
+</ul>
+<h3 id="10-1-3-步长（学习率）的影响（课件三张表）"><a href="#10-1-3-步长（学习率）的影响（课件三张表）" class="headerlink" title="10.1.3 步长（学习率）的影响（课件三张表）"></a>10.1.3 步长（学习率）的影响（课件三张表）</h3><p>以 <code>y = x² + 2</code>、初值 <code>x₀ = 3</code> 为例：</p>
+<table>
+<thead>
+<tr>
+<th>步长</th>
+<th>现象</th>
+<th>课件结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0.2</code></td>
+<td><code>3 → 2.8 → 2.6 → ... → 0.2 → 0</code>，逐次逼近</td>
+<td>正常收敛</td>
+</tr>
+<tr>
+<td><code>0.5</code></td>
+<td><code>3 → 2.5 → 1.5 → 0.5 → 0</code>，两次就到位</td>
+<td>收敛很快</td>
+</tr>
+<tr>
+<td><code>0.7</code></td>
+<td><code>3 → 2.3 → 0.9 → 0.2 → -0.5 → 0.2 → -0.5 ...</code></td>
+<td><strong>震荡（overshoot the minimum）</strong>，在极小值两侧来回跳</td>
+</tr>
+</tbody></table>
+<p><strong>课件给出的结论</strong>：</p>
+<ul>
+<li><strong>步长太小</strong>：迭代次数多、<strong>收敛慢</strong>；</li>
+<li><strong>步长太大</strong>：引起<strong>震荡，可能无法收敛</strong>。</li>
+</ul>
+<h3 id="10-1-4-二元凸函数与梯度的几何意义"><a href="#10-1-4-二元凸函数与梯度的几何意义" class="headerlink" title="10.1.4 二元凸函数与梯度的几何意义"></a>10.1.4 二元凸函数与梯度的几何意义</h3><p><img src="/images/dl/dl10-gradient/p04-01_585x360.jpg" alt="第4页 一元凸函数求极值"></p>
+<p>对二元函数 <code>f(x, y)</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">梯度 grad f = (∂f/∂x, ∂f/∂y)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>模</strong>：等于<strong>方向导数的最大值</strong>；</li>
+<li><strong>方向</strong>：是取得<strong>最大方向导数</strong>的方向。</li>
+</ul>
+<p>因此<strong>沿梯度的反方向走，函数值下降最快</strong>——这正是”梯度下降”这个名字的由来。</p>
+<hr>
+<h2 id="10-2-梯度下降法求解线性回归问题"><a href="#10-2-梯度下降法求解线性回归问题" class="headerlink" title="10.2 梯度下降法求解线性回归问题"></a>10.2 梯度下降法求解线性回归问题</h2><h3 id="10-2-1-一元线性回归（一个参数用标量，两个参数用向量思维）"><a href="#10-2-1-一元线性回归（一个参数用标量，两个参数用向量思维）" class="headerlink" title="10.2.1 一元线性回归（一个参数用标量，两个参数用向量思维）"></a>10.2.1 一元线性回归（一个参数用标量，两个参数用向量思维）</h3><p><strong>损失函数</strong>（平方损失 &#x2F; 均方差）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = Σᵢ (yᵢ - w·xᵢ - b)²     或     Loss = (1/n)Σᵢ (yᵢ - w·xᵢ - b)²</span><br></pre></td></tr></table></figure>
+
+<p><strong>模型参数更新算法</strong>（对每个样本求和后更新）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">w_(k+1) = w_k - η · Σᵢ (w_k·xᵢ + b_k - yᵢ)·xᵢ</span><br><span class="line">b_(k+1) = b_k - η · Σᵢ (w_k·xᵢ + b_k - yᵢ)</span><br></pre></td></tr></table></figure>
+
+<p>问题形式化为：<code>argmin_(w,b) Loss(w, b)</code> —— 一个<strong>二元求极值问题</strong>。</p>
+<blockquote>
+<p>注意与第 9 讲的对照：解析法<strong>一步到位</strong>给出 <code>w、b</code>；梯度下降则从随机的 <code>w₀、b₀</code> 出发，<strong>反复迭代</strong>逐步逼近。</p>
+</blockquote>
+<h3 id="10-2-2-多元线性回归"><a href="#10-2-2-多元线性回归" class="headerlink" title="10.2.2 多元线性回归"></a>10.2.2 多元线性回归</h3><p>损失函数的矩阵形式与权值更新算法：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Loss = (Y - XW)ᵀ(Y - XW)</span><br><span class="line"></span><br><span class="line">Loss 对 W 的梯度：∂Loss/∂W = -2Xᵀ(Y - XW)</span><br><span class="line"></span><br><span class="line">权值更新算法：W_(k+1) = W_k - η · Xᵀ(XW_k - Y)</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-2-3-学习率（超参数）"><a href="#10-2-3-学习率（超参数）" class="headerlink" title="10.2.3 学习率（超参数）"></a>10.2.3 学习率（超参数）</h3><ul>
+<li><strong>超参数</strong>：<strong>在开始学习之前设置、不是通过训练得到的</strong>参数（学习率、迭代次数都属于超参数，而 <code>w</code>、<code>b</code> 是模型参数）；</li>
+<li><strong>对于凸函数，只要学习率设置得足够小，可以保证一定收敛</strong>。</li>
+</ul>
+<h3 id="10-2-4-NumPy-实现一元线性回归"><a href="#10-2-4-NumPy-实现一元线性回归" class="headerlink" title="10.2.4 NumPy 实现一元线性回归"></a>10.2.4 NumPy 实现一元线性回归</h3><p><strong>流程</strong>：加载 x,y → 设置 learn_rate、iter → 设置 <code>w₀, b₀</code>, i&#x3D;0 → 迭代更新 w,b 并计算 Loss → i &gt; iter 后使用模型输出结果。</p>
+<p><strong>① 加载数据、设置超参数、参数初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">x = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">              <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">              <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line">learn_rate = <span class="number">0.00001</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">100</span></span><br><span class="line">display_step = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">w = np.random.randn()</span><br><span class="line">b = np.random.randn()</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 训练模型（手算梯度）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">mse = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    dL_dw = np.mean(x * (w*x + b - y))     <span class="comment"># ∂Loss/∂w</span></span><br><span class="line">    dL_db = np.mean(w*x + b - y)           <span class="comment"># ∂Loss/∂b</span></span><br><span class="line"></span><br><span class="line">    w = w - learn_rate * dL_dw</span><br><span class="line">    b = b - learn_rate * dL_db</span><br><span class="line"></span><br><span class="line">    pred = w*x + b</span><br><span class="line">    Loss = <span class="number">0.5</span> * np.mean(np.square(y - pred))</span><br><span class="line">    mse.append(Loss)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Loss:%f, w: %f, b: %f&quot;</span> % (i, mse[i], w, b))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>课件里用的是<strong>均方差损失</strong>（已除以样本数 n），所以梯度只需 <code>np.mean(...)</code>，无需再除以 n。损失写成 <code>0.5 * mean(...)</code> 是为了求导时把平方的 2 约掉，这也是后面 <code>0.5*tf.reduce_mean(...)</code> 的由来。</p>
+</blockquote>
+<p><strong>③ 结果可视化（梯度下降 vs 解析解对照）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">plt.figure()</span><br><span class="line">plt.scatter(x, y, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;销售记录&quot;</span>)</span><br><span class="line">plt.plot(x, pred, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;梯度下降法&quot;</span>)</span><br><span class="line">plt.plot(x, <span class="number">0.89</span>*x + <span class="number">5.41</span>, color=<span class="string">&quot;green&quot;</span>, label=<span class="string">&quot;解析法&quot;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Area&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Price&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&quot;upper left&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>对照课件的结论：<strong>解析解 w&#x3D;0.8945604, b&#x3D;5.4108505</strong>，梯度下降迭代得到的直线与之几乎重合——说明迭代法能收敛到同一个最优解。</p>
+<h3 id="10-2-5-归一化（数据预处理）"><a href="#10-2-5-归一化（数据预处理）" class="headerlink" title="10.2.5 归一化（数据预处理）"></a>10.2.5 归一化（数据预处理）</h3><p><img src="/images/dl/dl10-gradient/p27-01_1004x492.jpg" alt="第27页 线性归一化代码"></p>
+<p>在多元回归中，各属性的取值范围可能相差几个数量级（面积上百、房间数个位数），因此需要<strong>归一化</strong>：</p>
+<ul>
+<li><strong>定义</strong>：将数据的值<strong>限制在一定的范围之内</strong>；</li>
+<li><strong>目的</strong>：使所有属性处于<strong>同一个范围、同一个数量级下，更快收敛到最优解</strong>，并<strong>提高学习器的精度</strong>；</li>
+<li><strong>三种方式</strong>：</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>做法</th>
+<th>公式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>线性归一化</strong></td>
+<td>对原始数据做<strong>线性变换</strong>、<strong>等比例缩放</strong>，所有数据被映射到 <strong>[0, 1]</strong> 之间</td>
+<td><code>x&#39; = (x - min) / (max - min)</code></td>
+</tr>
+<tr>
+<td><strong>标准差归一化</strong></td>
+<td>将数据集归一化为<strong>均值为 0、方差为 1</strong> 的标准正态分布</td>
+<td><code>x&#39; = (x - μ) / σ</code></td>
+</tr>
+<tr>
+<td><strong>非线性映射归一化</strong></td>
+<td>对原始数据做<strong>非线性变换</strong></td>
+<td>指数、对数、正切等</td>
+</tr>
+</tbody></table>
+<p>线性归一化的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">area = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, ..., <span class="number">86.21</span>])</span><br><span class="line">room = np.array([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line"></span><br><span class="line">x1 = (area - area.<span class="built_in">min</span>()) / (area.<span class="built_in">max</span>() - area.<span class="built_in">min</span>())</span><br><span class="line">x2 = (room - room.<span class="built_in">min</span>()) / (room.<span class="built_in">max</span>() - room.<span class="built_in">min</span>())</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>归一化的坑</strong>：训练集和测试集必须用<strong>同一组 min&#x2F;max</strong>（通常用训练集的），否则测试数据的归一化尺度不一致，预测会失真。</p>
+</blockquote>
+<h3 id="10-2-6-NumPy-实现多元线性回归（训练循环）"><a href="#10-2-6-NumPy-实现多元线性回归（训练循环）" class="headerlink" title="10.2.6 NumPy 实现多元线性回归（训练循环）"></a>10.2.6 NumPy 实现多元线性回归（训练循环）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mse = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    dL_dW = np.matmul(np.transpose(X), np.matmul(X, W) - Y)</span><br><span class="line">    W = W - learn_rate * dL_dW</span><br><span class="line"></span><br><span class="line">    PRED = np.matmul(X, W)</span><br><span class="line">    Loss = np.mean(np.square(Y - PRED)) / <span class="number">2</span></span><br><span class="line">    mse.append(Loss)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Loss:%f&quot;</span> % (i, mse[i]))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>课件在这一页之后还给出了 <code>... / num</code>（除以样本数）的版本，即 <code>dL_dW = np.matmul(np.transpose(X), np.matmul(X, W) - Y) / num</code>——与 10.4 的 TensorFlow 版一致。两种写法的区别只在<strong>梯度是否按样本数取平均</strong>，对应学习率的取值也要相应调整。</p>
+</blockquote>
+<hr>
+<h2 id="10-3-TensorFlow-的自动求导机制"><a href="#10-3-TensorFlow-的自动求导机制" class="headerlink" title="10.3 TensorFlow 的自动求导机制"></a>10.3 TensorFlow 的自动求导机制</h2><h3 id="10-3-1-可训练变量-tf-Variable"><a href="#10-3-1-可训练变量-tf-Variable" class="headerlink" title="10.3.1 可训练变量 tf.Variable"></a>10.3.1 可训练变量 <code>tf.Variable</code></h3><p><strong>Variable 对象</strong>是对 <strong>Tensor 对象的进一步封装</strong>：</p>
+<ul>
+<li>在模型训练过程中<strong>自动记录梯度信息</strong>，由算法<strong>自动优化</strong>；</li>
+<li>是<strong>可以被训练的变量</strong>；</li>
+<li>在机器学习中<strong>作为模型参数</strong>。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tf.Variable(initial_value, dtype)</span><br></pre></td></tr></table></figure>
+
+<p><code>initial_value</code> 可以是 Python 列表、ndarray 对象、Tensor 对象。</p>
+<p><strong>创建方式（课件示例）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">tf.Variable(<span class="number">3</span>)                                  <span class="comment"># &lt;tf.Variable &#x27;Variable:0&#x27; shape=() dtype=int32, numpy=3&gt;</span></span><br><span class="line">tf.Variable([<span class="number">1</span>, <span class="number">2</span>])                             <span class="comment"># shape=(2,) dtype=int32</span></span><br><span class="line">tf.Variable(np.array([<span class="number">1</span>, <span class="number">2</span>]))                   <span class="comment"># 从 ndarray 创建</span></span><br><span class="line">tf.Variable(<span class="number">3.</span>)                                 <span class="comment"># &lt;tf.Variable &#x27;Variable:0&#x27; shape=() dtype=float32, numpy=3.0&gt;</span></span><br><span class="line">tf.Variable([<span class="number">1</span>, <span class="number">2</span>], dtype=tf.float64)           <span class="comment"># 指定 dtype</span></span><br><span class="line">tf.Variable(tf.constant([[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]]))      <span class="comment"># 从 Tensor 创建</span></span><br><span class="line">tf.Variable(tf.zeros([<span class="number">2</span>, <span class="number">3</span>]))                   <span class="comment"># 全 0</span></span><br><span class="line">tf.Variable(tf.random.normal([<span class="number">2</span>, <span class="number">2</span>]))           <span class="comment"># 随机正态</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>变量名、属性与类型</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable([<span class="number">1</span>, <span class="number">2</span>])</span><br><span class="line">x                      <span class="comment"># &lt;tf.Variable &#x27;Variable:0&#x27; shape=(2,) dtype=int32, numpy=array([1, 2])&gt;</span></span><br><span class="line"><span class="built_in">print</span>(x.shape, x.dtype)   <span class="comment"># (2,) &lt;dtype: &#x27;int32&#x27;&gt;</span></span><br><span class="line"><span class="built_in">print</span>(x.numpy())          <span class="comment"># [1 2]</span></span><br><span class="line">x.trainable               <span class="comment"># True</span></span><br><span class="line"><span class="built_in">type</span>(x)                   <span class="comment"># tensorflow.python.ops.resource_variable_ops.ResourceVariable</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>赋值方法</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>对象名.assign(新值)</code></td>
+<td>整体赋值</td>
+</tr>
+<tr>
+<td><code>对象名.assign_add(增量)</code></td>
+<td>累加</td>
+</tr>
+<tr>
+<td><code>对象名.assign_sub(减量)</code></td>
+<td>累减</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable([<span class="number">1</span>, <span class="number">2</span>])</span><br><span class="line">x.assign([<span class="number">3</span>, <span class="number">4</span>])        <span class="comment"># array([3, 4])</span></span><br><span class="line">x.assign_add([<span class="number">1</span>, <span class="number">1</span>])    <span class="comment"># array([4, 5])</span></span><br><span class="line">x.assign_add([<span class="number">1</span>, <span class="number">1</span>])    <span class="comment"># array([5, 6])</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>⚠️ 关键区别：Tensor 与 Variable 不能混用</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a = tf.constant(<span class="number">2</span>)</span><br><span class="line">a.assign(<span class="number">3</span>)     <span class="comment"># AttributeError: &#x27;EagerTensor&#x27; object has no attribute &#x27;assign&#x27;</span></span><br><span class="line">a.trainable     <span class="comment"># AttributeError: &#x27;EagerTensor&#x27; object has no attribute &#x27;trainable&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a = tf.<span class="built_in">range</span>(<span class="number">5</span>)</span><br><span class="line">x = tf.Variable(a)</span><br><span class="line"><span class="built_in">isinstance</span>(a, tf.Tensor), <span class="built_in">isinstance</span>(a, tf.Variable)   <span class="comment"># (True, False)</span></span><br><span class="line"><span class="built_in">isinstance</span>(x, tf.Tensor), <span class="built_in">isinstance</span>(x, tf.Variable)   <span class="comment"># (False, True)</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>结论：<strong>普通张量（Tensor）不能赋值、没有 trainable 属性；只有被封装成 Variable 才能作为可训练参数</strong>。而 Variable 是由 Tensor 封装而来，所以 <code>isinstance(x, tf.Tensor)</code> 为 False。</p>
+</blockquote>
+<h3 id="10-3-2-自动求导：tf-GradientTape"><a href="#10-3-2-自动求导：tf-GradientTape" class="headerlink" title="10.3.2 自动求导：tf.GradientTape"></a>10.3.2 自动求导：<code>tf.GradientTape</code></h3><p>基本用法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    函数表达式</span><br><span class="line">grad = tape.gradient(函数, 自变量)</span><br></pre></td></tr></table></figure>
+
+<p><strong>例 1：一元函数求导</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    y = tf.square(x)</span><br><span class="line"></span><br><span class="line">dy_dx = tape.gradient(y, x)</span><br><span class="line"><span class="built_in">print</span>(y)        <span class="comment"># tf.Tensor(9.0, shape=(), dtype=float32)</span></span><br><span class="line"><span class="built_in">print</span>(dy_dx)    <span class="comment"># tf.Tensor(6.0, shape=(), dtype=float32)</span></span><br></pre></td></tr></table></figure>
+
+<p>因为 <code>y = x²</code>，在 <code>x=3</code> 处 <code>dy/dx = 2x = 6</code> —— <strong>与手算完全一致</strong>。</p>
+<p><strong>⚠️ 同一个 tape 只能求一次梯度</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    y = tf.square(x)</span><br><span class="line">    z = <span class="built_in">pow</span>(x, <span class="number">3</span>)</span><br><span class="line">dy_dx = tape.gradient(y, x)</span><br><span class="line">dz_dx = tape.gradient(z, x)     <span class="comment"># RuntimeError</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RuntimeError: GradientTape.gradient can only be called once on non-persistent tapes.</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决办法 1：<code>persistent=True</code>（求完记得 <code>del tape</code>）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape(persistent=<span class="literal">True</span>) <span class="keyword">as</span> tape:</span><br><span class="line">    y = tf.square(x)</span><br><span class="line">    z = <span class="built_in">pow</span>(x, <span class="number">3</span>)</span><br><span class="line">dy_dx = tape.gradient(y, x)     <span class="comment"># 6.0</span></span><br><span class="line">dz_dx = tape.gradient(z, x)     <span class="comment"># 27.0   （z = x³，dz/dx = 3x² = 27）</span></span><br><span class="line"><span class="keyword">del</span> tape</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决办法 2：<code>watch_accessed_variables=False</code> + 手动 <code>watch()</code></strong></p>
+<p><img src="/images/dl/dl10-gradient/p19-01_921x363.jpg" alt="第19页 tape.watch() 手动添加监视"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape(watch_accessed_variables=<span class="literal">False</span>) <span class="keyword">as</span> tape:</span><br><span class="line">    y = tf.square(x)</span><br><span class="line">dy_dx = tape.gradient(y, x)</span><br><span class="line"><span class="built_in">print</span>(y)      <span class="comment"># tf.Tensor(9.0, ...)</span></span><br><span class="line"><span class="built_in">print</span>(dy_dx)  <span class="comment"># None      ← 没有监视，梯度为 None</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape(watch_accessed_variables=<span class="literal">False</span>) <span class="keyword">as</span> tape:</span><br><span class="line">    tape.watch(x)          <span class="comment"># 手动添加监视</span></span><br><span class="line">    y = tf.square(x)</span><br><span class="line">dy_dx = tape.gradient(y, x)     <span class="comment"># 6.0</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>监视”非可训练变量”</strong>：<code>watch()</code> 也能监视普通的 Tensor（常量）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">x = tf.constant(<span class="number">3.</span>)       <span class="comment"># 用 constant 而不是 Variable</span></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape(watch_accessed_variables=<span class="literal">False</span>) <span class="keyword">as</span> tape:</span><br><span class="line">    tape.watch(x)</span><br><span class="line">    y = tf.square(x)</span><br><span class="line">dy_dx = tape.gradient(y, x)     <span class="comment"># 6.0</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>例 2：多元函数求偏导</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line">y = tf.Variable(<span class="number">4.</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    f = tf.square(x) + <span class="number">2</span>*tf.square(y) + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">df_dx, df_dy = tape.gradient(f, [x, y])</span><br><span class="line"><span class="built_in">print</span>(f)         <span class="comment"># tf.Tensor(42.0, ...)   （3² + 2×4² + 1 = 9 + 32 + 1 = 42）</span></span><br><span class="line"><span class="built_in">print</span>(df_dx)     <span class="comment"># tf.Tensor(6.0, ...)    （∂f/∂x = 2x = 6）</span></span><br><span class="line"><span class="built_in">print</span>(df_dy)     <span class="comment"># tf.Tensor(16.0, ...)   （∂f/∂y = 4y = 16）</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>例 3：求二阶导数</strong>（嵌套两个 persistent tape）</p>
+<p><img src="/images/dl/dl10-gradient/p24-01_778x500.jpg" alt="第24页 嵌套 GradientTape 求二阶导数"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable(<span class="number">3.</span>)</span><br><span class="line">y = tf.Variable(<span class="number">4.</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape(persistent=<span class="literal">True</span>) <span class="keyword">as</span> tape2:</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape(persistent=<span class="literal">True</span>) <span class="keyword">as</span> tape1:</span><br><span class="line">        f = tf.square(x) + <span class="number">2</span>*tf.square(y) + <span class="number">1</span></span><br><span class="line">    first_grads = tape1.gradient(f, [x, y])</span><br><span class="line"></span><br><span class="line">second_grads = [tape2.gradient(first_grads, [x, y])]</span><br><span class="line"><span class="built_in">print</span>(f)              <span class="comment"># 42.0</span></span><br><span class="line"><span class="built_in">print</span>(first_grads)    <span class="comment"># [6.0, 16.0]</span></span><br><span class="line"><span class="built_in">print</span>(second_grads)   <span class="comment"># [[2.0, 4.0]]</span></span><br><span class="line"><span class="keyword">del</span> tape1</span><br><span class="line"><span class="keyword">del</span> tape2</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>二阶导结果解释：<code>∂²f/∂x² = 2</code>、<code>∂²f/∂y² = 4</code> —— 正是平方项系数的两倍。</p>
+</blockquote>
+<p><strong>例 4：对向量求偏导</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x = tf.Variable([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>])</span><br><span class="line">y = tf.Variable([<span class="number">4.</span>, <span class="number">5.</span>, <span class="number">6.</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    f = tf.square(x) + <span class="number">2</span>*tf.square(y) + <span class="number">1</span></span><br><span class="line"></span><br><span class="line">df_dx, df_dy = tape.gradient(f, [x, y])</span><br><span class="line"><span class="built_in">print</span>(f)        <span class="comment"># tf.Tensor([34. 55. 82.], shape=(3,), dtype=float32)</span></span><br><span class="line"><span class="built_in">print</span>(df_dx)    <span class="comment"># tf.Tensor([2. 4. 6.], ...)    （2x）</span></span><br><span class="line"><span class="built_in">print</span>(df_dy)    <span class="comment"># tf.Tensor([16. 20. 24.], ...) （4y）</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>小结（这一节要记住的三件事）</strong></p>
+<table>
+<thead>
+<tr>
+<th>要点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>谁能被求导</td>
+<td>被 tape <strong>监视</strong>的变量；Variable 自动被监视，普通 Tensor 需 <code>tape.watch()</code></td>
+</tr>
+<tr>
+<td>能用几次</td>
+<td>默认（非 persistent）<strong>只能求一次</strong>；多次求导用 <code>persistent=True</code>，用完 <code>del tape</code> 释放</td>
+</tr>
+<tr>
+<td>怎么取结果</td>
+<td><code>tape.gradient(目标, 自变量)</code>；自变量可以是列表，返回对应的梯度列表</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-4-TensorFlow-实现梯度下降法"><a href="#10-4-TensorFlow-实现梯度下降法" class="headerlink" title="10.4 TensorFlow 实现梯度下降法"></a>10.4 TensorFlow 实现梯度下降法</h2><h3 id="10-4-1-NumPy-实现（作对照）"><a href="#10-4-1-NumPy-实现（作对照）" class="headerlink" title="10.4.1 NumPy 实现（作对照）"></a>10.4.1 NumPy 实现（作对照）</h3><p><strong>一元线性回归——超参数与初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.00001</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">100</span></span><br><span class="line">display_step = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">w = np.random.randn()</span><br><span class="line">b = np.random.randn()</span><br></pre></td></tr></table></figure>
+
+<p><strong>一元线性回归——训练循环</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mse = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line">    pred = w*x + b</span><br><span class="line">    Loss = <span class="number">0.5</span> * np.mean(np.square(y - pred))</span><br><span class="line">    mse.append(Loss)</span><br><span class="line"></span><br><span class="line">    dL_dw = np.mean(x * (w*x + b - y))</span><br><span class="line">    dL_db = np.mean(w*x + b - y)</span><br><span class="line"></span><br><span class="line">    w = w - learn_rate * dL_dw</span><br><span class="line">    b = b - learn_rate * dL_db</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Loss:%f&quot;</span> % (i, mse[i]))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果（学习率 0.0001、迭代 10 次时的另一组设置）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">i: 0,  Loss:4749.362486, w: 0.946047, b: -1.153577</span><br><span class="line">i: 1,  Loss:89.861841,  w: 0.957843, b: -1.153412</span><br><span class="line">i: 2,  Loss:89.157502,  w: 0.957987, b: -1.153359</span><br><span class="line">...</span><br><span class="line">i: 10, Loss:89.157186,  w: 0.957985, b: -1.152950</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>观察：<strong>Loss 在第 1 次迭代就降了两个数量级</strong>，之后缓慢下降——这就是”离极值远时步子大、接近极值时步子小”的典型曲线。</p>
+</blockquote>
+<h3 id="10-4-2-TensorFlow-实现一元线性回归"><a href="#10-4-2-TensorFlow-实现一元线性回归" class="headerlink" title="10.4.2 TensorFlow 实现一元线性回归"></a>10.4.2 TensorFlow 实现一元线性回归</h3><p>关键差别只有三处：<strong>参数要用 <code>tf.Variable</code> 封装</strong>、<strong>梯度交给 <code>GradientTape</code> 自动求</strong>、<strong>更新用 <code>assign_sub</code></strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;TensorFlow version:&quot;</span>, tf.__version__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">x = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">              <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">              <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line">learn_rate = <span class="number">0.0001</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">10</span></span><br><span class="line">display_step = <span class="number">1</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">w = tf.Variable(np.random.randn())</span><br><span class="line">b = tf.Variable(np.random.randn())</span><br><span class="line"></span><br><span class="line">mse = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        pred = w*x + b</span><br><span class="line">        Loss = <span class="number">0.5</span> * tf.reduce_mean(tf.square(y - pred))</span><br><span class="line">    mse.append(Loss)</span><br><span class="line"></span><br><span class="line">    dL_dw, dL_db = tape.gradient(Loss, [w, b])</span><br><span class="line"></span><br><span class="line">    w.assign_sub(learn_rate * dL_dw)</span><br><span class="line">    b.assign_sub(learn_rate * dL_db)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Loss: %f, w: %f, b: %f&quot;</span> % (i, Loss, w.numpy(), b.numpy()))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>（与上面的 NumPy 版数值一致）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i: 0,  Loss: 4749.362305, w: 0.946047, b: -1.153577</span><br><span class="line">i: 1,  Loss: 89.861855,  w: 0.957843, b: -1.153412</span><br><span class="line">...</span><br><span class="line">i: 10, Loss: 89.157196,  w: 0.957985, b: -1.152950</span><br></pre></td></tr></table></figure>
+
+<p><strong>TensorFlow 版与 NumPy 版的对照（这张表是本讲的重点）</strong></p>
+<table>
+<thead>
+<tr>
+<th>环节</th>
+<th>NumPy 版</th>
+<th>TensorFlow 版</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>参数</td>
+<td><code>w = np.random.randn()</code></td>
+<td><code>w = tf.Variable(np.random.randn())</code></td>
+</tr>
+<tr>
+<td>求导</td>
+<td><strong>手写公式</strong>：<code>dL_dw = np.mean(x * (w*x + b - y))</code></td>
+<td><strong>自动求导</strong>：<code>dL_dw, dL_db = tape.gradient(Loss, [w, b])</code></td>
+</tr>
+<tr>
+<td>更新</td>
+<td><code>w = w - learn_rate * dL_dw</code></td>
+<td><code>w.assign_sub(learn_rate * dL_dw)</code></td>
+</tr>
+<tr>
+<td>损失</td>
+<td><code>0.5 * np.mean(np.square(y - pred))</code></td>
+<td><code>0.5 * tf.reduce_mean(tf.square(y - pred))</code></td>
+</tr>
+</tbody></table>
+<h3 id="10-4-3-TensorFlow-实现多元线性回归"><a href="#10-4-3-TensorFlow-实现多元线性回归" class="headerlink" title="10.4.3 TensorFlow 实现多元线性回归"></a>10.4.3 TensorFlow 实现多元线性回归</h3><p><img src="/images/dl/dl10-gradient/p15-01_790x423.jpg" alt="第15页 TensorFlow 多元回归训练循环"></p>
+<p><strong>① 数据与归一化</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">area = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">                 <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">room = np.array([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">price = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">                  <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line">num = <span class="built_in">len</span>(area)</span><br><span class="line"></span><br><span class="line">x0 = np.ones(num)</span><br><span class="line">x1 = (area - area.<span class="built_in">min</span>()) / (area.<span class="built_in">max</span>() - area.<span class="built_in">min</span>())</span><br><span class="line">x2 = (room - room.<span class="built_in">min</span>()) / (room.<span class="built_in">max</span>() - room.<span class="built_in">min</span>())</span><br><span class="line"></span><br><span class="line">X = np.stack((x0, x1, x2), axis=<span class="number">1</span>)     <span class="comment"># (16, 3)  增广矩阵</span></span><br><span class="line">Y = price.reshape(-<span class="number">1</span>, <span class="number">1</span>)               <span class="comment"># (16, 1)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>② 超参数与变量初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.2</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">50</span></span><br><span class="line">display_step = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">W = tf.Variable(np.random.randn(<span class="number">3</span>, <span class="number">1</span>))   <span class="comment"># 注意这里是 (3,1) 的矩阵，不是标量</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 训练循环（向量化）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mse = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED = tf.matmul(X, W)</span><br><span class="line">        Loss = <span class="number">0.5</span> * tf.reduce_mean(tf.square(Y - PRED))</span><br><span class="line">    mse.append(Loss)</span><br><span class="line"></span><br><span class="line">    dL_dW = tape.gradient(Loss, W)</span><br><span class="line">    W.assign_sub(learn_rate * dL_dW)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Loss: %f&quot;</span> % (i, Loss))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">i: 0,   Loss: 4593.851656</span><br><span class="line">i: 10,  Loss: 85.480869</span><br><span class="line">i: 20,  Loss: 82.080953</span><br><span class="line">i: 30,  Loss: 81.408948</span><br><span class="line">i: 40,  Loss: 81.025841</span><br><span class="line">i: 50,  Loss: 80.803450</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>一元与多元的写法差异</strong>：一元时 <code>w</code>、<code>b</code> 是两个标量，梯度要 <code>tape.gradient(Loss, [w, b])</code> 分别取；多元时把参数合成一个向量 <code>W</code>（shape 为 <code>(3,1)</code>，第 0 个就是偏置 <code>b</code>），只需要 <code>tape.gradient(Loss, W)</code> 一次。<strong>这就是为什么多元回归必须补一列 1</strong>（第 9 讲的重点在此再次出现）。</p>
+</blockquote>
+<hr>
+<h2 id="10-5-模型评估"><a href="#10-5-模型评估" class="headerlink" title="10.5 模型评估"></a>10.5 模型评估</h2><h3 id="10-5-1-误差与泛化"><a href="#10-5-1-误差与泛化" class="headerlink" title="10.5.1 误差与泛化"></a>10.5.1 误差与泛化</h3><ul>
+<li><strong>误差（error）</strong>：学习器的<strong>预测输出</strong>和样本的<strong>真实标记</strong>之间的差异。</li>
+<li><strong>训练误差（training error）</strong>：<strong>训练集</strong>上的误差。</li>
+<li><strong>泛化误差（generalization error）</strong>：在<strong>新样本</strong>上的误差。</li>
+</ul>
+<h3 id="10-5-2-过拟合与欠拟合"><a href="#10-5-2-过拟合与欠拟合" class="headerlink" title="10.5.2 过拟合与欠拟合"></a>10.5.2 过拟合与欠拟合</h3><table>
+<thead>
+<tr>
+<th>现象</th>
+<th>含义</th>
+<th>表现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>过拟合（overfitting）</strong></td>
+<td><strong>学习过度</strong></td>
+<td>在训练集上表现很好，在<strong>新样本上泛化误差很大</strong></td>
+</tr>
+<tr>
+<td><strong>欠拟合（underfitting）</strong></td>
+<td><strong>学习不足</strong></td>
+<td>没有学习到样本中的<strong>通用特征</strong></td>
+</tr>
+</tbody></table>
+<h3 id="10-5-3-训练集与测试集"><a href="#10-5-3-训练集与测试集" class="headerlink" title="10.5.3 训练集与测试集"></a>10.5.3 训练集与测试集</h3><ul>
+<li><strong>机器学习的目标</strong>：<strong>泛化误差小</strong>；</li>
+<li><strong>训练集（training set）</strong>：<strong>训练模型</strong>用；</li>
+<li><strong>测试集（testing set）</strong>：<strong>测试学习器在新样本上的预测或判断能力</strong>；</li>
+<li><strong>测试误差（testing error）</strong>：用来<strong>近似泛化误差</strong>。</li>
+</ul>
+<blockquote>
+<p>实践要点：<strong>只能用训练集来训练参数</strong>，测试集在训练过程中<strong>不能参与参数更新</strong>——否则测试误差就不再是泛化误差的近似。本讲 10.6 的实现里，每一步都会同时记录 <code>loss_train</code> 和 <code>loss_test</code>，但<strong>只有 <code>loss_train</code> 被用于求梯度</strong>。</p>
+</blockquote>
+<hr>
+<h2 id="10-6-实例：波士顿房价预测"><a href="#10-6-实例：波士顿房价预测" class="headerlink" title="10.6 实例：波士顿房价预测"></a>10.6 实例：波士顿房价预测</h2><h3 id="10-6-1-一元线性回归（用房间数预测房价）"><a href="#10-6-1-一元线性回归（用房间数预测房价）" class="headerlink" title="10.6.1 一元线性回归（用房间数预测房价）"></a>10.6.1 一元线性回归（用房间数预测房价）</h3><p><img src="/images/dl/dl10-gradient/p07-01_1086x600.jpg" alt="第7页 波士顿一元回归训练循环（记录训练&#x2F;测试损失）"></p>
+<p><strong>① 加载数据集</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">boston_housing = tf.keras.datasets.boston_housing</span><br><span class="line">(train_x, train_y), (test_x, test_y) = boston_housing.load_data()</span><br><span class="line"></span><br><span class="line">train_x.shape, train_y.shape     <span class="comment"># ((404, 13), (404,))</span></span><br><span class="line">test_x.shape, test_y.shape       <span class="comment"># ((102, 13), (102,))</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>数据集共 <strong>506 条</strong>样本（404 训练 + 102 测试），每条 <strong>13 个属性</strong>、1 个标签（房价，单位 1000 美元）。</p>
+</blockquote>
+<p><strong>② 数据处理：只取第 6 个属性 RM（每栋住宅的平均房间数）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x_train = train_x[:, <span class="number">5</span>]      <span class="comment"># 取第 6 列（索引 5）作为一元回归的自变量</span></span><br><span class="line">y_train = train_y</span><br><span class="line">x_test = test_x[:, <span class="number">5</span>]</span><br><span class="line">y_test = test_y</span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 设置超参数与参数初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.04</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">2000</span></span><br><span class="line">display_step = <span class="number">200</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">w = tf.Variable(np.random.randn())</span><br><span class="line">b = tf.Variable(np.random.randn())</span><br></pre></td></tr></table></figure>
+
+<p><strong>④ 训练模型（训练损失用于求导，测试损失仅记录）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mse_train = []</span><br><span class="line">mse_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        pred_train = w*x_train + b</span><br><span class="line">        loss_train = <span class="number">0.5</span> * tf.reduce_mean(tf.square(y_train - pred_train))</span><br><span class="line"></span><br><span class="line">        pred_test = w*x_test + b</span><br><span class="line">        loss_test = <span class="number">0.5</span> * tf.reduce_mean(tf.square(y_test - pred_test))</span><br><span class="line"></span><br><span class="line">    mse_train.append(loss_train)</span><br><span class="line">    mse_test.append(loss_test)</span><br><span class="line"></span><br><span class="line">    dL_dw, dL_db = tape.gradient(loss_train, [w, b])</span><br><span class="line">    w.assign_sub(learn_rate * dL_dw)</span><br><span class="line">    b.assign_sub(learn_rate * dL_db)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Train Loss: %f, Test Loss: %f&quot;</span> % (i, loss_train, loss_test))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">i: 0,     Train Loss: 321.837585, Test Loss: 337.568665</span><br><span class="line">i: 200,   Train Loss: 28.122614,  Test Loss: 26.237764</span><br><span class="line">i: 400,   Train Loss: 27.144741,  Test Loss: 25.099329</span><br><span class="line">i: 600,   Train Loss: 26.341951,  Test Loss: 24.141077</span><br><span class="line">i: 800,   Train Loss: 25.682898,  Test Loss: 23.332981</span><br><span class="line">i: 1000,  Train Loss: 25.141848,  Test Loss: 22.650158</span><br><span class="line">i: 1200,  Train Loss: 24.697674,  Test Loss: 22.072004</span><br><span class="line">i: 1400,  Train Loss: 24.333027,  Test Loss: 21.581432</span><br><span class="line">i: 1600,  Train Loss: 24.033665,  Test Loss: 21.164263</span><br><span class="line">i: 1800,  Train Loss: 23.787907,  Test Loss: 20.808695</span><br><span class="line">i: 2000,  Train Loss: 23.586145,  Test Loss: 20.504940</span><br></pre></td></tr></table></figure>
+
+<p><strong>⑤ 可视化输出（2×2 四联图）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">plt.figure(figsize=(<span class="number">15</span>, <span class="number">10</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">221</span>)</span><br><span class="line">plt.scatter(x_train, y_train, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;data&quot;</span>)</span><br><span class="line">plt.plot(x_train, pred_train, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;model&quot;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&quot;upper left&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">222</span>)</span><br><span class="line">plt.plot(mse_train, color=<span class="string">&quot;blue&quot;</span>, linewidth=<span class="number">3</span>, label=<span class="string">&quot;train loss&quot;</span>)</span><br><span class="line">plt.plot(mse_test, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">1.5</span>, label=<span class="string">&quot;test loss&quot;</span>)</span><br><span class="line">plt.legend(loc=<span class="string">&quot;upper right&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">223</span>)</span><br><span class="line">plt.plot(y_train, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_train, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">224</span>)</span><br><span class="line">plt.plot(y_test, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_test, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>四张图分别看：<strong>① 数据散点 + 拟合直线</strong>（能直观看到只有一个特征时拟合的局限）、<strong>② 训练&#x2F;测试损失下降曲线</strong>、<strong>③ 训练集真实价 vs 预测价</strong>、<strong>④ 测试集真实价 vs 预测价</strong>。</p>
+<h3 id="10-6-2-多元线性回归（用全部-13-个属性）"><a href="#10-6-2-多元线性回归（用全部-13-个属性）" class="headerlink" title="10.6.2 多元线性回归（用全部 13 个属性）"></a>10.6.2 多元线性回归（用全部 13 个属性）</h3><h4 id="（1）波士顿房价数据集的-13-个属性"><a href="#（1）波士顿房价数据集的-13-个属性" class="headerlink" title="（1）波士顿房价数据集的 13 个属性"></a>（1）波士顿房价数据集的 13 个属性</h4><table>
+<thead>
+<tr>
+<th>序号</th>
+<th>变量名</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>CRIM</td>
+<td>城镇人均犯罪率</td>
+<td>0.00632</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ZN</td>
+<td>超过 25000 平方英尺的住宅用地所占比例</td>
+<td>18.0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>INDUS</td>
+<td>城镇非零售业的商业用地所占比例</td>
+<td>2.31</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CHAS</td>
+<td>是否被 Charles 河流穿过（1：是；0：否）</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>NOX</td>
+<td>一氧化碳浓度</td>
+<td>0.538</td>
+</tr>
+<tr>
+<td>6</td>
+<td>RM</td>
+<td>每栋住宅的平均房间数</td>
+<td>6.575</td>
+</tr>
+<tr>
+<td>7</td>
+<td>AGE</td>
+<td>早于 1940 年建成的自住房屋比例</td>
+<td>65.2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>DIS</td>
+<td>到波士顿 5 个中心区域的加权平均距离</td>
+<td>4.0900</td>
+</tr>
+<tr>
+<td>9</td>
+<td>RAD</td>
+<td>到达高速公路的便利指数</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>TAX</td>
+<td>每 10000 美元的全值财产税率</td>
+<td>296</td>
+</tr>
+<tr>
+<td>11</td>
+<td>PTRATIO</td>
+<td>城镇中师生比例</td>
+<td>15.3</td>
+</tr>
+<tr>
+<td>12</td>
+<td>B</td>
+<td>反映城镇中黑人比例的指标：<code>B = 1000*(BK-0.63)</code>，其中 BK 是黑人比例</td>
+<td>396.90</td>
+</tr>
+<tr>
+<td>13</td>
+<td>LSTAT</td>
+<td>低收入人口的比例</td>
+<td>7.68</td>
+</tr>
+<tr>
+<td>—</td>
+<td><strong>MEDV</strong></td>
+<td>自住房屋房价的平均房价（单位：1000 美元）→ <strong>预测目标</strong></td>
+<td>24.0</td>
+</tr>
+</tbody></table>
+<p>课件还给出了<strong>各属性与房价的散点图矩阵</strong>（1~13 号属性分别对 Price 作图），用于观察哪些属性与房价存在明显线性关系。</p>
+<h4 id="（2）归一化的两种写法（课件专门对比）"><a href="#（2）归一化的两种写法（课件专门对比）" class="headerlink" title="（2）归一化的两种写法（课件专门对比）"></a>（2）归一化的两种写法（课件专门对比）</h4><p><img src="/images/dl/dl10-gradient/p16-01_814x464.jpg" alt="第16页 二维数组归一化的广播写法"></p>
+<p><strong>方法一：对二维数组逐列循环归一化</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x = np.array([[<span class="number">3.</span>, <span class="number">10.</span>, <span class="number">500.</span>],</span><br><span class="line">              [<span class="number">2.</span>, <span class="number">20.</span>, <span class="number">200.</span>],</span><br><span class="line">              [<span class="number">1.</span>, <span class="number">30.</span>, <span class="number">300.</span>],</span><br><span class="line">              [<span class="number">5.</span>, <span class="number">50.</span>, <span class="number">100.</span>]])</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(x.shape[<span class="number">1</span>]):</span><br><span class="line">    x[:, i] = (x[:, i] - x[:, i].<span class="built_in">min</span>()) / (x[:, i].<span class="built_in">max</span>() - x[:, i].<span class="built_in">min</span>())</span><br><span class="line">x</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">array([[0.5 , 0.  , 1.  ],</span><br><span class="line">       [0.25, 0.25, 0.25],</span><br><span class="line">       [0.  , 0.5 , 0.5 ],</span><br><span class="line">       [1.  , 1.  , 0.  ]])</span><br></pre></td></tr></table></figure>
+
+<p><strong>方法二：广播运算（更简洁）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x.<span class="built_in">min</span>(axis=<span class="number">0</span>)     <span class="comment"># array([ 1., 10., 100.])</span></span><br><span class="line">x.<span class="built_in">max</span>(axis=<span class="number">0</span>)     <span class="comment"># array([ 5.,  50., 500.])</span></span><br><span class="line">x.<span class="built_in">max</span>(axis=<span class="number">0</span>) - x.<span class="built_in">min</span>(axis=<span class="number">0</span>)     <span class="comment"># array([ 4.,  40., 400.])</span></span><br><span class="line"></span><br><span class="line">x - x.<span class="built_in">min</span>(axis=<span class="number">0</span>)                                  <span class="comment"># 每列都减各自的最小值</span></span><br><span class="line">(x - x.<span class="built_in">min</span>(axis=<span class="number">0</span>)) / (x.<span class="built_in">max</span>(axis=<span class="number">0</span>) - x.<span class="built_in">min</span>(axis=<span class="number">0</span>))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>axis=0</code> 表示<strong>沿行方向求（即对每一列求）</strong>，所以 <code>x.min(axis=0)</code> 得到的是”每列的最小值”向量；广播机制会自动把这个向量作用到每一行上——这是 NumPy 向量化最常用的技巧。</p>
+</blockquote>
+<h4 id="（3）完整流程"><a href="#（3）完整流程" class="headerlink" title="（3）完整流程"></a>（3）完整流程</h4><p><strong>① 加载数据</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">boston_housing = tf.keras.datasets.boston_housing</span><br><span class="line">(train_x, train_y), (test_x, test_y) = boston_housing.load_data()</span><br><span class="line">num_train = <span class="built_in">len</span>(train_x)</span><br><span class="line">num_test = <span class="built_in">len</span>(test_x)</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 数据处理：归一化 + 增广矩阵</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">x_train = (train_x - train_x.<span class="built_in">min</span>(axis=<span class="number">0</span>)) / (train_x.<span class="built_in">max</span>(axis=<span class="number">0</span>) - train_x.<span class="built_in">min</span>(axis=<span class="number">0</span>))</span><br><span class="line">y_train = train_y</span><br><span class="line">x_test = (test_x - test_x.<span class="built_in">min</span>(axis=<span class="number">0</span>)) / (test_x.<span class="built_in">max</span>(axis=<span class="number">0</span>) - test_x.<span class="built_in">min</span>(axis=<span class="number">0</span>))</span><br><span class="line">y_test = test_y</span><br><span class="line"></span><br><span class="line">x0_train = np.ones(num_train).reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">x0_test = np.ones(num_test).reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">X_train = tf.cast(tf.concat([x0_train, x_train], axis=<span class="number">1</span>), tf.float32)</span><br><span class="line">X_test = tf.cast(tf.concat([x0_test, x_test], axis=<span class="number">1</span>), tf.float32)</span><br><span class="line"></span><br><span class="line">X_train.shape, X_test.shape     <span class="comment"># (TensorShape([404, 14]), TensorShape([102, 14]))</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Y_train = tf.constant(y_train.reshape(-<span class="number">1</span>, <span class="number">1</span>), tf.float32)</span><br><span class="line">Y_test = tf.constant(y_test.reshape(-<span class="number">1</span>, <span class="number">1</span>), tf.float32)</span><br><span class="line">Y_train.shape, Y_test.shape     <span class="comment"># (TensorShape([404, 1]), TensorShape([102, 1]))</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>形状变化：<code>(404, 13)</code> → 拼接一列 1 → <code>(404, 14)</code>；标签 → <code>(404, 1)</code>。<strong>13 个属性 + 1 个偏置 &#x3D; 14 个待求参数</strong>。</p>
+</blockquote>
+<p><strong>③ 超参数与变量初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.01</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">2000</span></span><br><span class="line">display_step = <span class="number">200</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">W = tf.Variable(np.random.randn(<span class="number">14</span>, <span class="number">1</span>), dtype=tf.float32)</span><br></pre></td></tr></table></figure>
+
+<p><strong>④ 训练模型</strong></p>
+<p><img src="/images/dl/dl10-gradient/p22-01_971x555.jpg" alt="第22页 波士顿多元回归训练循环"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mse_train = []</span><br><span class="line">mse_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED_train = tf.matmul(X_train, W)</span><br><span class="line">        Loss_train = <span class="number">0.5</span> * tf.reduce_mean(tf.square(Y_train - PRED_train))</span><br><span class="line"></span><br><span class="line">        PRED_test = tf.matmul(X_test, W)</span><br><span class="line">        Loss_test = <span class="number">0.5</span> * tf.reduce_mean(tf.square(Y_test - PRED_test))</span><br><span class="line"></span><br><span class="line">    mse_train.append(Loss_train)</span><br><span class="line">    mse_test.append(Loss_test)</span><br><span class="line"></span><br><span class="line">    dL_dW = tape.gradient(Loss_train, W)</span><br><span class="line">    W.assign_sub(learn_rate * dL_dW)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Train Loss: %f, Test Loss: %f&quot;</span> % (i, Loss_train, Loss_test))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">i: 0,     Train Loss: 263.193451, Test Loss: 276.994110</span><br><span class="line">i: 200,   Train Loss: 36.176552,  Test Loss: 37.562954</span><br><span class="line">i: 400,   Train Loss: 28.789461,  Test Loss: 28.952513</span><br><span class="line">i: 600,   Train Loss: 25.520697,  Test Loss: 25.333916</span><br><span class="line">i: 800,   Train Loss: 23.460522,  Test Loss: 23.340532</span><br><span class="line">i: 1000,  Train Loss: 21.887278,  Test Loss: 22.039747</span><br><span class="line">i: 1200,  Train Loss: 20.596283,  Test Loss: 21.124847</span><br><span class="line">i: 1400,  Train Loss: 19.510204,  Test Loss: 20.467239</span><br><span class="line">i: 1600,  Train Loss: 18.587009,  Test Loss: 19.997717</span><br><span class="line">i: 1800,  Train Loss: 17.797461,  Test Loss: 19.671591</span><br><span class="line">i: 2000,  Train Loss: 17.118927,  Test Loss: 19.456863</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>对比 10.6.1 的一元版</strong>：一元（仅 RM）测试损失降到 20.50 就几乎不再下降；多元（13 个属性）到 2000 轮时测试损失已到 <strong>19.46</strong>，训练损失 17.12 —— <strong>用了更多特征，拟合能力更强、误差更小</strong>。</p>
+</blockquote>
+<p><strong>⑤ 迭代次数不够怎么办？</strong></p>
+<p>课件把迭代次数从 2000 提到 <strong>8000</strong>（<code>learn_rate = 0.01, iter = 8000, display_step = 500</code>），结果出现<strong>过拟合</strong>的典型信号：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">i: 0,     Train Loss: 263.193451, Test Loss: 276.994110</span><br><span class="line">i: 500,   Train Loss: 26.911528,  Test Loss: 26.827421</span><br><span class="line">i: 1000,  Train Loss: 21.887278,  Test Loss: 22.039747</span><br><span class="line">...</span><br><span class="line">i: 4500,  Train Loss: 13.287543,  Test Loss: 20.295109</span><br><span class="line">i: 5000,  Train Loss: 12.991438,  Test Loss: 20.631866</span><br><span class="line">...</span><br><span class="line">i: 8000,  Train Loss: 12.101961,  Test Loss: 22.031693</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键观察</strong>：训练损失一路降到 12.10，但<strong>测试损失在 4500 轮附近触底（约 19.9）后开始回升</strong>（19.9 → 20.6 → 22.0）——这就是 <strong>10.5 讲的过拟合</strong>在实际训练中的表现。<strong>“训练误差最小”不等于”泛化误差最小”</strong>，这也是为什么必须监控测试损失。</p>
+<p><strong>⑥ 可视化输出</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">plt.figure(figsize=(<span class="number">20</span>, <span class="number">4</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">131</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;MSE&quot;</span>)</span><br><span class="line">plt.plot(mse_train, color=<span class="string">&quot;blue&quot;</span>, linewidth=<span class="number">3</span>)</span><br><span class="line">plt.plot(mse_test, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">1.5</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">132</span>)</span><br><span class="line">plt.plot(y_train, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(PRED_train, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.ylabel(<span class="string">&quot;Price&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">133</span>)</span><br><span class="line">plt.plot(y_test, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(PRED_test, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.ylabel(<span class="string">&quot;Price&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="10-7-PyTorch-实现（子篇）"><a href="#10-7-PyTorch-实现（子篇）" class="headerlink" title="10.7 PyTorch 实现（子篇）"></a>10.7 PyTorch 实现（子篇）</h2><p>第 10 讲的 10.7.x 是<strong>用 PyTorch 完成同样的梯度下降任务</strong>（自动求导机制、一元&#x2F;多元梯度下降、波士顿房价预测），体量较大，单独整理为：</p>
+<p><strong>→ 《第10讲-PyTorch梯度下降实现（子篇）.md》</strong></p>
+<hr>
+<h2 id="本讲易错点清单"><a href="#本讲易错点清单" class="headerlink" title="本讲易错点清单"></a>本讲易错点清单</h2><ol>
+<li><strong>学习率先小后大</strong>：太小收敛慢，太大震荡甚至发散。课件在商品房数据上先用 <code>0.00001</code>、归一化后用 <code>0.2</code>、波士顿数据用 <code>0.04</code>——<strong>学习率与数据尺度强相关</strong>。</li>
+<li><strong>参数必须用 <code>tf.Variable</code></strong>：普通 Tensor 没有 <code>assign</code>、<code>trainable</code>；用错会直接报 AttributeError。</li>
+<li><strong>更新参数用 <code>assign_sub</code></strong>（<code>w.assign_sub(lr*dL_dw)</code>），不是 <code>w = w - lr*dL_dw</code>（后者会把 Variable 变成普通 Tensor，丢掉可训练性）。</li>
+<li><strong><code>GradientTape</code> 默认只能求一次梯度</strong>；需求多次要 <code>persistent=True</code>，并在最后 <code>del tape</code> 释放资源。</li>
+<li><strong><code>watch_accessed_variables=False</code> 时记得 <code>tape.watch(x)</code></strong>，否则梯度返回 <code>None</code>。</li>
+<li><strong>损失里的 0.5</strong>：<code>0.5 * mean(square(...))</code> 是为了求导时约掉平方的系数 2；一旦写成 <code>0.5*...</code>，梯度就恰好是 <code>(pred - y)·x</code> 的均值——<strong>如果用均方差损失就必须除以 n</strong>，否则学习率要同步缩小 n 倍。</li>
+<li><strong>多元回归必须补一列 1</strong>：<code>X = concat([x0, x_train], axis=1)</code>，参数个数 &#x3D; 属性数 + 1。</li>
+<li><strong>归一化只用训练集的 min&#x2F;max</strong>：测试集必须用<strong>同一组</strong>统计量，否则尺度不一致。</li>
+<li><strong>测试集不参与训练</strong>：<code>loss_test</code> 只记录、不用于 <code>tape.gradient</code>，否则测试误差就不再是泛化误差的近似。</li>
+<li><strong>过拟合的信号</strong>：训练损失持续下降而<strong>测试损失触底回升</strong>——此时应停止训练或加正则化。</li>
+<li><strong>广播的方向</strong>：<code>x.min(axis=0)</code> 是”每列的最小值”（沿行方向聚合），别和 <code>axis=1</code> 搞混。</li>
+<li><strong><code>tf.concat</code> vs <code>np.stack</code></strong>：拼接既有张量用 <code>tf.concat</code>（不增加维度），从零构造增广矩阵用 <code>np.stack(..., axis=1)</code>。</li>
+</ol>
+<hr>
+<h2 id="本讲知识地图"><a href="#本讲知识地图" class="headerlink" title="本讲知识地图"></a>本讲知识地图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">10.1 梯度下降原理</span><br><span class="line">      └── 解析解 vs 数值解 → 迭代公式 x_(k+1) = x_k - η·f&#x27;(x_k)</span><br><span class="line">            └── 学习率的影响：太小慢 / 太大震荡 / 合适收敛</span><br><span class="line">                  └── 二元凸函数：梯度方向 = 方向导数最大方向</span><br><span class="line">                        │</span><br><span class="line">10.2 求解线性回归（NumPy）</span><br><span class="line">      ├── 10.2.1/10.2.2 一元：w、b 的更新公式 + 手算梯度</span><br><span class="line">      └── 10.2.3 多元：W_(k+1) = W_k - η·Xᵀ(XW_k - Y) + 归一化三种方式</span><br><span class="line">                        │</span><br><span class="line">10.3 TensorFlow 自动求导</span><br><span class="line">      ├── 10.3.1 tf.Variable：可训练变量、assign/assign_add/assign_sub</span><br><span class="line">      └── 10.3.2 tf.GradientTape：一阶/偏导/二阶、watch、persistent</span><br><span class="line">                        │</span><br><span class="line">10.4 TensorFlow 实现梯度下降</span><br><span class="line">      └── 一元（标量 w、b）与多元（向量 W）训练循环对照</span><br><span class="line">                        │</span><br><span class="line">10.5 模型评估</span><br><span class="line">      └── 训练误差 / 泛化误差 / 过拟合 / 欠拟合 / 训练集与测试集</span><br><span class="line">                        │</span><br><span class="line">10.6 波士顿房价预测</span><br><span class="line">      ├── 10.6.1 一元（RM 房间数）：404/102 划分、2000 轮、四联图</span><br><span class="line">      └── 10.6.2 多元（13 属性 + 偏置 = 14 参数）：归一化、2000→8000 轮看</span><br><span class="line">           过拟合</span><br><span class="line">                        │</span><br><span class="line">10.7 PyTorch 实现（子篇）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>原始课件位置：<code>课件/第10讲/</code>（10.1 梯度下降原理、10.2 梯度下降法求解线性回归问题、10.3 TensorFlow的自动求导机制、10.4 TensorFlow实现梯度下降法、10.5 模型评估、10.6 波士顿房价预测、10.7.1–10.7.5 PyTorch 系列）。<br>说明：10.2 与 10.3 的课件公式在 PDF 文字抽取时严重错乱（如 <code>YXXXW</code>），笔记中的公式已按标准梯度下降推导整理，并与 10.4&#x2F;10.6 的<strong>可运行代码逐行对应核对</strong>；所有运行结果数值均取自课件截图。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/" title="第10讲 梯度下降法">http://example.com/2026/10/06/第10讲-梯度下降法/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/" rel="tag"># 梯度下降</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/05/%E7%AC%AC8%E8%AE%B2-TensorFlow2.0%E5%9F%BA%E7%A1%80/" rel="prev" title="第8讲 TensorFlow2.0基础">
+      <i class="fa fa-chevron-left"></i> 第8讲 TensorFlow2.0基础
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" rel="next" title="第10讲 PyTorch梯度下降实现（子篇）">
+      第10讲 PyTorch梯度下降实现（子篇） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-10-%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%88%E5%8E%9F%E7%90%86-%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92-TensorFlow-%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC-%E6%A8%A1%E5%9E%8B%E8%AF%84%E4%BC%B0-%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E9%A2%84%E6%B5%8B%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 10 讲 梯度下降法（原理 &#x2F; 求解线性回归 &#x2F; TensorFlow 自动求导 &#x2F; 模型评估 &#x2F; 波士顿房价预测）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">10.1 梯度下降原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-1-%E8%A7%A3%E6%9E%90%E8%A7%A3%E4%B8%8E%E6%95%B0%E5%80%BC%E8%A7%A3"><span class="nav-number">1.1.1.</span> <span class="nav-text">10.1.1 解析解与数值解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-2-%E7%94%A8%E8%BF%AD%E4%BB%A3%E6%B3%95%E9%80%BC%E8%BF%91%E6%9E%81%E5%B0%8F%E5%80%BC"><span class="nav-number">1.1.2.</span> <span class="nav-text">10.1.2 用迭代法逼近极小值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-3-%E6%AD%A5%E9%95%BF%EF%BC%88%E5%AD%A6%E4%B9%A0%E7%8E%87%EF%BC%89%E7%9A%84%E5%BD%B1%E5%93%8D%EF%BC%88%E8%AF%BE%E4%BB%B6%E4%B8%89%E5%BC%A0%E8%A1%A8%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">10.1.3 步长（学习率）的影响（课件三张表）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-1-4-%E4%BA%8C%E5%85%83%E5%87%B8%E5%87%BD%E6%95%B0%E4%B8%8E%E6%A2%AF%E5%BA%A6%E7%9A%84%E5%87%A0%E4%BD%95%E6%84%8F%E4%B9%89"><span class="nav-number">1.1.4.</span> <span class="nav-text">10.1.4 二元凸函数与梯度的几何意义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%E6%B1%82%E8%A7%A3%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">10.2 梯度下降法求解线性回归问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-1-%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E4%B8%80%E4%B8%AA%E5%8F%82%E6%95%B0%E7%94%A8%E6%A0%87%E9%87%8F%EF%BC%8C%E4%B8%A4%E4%B8%AA%E5%8F%82%E6%95%B0%E7%94%A8%E5%90%91%E9%87%8F%E6%80%9D%E7%BB%B4%EF%BC%89"><span class="nav-number">1.2.1.</span> <span class="nav-text">10.2.1 一元线性回归（一个参数用标量，两个参数用向量思维）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-2-%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.2.2.</span> <span class="nav-text">10.2.2 多元线性回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-3-%E5%AD%A6%E4%B9%A0%E7%8E%87%EF%BC%88%E8%B6%85%E5%8F%82%E6%95%B0%EF%BC%89"><span class="nav-number">1.2.3.</span> <span class="nav-text">10.2.3 学习率（超参数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-4-NumPy-%E5%AE%9E%E7%8E%B0%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.2.4.</span> <span class="nav-text">10.2.4 NumPy 实现一元线性回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-5-%E5%BD%92%E4%B8%80%E5%8C%96%EF%BC%88%E6%95%B0%E6%8D%AE%E9%A2%84%E5%A4%84%E7%90%86%EF%BC%89"><span class="nav-number">1.2.5.</span> <span class="nav-text">10.2.5 归一化（数据预处理）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-2-6-NumPy-%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF%EF%BC%89"><span class="nav-number">1.2.6.</span> <span class="nav-text">10.2.6 NumPy 实现多元线性回归（训练循环）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-3-TensorFlow-%E7%9A%84%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC%E6%9C%BA%E5%88%B6"><span class="nav-number">1.3.</span> <span class="nav-text">10.3 TensorFlow 的自动求导机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-3-1-%E5%8F%AF%E8%AE%AD%E7%BB%83%E5%8F%98%E9%87%8F-tf-Variable"><span class="nav-number">1.3.1.</span> <span class="nav-text">10.3.1 可训练变量 tf.Variable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-3-2-%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC%EF%BC%9Atf-GradientTape"><span class="nav-number">1.3.2.</span> <span class="nav-text">10.3.2 自动求导：tf.GradientTape</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-4-TensorFlow-%E5%AE%9E%E7%8E%B0%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-number">1.4.</span> <span class="nav-text">10.4 TensorFlow 实现梯度下降法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-1-NumPy-%E5%AE%9E%E7%8E%B0%EF%BC%88%E4%BD%9C%E5%AF%B9%E7%85%A7%EF%BC%89"><span class="nav-number">1.4.1.</span> <span class="nav-text">10.4.1 NumPy 实现（作对照）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-2-TensorFlow-%E5%AE%9E%E7%8E%B0%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.4.2.</span> <span class="nav-text">10.4.2 TensorFlow 实现一元线性回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-4-3-TensorFlow-%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.4.3.</span> <span class="nav-text">10.4.3 TensorFlow 实现多元线性回归</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-5-%E6%A8%A1%E5%9E%8B%E8%AF%84%E4%BC%B0"><span class="nav-number">1.5.</span> <span class="nav-text">10.5 模型评估</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-1-%E8%AF%AF%E5%B7%AE%E4%B8%8E%E6%B3%9B%E5%8C%96"><span class="nav-number">1.5.1.</span> <span class="nav-text">10.5.1 误差与泛化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-2-%E8%BF%87%E6%8B%9F%E5%90%88%E4%B8%8E%E6%AC%A0%E6%8B%9F%E5%90%88"><span class="nav-number">1.5.2.</span> <span class="nav-text">10.5.2 过拟合与欠拟合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-5-3-%E8%AE%AD%E7%BB%83%E9%9B%86%E4%B8%8E%E6%B5%8B%E8%AF%95%E9%9B%86"><span class="nav-number">1.5.3.</span> <span class="nav-text">10.5.3 训练集与测试集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-6-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E9%A2%84%E6%B5%8B"><span class="nav-number">1.6.</span> <span class="nav-text">10.6 实例：波士顿房价预测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-6-1-%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E7%94%A8%E6%88%BF%E9%97%B4%E6%95%B0%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7%EF%BC%89"><span class="nav-number">1.6.1.</span> <span class="nav-text">10.6.1 一元线性回归（用房间数预测房价）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-6-2-%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E7%94%A8%E5%85%A8%E9%83%A8-13-%E4%B8%AA%E5%B1%9E%E6%80%A7%EF%BC%89"><span class="nav-number">1.6.2.</span> <span class="nav-text">10.6.2 多元线性回归（用全部 13 个属性）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E6%95%B0%E6%8D%AE%E9%9B%86%E7%9A%84-13-%E4%B8%AA%E5%B1%9E%E6%80%A7"><span class="nav-number">1.6.2.1.</span> <span class="nav-text">（1）波士顿房价数据集的 13 个属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E5%BD%92%E4%B8%80%E5%8C%96%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%86%99%E6%B3%95%EF%BC%88%E8%AF%BE%E4%BB%B6%E4%B8%93%E9%97%A8%E5%AF%B9%E6%AF%94%EF%BC%89"><span class="nav-number">1.6.2.2.</span> <span class="nav-text">（2）归一化的两种写法（课件专门对比）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="nav-number">1.6.2.3.</span> <span class="nav-text">（3）完整流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-PyTorch-%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">10.7 PyTorch 实现（子篇）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E6%98%93%E9%94%99%E7%82%B9%E6%B8%85%E5%8D%95"><span class="nav-number">1.8.</span> <span class="nav-text">本讲易错点清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE"><span class="nav-number">1.9.</span> <span class="nav-text">本讲知识地图</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

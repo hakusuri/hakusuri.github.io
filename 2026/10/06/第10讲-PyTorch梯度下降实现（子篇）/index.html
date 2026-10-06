@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5） 代码还原声明（务必先读） 本子篇的素材来自课件 PDF 的文字抽取，抽取结果存在两个严重问题：  换行碎片化——一条代码语句常被拆成好几行（例：w &#x3D; torch.randn(1, 与 requires_grad&#x3D;True) 被拆成两行；for i in range(num_epochs+1): 只剩 (num_e">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第10讲 PyTorch梯度下降实现（子篇）">
+<meta property="og:url" content="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5） 代码还原声明（务必先读） 本子篇的素材来自课件 PDF 的文字抽取，抽取结果存在两个严重问题：  换行碎片化——一条代码语句常被拆成好几行（例：w &#x3D; torch.randn(1, 与 requires_grad&#x3D;True) 被拆成两行；for i in range(num_epochs+1): 只剩 (num_e">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p02-01_561x311.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p02-01_350x187.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p03-01_440x301.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p05-01_1269x261.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p04-01_575x236.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl10-pytorch/p04-02_1254x250.jpg">
+<meta property="article:published_time" content="2026-10-06T10:10:50.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:51.021Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="梯度下降">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl10-pytorch/p02-01_561x311.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第10讲 PyTorch梯度下降实现（子篇） | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第10讲 PyTorch梯度下降实现（子篇）
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-06 18:10:50 / 修改时间：23:43:51" itemprop="dateCreated datePublished" datetime="2026-10-06T18:10:50+08:00">2026-10-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>36k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>33 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-10-讲-PyTorch-梯度下降实现（子篇：10-7-1-10-7-5）"><a href="#第-10-讲-PyTorch-梯度下降实现（子篇：10-7-1-10-7-5）" class="headerlink" title="第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5）"></a>第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5）</h1><blockquote>
+<p><strong>代码还原声明（务必先读）</strong></p>
+<p>本子篇的素材来自课件 PDF 的<strong>文字抽取</strong>，抽取结果存在两个严重问题：</p>
+<ol>
+<li><strong>换行碎片化</strong>——一条代码语句常被拆成好几行（例：<code>w = torch.randn(1,</code> 与 <code>requires_grad=True)</code> 被拆成两行；<code>for i in range(num_epochs+1):</code> 只剩 <code>(num_epochs+1):</code>），个别行甚至整体丢失；</li>
+<li><strong>字体缺字形映射</strong>——代码字体里的<strong>小写字母被整体丢掉</strong>（渲染成空格），只有大写字母、数字和符号（<code>_ . = ( ) [ ] , % * - /</code>）被保留。例：<code>torch.manual_seed(612)</code> 抽取成 <code>.      _    (612)</code>；<code>requires_grad=True</code> 抽取成 <code>_    =T   )</code>；<code>np.stack</code> 抽取成 <code>[2].[5]</code>。</li>
+</ol>
+<p>因此，<strong>本文中的代码是按 PyTorch 语义还原后的可运行代码</strong>：语句结构、超参数、API 调用、运行结果与课件一致，但<strong>部分变量名的拼写无法逐字还原</strong>（课件里的小写变量名在抽取中全部消失）。凡属<strong>推断补全</strong>之处，均单独用「&gt; 注：」标注；<strong>课件没有给出的运行结果，本笔记一律不补写</strong>——文中终端输出与图均直接来自课件截图。</p>
+<p>具体哪几处无法逐字还原，集中列在文末《附录 B：本子篇未能从 PDF 还原的内容》。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>本子篇对应课件</strong>：<strong>10.7.1 PyTorch 自动求导机制 → 10.7.2 PyTorch 实现梯度下降法（一元线性回归）→ 10.7.3 PyTorch 实现梯度下降法（多元线性回归）→ 10.7.4 PyTorch 实现波士顿房价预测（一元线性回归）→ 10.7.5 PyTorch 实现波士顿房价预测（多元线性回归）</strong>。</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="0-与-TensorFlow-版的对应关系（这一篇的定位）"><a href="#0-与-TensorFlow-版的对应关系（这一篇的定位）" class="headerlink" title="0. 与 TensorFlow 版的对应关系（这一篇的定位）"></a>0. 与 TensorFlow 版的对应关系（这一篇的定位）</h2><p>10.7.x 不是新知识，而是<strong>把 10.1~10.6 已经用 TensorFlow 做过的事，换成 PyTorch 再做一遍</strong>。课件每一节的题目描述里都点名了对应的 TensorFlow 章节：</p>
+<table>
+<thead>
+<tr>
+<th>PyTorch 小节</th>
+<th>课件点名的 TensorFlow 对应章节</th>
+<th>任务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10.7.1 PyTorch 自动求导机制</td>
+<td>10.3 TensorFlow 的自动求导机制</td>
+<td>autograd 机制；与 <code>GradientTape</code> 对比</td>
+</tr>
+<tr>
+<td>10.7.2 梯度下降法（一元线性回归）</td>
+<td><strong>10.4 实例：TensorFlow 实现梯度下降法</strong></td>
+<td>商品房面积 → 房价</td>
+</tr>
+<tr>
+<td>10.7.3 梯度下降法（多元线性回归）</td>
+<td><strong>10.4 实例：TensorFlow 实现梯度下降法</strong></td>
+<td>面积 + 房间数 → 房价</td>
+</tr>
+<tr>
+<td>10.7.4 波士顿房价预测（一元线性回归）</td>
+<td><strong>10.6.1 实例：波士顿房价预测（1）</strong></td>
+<td>房间数 RM → 房价</td>
+</tr>
+<tr>
+<td>10.7.5 波士顿房价预测（多元线性回归）</td>
+<td><strong>10.6.2 实例：波士顿房价预测（2）</strong></td>
+<td>13 个属性 → 房价</td>
+</tr>
+</tbody></table>
+<p>课件原文（照录）：</p>
+<ul>
+<li>10.7.2：「本实例根据梯度下降法的基本原理，完成借助 PyTorch 的自动求导机制实现梯度下降法求解一元线性回归问题。相关知识点详见 <strong>10.1：梯度下降法基本原理</strong>，TensorFlow 实现代码详见 <strong>10.4 实例：TensorFlow 实现梯度下降法</strong>；PyTorch 自动求导机制详见 <strong>10.7.1</strong>。」</li>
+<li>10.7.3：同上，任务改为「求解<strong>多元</strong>线性回归问题」。</li>
+<li>10.7.4：「本实例基于 PyTorch 深度学习框架实现一元线性回归，完成波士顿房价预测。使用波士顿房价数据集中的<strong>房间数属性</strong>训练一元线性回归模型，并测试其性能，以可视化的形式展现训练测试的过程。相关知识点详见 <strong>10.1、10.3：梯度下降法</strong>，TensorFlow 实现代码详见 <strong>10.6.1 实例，波士顿房价预测（1）</strong>。」</li>
+<li>10.7.5：「本实例基于 PyTorch 深度学习框架实现多元线性回归，完成波士顿房价预测。使用波士顿房价数据集中的<strong>所有属性</strong>训练多元线性回归模型，并测试其性能，以可视化的形式展现训练和测试的过程及结果。相关知识点详见 <strong>10.1、10.3：梯度下降法</strong>，TensorFlow 实现代码详见 <strong>10.6.2 实例：波士顿房价预测（2）</strong>。」</li>
+</ul>
+<h3 id="0-1-一句话对照：同一件事，两套-API"><a href="#0-1-一句话对照：同一件事，两套-API" class="headerlink" title="0.1 一句话对照：同一件事，两套 API"></a>0.1 一句话对照：同一件事，两套 API</h3><table>
+<thead>
+<tr>
+<th>环节</th>
+<th>TensorFlow 2.x（10.3~10.6）</th>
+<th>PyTorch（10.7.x）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>张量&#x2F;常量</td>
+<td><code>tf.constant()</code></td>
+<td><code>torch.tensor()</code></td>
+</tr>
+<tr>
+<td>可训练参数</td>
+<td><code>tf.Variable(...)</code></td>
+<td><code>torch.tensor(..., requires_grad=True)</code> &#x2F; <code>torch.randn(..., requires_grad=True)</code></td>
+</tr>
+<tr>
+<td>记录梯度上下文</td>
+<td><code>with tf.GradientTape() as tape:</code></td>
+<td>不需要上下文，动态图随时可 <code>backward()</code></td>
+</tr>
+<tr>
+<td>求梯度</td>
+<td><code>tape.gradient(Loss, [w, b])</code></td>
+<td><code>Loss.backward()</code> 后读 <code>w.grad</code>；或 <code>torch.autograd.grad(outputs, inputs)</code></td>
+</tr>
+<tr>
+<td>参数更新（手写）</td>
+<td><code>w.assign_sub(lr * dL_dw)</code></td>
+<td><code>w.data = w.data - lr * w.grad.data</code></td>
+</tr>
+<tr>
+<td>参数更新（优化器）</td>
+<td><code>optimizer.apply_gradients(zip(grads, [w, b]))</code></td>
+<td><code>optimizer = torch.optim.SGD([w, b], lr=...)</code> + <code>optimizer.step()</code></td>
+</tr>
+<tr>
+<td>梯度清零</td>
+<td>自动（GradientTape 用完即弃）</td>
+<td><strong>必须手动</strong>：<code>optimizer.zero_grad()</code> 或 <code>w.grad.data.zero_()</code></td>
+</tr>
+<tr>
+<td>求平均 &#x2F; 平方</td>
+<td><code>tf.reduce_mean</code> &#x2F; <code>tf.square</code></td>
+<td><code>torch.mean</code> &#x2F; <code>torch.square</code> 或 <code>**2</code></td>
+</tr>
+<tr>
+<td>矩阵乘法</td>
+<td><code>tf.matmul(X, W)</code></td>
+<td><code>torch.matmul(X, W)</code></td>
+</tr>
+<tr>
+<td>拼接</td>
+<td><code>tf.concat</code></td>
+<td><code>torch.cat</code></td>
+</tr>
+<tr>
+<td>值取出</td>
+<td><code>loss.numpy()</code></td>
+<td><code>loss.item()</code> &#x2F; <code>loss.data.numpy()</code></td>
+</tr>
+</tbody></table>
+<h3 id="0-2-本子篇速览"><a href="#0-2-本子篇速览" class="headerlink" title="0.2 本子篇速览"></a>0.2 本子篇速览</h3><table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10.7.1</td>
+<td>autograd 包；叶子节点&#x2F;结果节点；Tensor 的 <code>data / requires_grad / grad / grad_fn / is_leaf</code>；<code>backward()</code> 与 <code>grad()</code> 的参数表；与 <code>GradientTape</code> 对比</td>
+</tr>
+<tr>
+<td>10.7.2</td>
+<td>一元回归；<code>np.array</code> 造数据；<code>torch.randn(1, requires_grad=True)</code> 造参数；<code>torch.optim.SGD</code> 三步走</td>
+</tr>
+<tr>
+<td>10.7.3</td>
+<td>多元回归；min-max 归一化 + 增广列 1；<code>torch.from_numpy().float()</code>；<code>torch.matmul(X, W)</code></td>
+</tr>
+<tr>
+<td>10.7.4</td>
+<td>波士顿房价一元；pandas 自定义读数据函数；<code>.float().reshape(-1,1)</code>；手写 <code>w.data = w.data - lr*w.grad.data</code>；四联图可视化</td>
+</tr>
+<tr>
+<td>10.7.5</td>
+<td>波士顿房价多元；<code>torch.ones</code> 全 1 列 + <code>torch.cat([ones, X], dim=1)</code>；<code>W</code>（14,1）一次求导</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="10-7-1-PyTorch-自动求导机制"><a href="#10-7-1-PyTorch-自动求导机制" class="headerlink" title="10.7.1 PyTorch 自动求导机制"></a>10.7.1 PyTorch 自动求导机制</h2><h3 id="10-7-1-1-什么是自动求导"><a href="#10-7-1-1-什么是自动求导" class="headerlink" title="10.7.1.1 什么是自动求导"></a>10.7.1.1 什么是自动求导</h3><ul>
+<li><strong><code>Torch.autograd</code> 包为张量上所有操作提供了自动求导机制。</strong></li>
+<li>PyTorch 中有<strong>两种求梯度的方法</strong>：<ol>
+<li><code>torch.autograd.backward()</code></li>
+<li><code>torch.autograd.grad()</code></li>
+</ol>
+</li>
+<li>在计算梯度之前，需要首先明确<strong>哪个变量需要计算梯度</strong>，在张量创建时，将需要计算梯度的张量的 <strong><code>requires_grad</code> 参数设置为 <code>True</code></strong>。</li>
+<li>为方便理解，把自己定义的变量称之为<strong>叶子节点（leaf nodes）</strong>，而基于叶子节点得到的中间或最终变量则可称之为<strong>结果节点</strong>。</li>
+</ul>
+<h3 id="10-7-1-2-Tensor-中通常记录的属性（照录）"><a href="#10-7-1-2-Tensor-中通常记录的属性（照录）" class="headerlink" title="10.7.1.2 Tensor 中通常记录的属性（照录）"></a>10.7.1.2 Tensor 中通常记录的属性（照录）</h3><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>课件说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>data</code></td>
+<td>即存储的数据信息</td>
+</tr>
+<tr>
+<td><code>requires_grad</code></td>
+<td>设置为 <code>True</code> 则表示该 Tensor 需要求导</td>
+</tr>
+<tr>
+<td><code>grad</code></td>
+<td>该 Tensor 的梯度值；如果利用 <code>torch.autograd.backward()</code> 方法求梯度时，tensor 的梯度会<strong>自动累加</strong></td>
+</tr>
+<tr>
+<td><code>grad_fn</code></td>
+<td>叶子节点通常为 <code>None</code>，只有结果节点的 <code>grad_fn</code> 才有效，用于指示梯度函数是哪种类型</td>
+</tr>
+<tr>
+<td><code>is_leaf</code></td>
+<td>用来指示该 Tensor 是否是叶子节点</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>一句话记忆：<strong>只有叶子节点（<code>is_leaf=True</code> 且 <code>requires_grad=True</code>）才会有非空的 <code>.grad</code> 可读</strong>，中间变量的梯度默认算完即丢。</p>
+</blockquote>
+<h3 id="10-7-1-3-torch-autograd-backward-（参数表照录）"><a href="#10-7-1-3-torch-autograd-backward-（参数表照录）" class="headerlink" title="10.7.1.3 torch.autograd.backward()（参数表照录）"></a>10.7.1.3 <code>torch.autograd.backward()</code>（参数表照录）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.autograd.backward(tensor, grad_tensors=<span class="literal">None</span>, retain_graph=<span class="literal">None</span>, create_graph=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：课件上写的是 <code>torch.autograd.backward(tensor grad_tensors=none)</code>，逗号与大小写为 PDF 抽取所缺，本文按 PyTorch 官方签名补全。</p>
+</blockquote>
+<p><strong>参数作用（课件照录）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>课件说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>tensor</code></td>
+<td>用于计算梯度的 tensor（也就是说这两种方式是等价的）</td>
+</tr>
+<tr>
+<td><code>grad_tensors</code></td>
+<td>在计算矩阵的梯度时会用到，它其实也是一个 tensor，shape 一般需要和前面的 tensor 保持一致，令 <code>grad_outputs=torch.ones_like(y)</code></td>
+</tr>
+<tr>
+<td><code>retain_graph</code></td>
+<td>通常在调用一次 backward 后，pytorch 会自动把计算图销毁，所以要想对某个变量重复调用 backward，则需要将该参数设置为 <code>True</code></td>
+</tr>
+<tr>
+<td><code>create_graph</code></td>
+<td>当设置为 <code>True</code> 的时候可以用来计算更高阶的梯度</td>
+</tr>
+</tbody></table>
+<p><strong>课件补充的四条要点（照录）</strong>：</p>
+<ol>
+<li><code>torch.autograd.backward()</code> 不需要传入参数，只需要<strong>由张量调用</strong>，<strong>没有返回值</strong>；</li>
+<li>梯度信息自动保存到原来自变量参数的 <code>grad</code> 属性中，通过 <strong><code>.grad</code></strong> 访问梯度信息；</li>
+<li><code>grad</code> 会<strong>自动累加</strong>梯度，在每轮计算梯度前，<strong>要将梯度清 0</strong>；</li>
+<li><code>backward</code> 方法的两种表示方式是等价的（<code>Loss</code> 是张量）：</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">torch.autograd.backward(Loss)   ==   Loss.backward()</span><br></pre></td></tr></table></figure>
+
+<p><strong>课件举例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 举例：</span></span><br><span class="line">x = torch.tensor(<span class="number">2.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">y = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">z = x**<span class="number">2</span>*y                    <span class="comment"># &lt;-- 该定义行在 PDF 抽取中整行丢失</span></span><br><span class="line">z.backward()                  <span class="comment"># 等价于 torch.autograd.backward(z)</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(x.grad)                 <span class="comment"># tensor(12.)</span></span><br><span class="line"><span class="built_in">print</span>(y.grad)                 <span class="comment"># tensor(4.)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>课件给出的运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tensor(12.)</span><br><span class="line">tensor(4.)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：课件抽取结果里只有 <code>x=torch.tensor(2.,requires_grad=True)</code>、<code>y=torch.tensor(3.,requires_grad=True)</code> 两行与结果 <code>(12.)</code>、<code>(4.)</code>，<strong>中间定义 <code>z</code> 的那一行整体丢失</strong>。由「对 x 求导得 12、对 y 求导得 4」反推，课件中的中间量必为 <code>z = x**2 * y</code>（<code>∂z/∂x = 2xy = 12</code>，<code>∂z/∂y = x² = 4</code>），此行为推断补全。另：结果行抽取为 <code>(12.)</code>，是因为小写单词 <code>tensor</code> 被整词丢弃，实际输出是 <code>tensor(12.)</code>。</p>
+</blockquote>
+<h3 id="10-7-1-4-torch-autograd-grad-（参数表照录）"><a href="#10-7-1-4-torch-autograd-grad-（参数表照录）" class="headerlink" title="10.7.1.4 torch.autograd.grad()（参数表照录）"></a>10.7.1.4 <code>torch.autograd.grad()</code>（参数表照录）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">torch.autograd.grad(outputs, inputs,</span><br><span class="line">                    grad_outputs=<span class="literal">None</span>, retain_graph=<span class="literal">None</span>, create_graph=<span class="literal">False</span>,</span><br><span class="line">                    only_inputs=<span class="literal">True</span>, allow_unused=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：课件上写的是 <code>torch.autograd.grad(outputs，inputs)</code>，后面几个参数（<code>grad_tensors=None, retain_graph=None, create_graph=False, only_inputs=True, allow_unused=False)</code>）来自课件参数表，本文按官方签名排列。</p>
+</blockquote>
+<p><strong>与 <code>backward()</code> 的关键差别（照录 + 强调）</strong>：</p>
+<ul>
+<li><code>torch.autograd.grad(outputs，inputs)</code> <strong>计算梯度，需要传入参数，返回参数梯度值列表</strong>；</li>
+<li><code>backward()</code> 则是<strong>没有返回值</strong>，梯度写进 <code>.grad</code> 里。</li>
+</ul>
+<p><strong>参数作用（课件照录）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>课件说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>outputs</code></td>
+<td>结果节点，即被求导数</td>
+</tr>
+<tr>
+<td><code>inputs</code></td>
+<td>叶子节点</td>
+</tr>
+<tr>
+<td><code>grad_outputs</code></td>
+<td>类似于 backward 方法中的 <code>grad_tensors</code></td>
+</tr>
+<tr>
+<td><code>retain_graph</code></td>
+<td>同上（重复调用 backward 需要设为 True）</td>
+</tr>
+<tr>
+<td><code>create_graph</code></td>
+<td>同上（设为 True 可算高阶梯度）</td>
+</tr>
+<tr>
+<td><code>only_inputs</code></td>
+<td>默认为 <code>True</code>，如果为 <code>True</code>，则只会返回指定 input 的梯度值；若为 <code>False</code>，则会计算所有叶子节点的梯度，并且将计算得到的梯度<strong>累加到各自的 <code>.grad</code> 属性上去</strong></td>
+</tr>
+<tr>
+<td><code>allow_unused</code></td>
+<td>默认为 <code>False</code>，即必须要指定 input，如果没有指定的话则报错</td>
+</tr>
+</tbody></table>
+<p><strong>课件举例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 举例：</span></span><br><span class="line">x = torch.tensor(<span class="number">2.</span>).requires_grad_()</span><br><span class="line">y = torch.tensor(<span class="number">3.</span>).requires_grad_()</span><br><span class="line">z = x**<span class="number">2</span>*y                                              <span class="comment"># &lt;-- 该行在抽取中丢失，推断补全</span></span><br><span class="line">dz_dx = torch.autograd.grad(outputs=z, inputs=x, create_graph=<span class="literal">True</span>)</span><br><span class="line">dz_dy = torch.autograd.grad(outputs=z, inputs=y, create_graph=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(dz_dx)     <span class="comment"># (tensor(12.),)</span></span><br><span class="line"><span class="built_in">print</span>(dz_dy)     <span class="comment"># (tensor(4.),)</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>课件给出的运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(tensor(12.),)</span><br><span class="line">(tensor(4.),)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：课件抽取出的是 <code>x=torch.tensor(2.).requires_grad_()</code>、<code>y=torch.tensor(3.).requires_grad_()</code>、<code>z=torch.autograd.grad(outputs=z,inputs=x,create_graph=True)</code> 与两行结果 <code>(tensor(12.),)</code>、<code>(tensor(4.),)</code> —— 注意结果带<strong>外层圆括号与逗号</strong>，这正是 <code>grad()</code> <strong>返回的是一个 tuple</strong> 的直接证据；第二次（对 y）的 <code>grad</code> 调用行在抽取中丢失，由第二行结果反推。</p>
+</blockquote>
+<h3 id="10-7-1-5-PyTorch-与-TensorFlow-自动求导机制对比（表-1-照录）"><a href="#10-7-1-5-PyTorch-与-TensorFlow-自动求导机制对比（表-1-照录）" class="headerlink" title="10.7.1.5 PyTorch 与 TensorFlow 自动求导机制对比（表 1 照录）"></a>10.7.1.5 PyTorch 与 TensorFlow 自动求导机制对比（表 1 照录）</h3><p>课件原文：「PyTorch 与 TensorFlow 自动求导机制对比如表 1 所示」。</p>
+<table>
+<thead>
+<tr>
+<th>Pytorch 自动求导</th>
+<th>TensorFlow 求导</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>torch.autograd.backward()</code></td>
+<td><code>with GradientTape() as tape:</code></td>
+</tr>
+<tr>
+<td><code>torch.autograd.grad()</code></td>
+<td><code>grad = tape.gradient(函数自变量, 被求导变量)</code></td>
+</tr>
+</tbody></table>
+<p>用同一段逻辑对照，看得更清楚：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># PyTorch：先 forward，再 backward，梯度落在 .grad</span></span><br><span class="line">x = torch.tensor(<span class="number">3.</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line">y = x**<span class="number">2</span></span><br><span class="line">y.backward()</span><br><span class="line"><span class="built_in">print</span>(x.grad)                     <span class="comment"># tensor(6.)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># TensorFlow：用 GradientTape 包住 forward，再 gradient</span></span><br><span class="line">x = tf.Variable(<span class="number">3.0</span>)</span><br><span class="line"><span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">    y = x**<span class="number">2</span></span><br><span class="line"><span class="built_in">print</span>(tape.gradient(y, x))        <span class="comment"># tf.Tensor(6.0, shape=(), dtype=float32)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="10-7-1-6-易错点"><a href="#10-7-1-6-易错点" class="headerlink" title="10.7.1.6 易错点"></a>10.7.1.6 易错点</h3><ol>
+<li><strong><code>requires_grad</code> 必须在创建时给对</strong>：<code>x = torch.tensor(2.)</code> 之后 <code>x.requires_grad</code> 默认是 <code>False</code>，此时 <code>z.backward()</code> 会报 <code>element 0 of tensors does not require grad</code>。要么创建时写 <code>requires_grad=True</code>，要么事后调用 <code>x.requires_grad_()</code>（带下划线表示原地修改）。</li>
+<li><strong>只有叶子节点的 <code>.grad</code> 才留得住</strong>：对中间结果（结果节点）<code>print(y.grad)</code> 得到的是 <code>None</code>；若确实要，用 <code>y.retain_grad()</code>。</li>
+<li><strong><code>grad</code> 会累加，不清零必出错</strong>：<code>backward()</code> 是<strong>累加</strong>而不是覆盖，循环里不清零，梯度会越来越大。课件原话：「<code>grad</code> 会自动累加梯度，在每轮计算梯度前，要将梯度清 0」。</li>
+<li><strong><code>backward()</code> 与 <code>grad()</code> 返回值不同</strong>：<code>backward()</code> 返回 <code>None</code>（直接读 <code>.grad</code>），<code>grad()</code> 返回<strong>梯度列表&#x2F;tuple</strong>（参数在 <code>inputs</code> 里指定，且默认不给叶子节点写 <code>.grad</code>）。</li>
+<li><strong>计算图默认用完即销毁</strong>：想对同一张图重复求导，要 <code>retain_graph=True</code>；想求二阶导，要 <code>create_graph=True</code>。</li>
+<li><strong><code>.data</code> 与 <code>.detach()</code></strong>：读数值用 <code>.item()</code>（标量）或 <code>.data.numpy()</code>；手写参数更新时课件写成 <code>w.data = w.data - ...</code>，用 <code>.data</code> 是为了<strong>绕过 autograd 的记录</strong>，属于”老写法”，新版本更推荐 <code>with torch.no_grad():</code>。</li>
+</ol>
+<hr>
+<h2 id="10-7-2-PyTorch-实现梯度下降法（一元线性回归）"><a href="#10-7-2-PyTorch-实现梯度下降法（一元线性回归）" class="headerlink" title="10.7.2 PyTorch 实现梯度下降法（一元线性回归）"></a>10.7.2 PyTorch 实现梯度下降法（一元线性回归）</h2><h3 id="10-7-2-1-题目描述（照录）"><a href="#10-7-2-1-题目描述（照录）" class="headerlink" title="10.7.2.1 题目描述（照录）"></a>10.7.2.1 题目描述（照录）</h3><blockquote>
+<p>本实例根据梯度下降法的基本原理，完成借助 PyTorch 的自动求导机制实现梯度下降法求解一元线性回归问题。</p>
+<p>相关知识点详见 10.1：梯度下降法基本原理，TensorFlow 实现代码详见 10.4 实例：TensorFlow 实现梯度下降法；PyTorch 自动求导机制详见 10.7.1。</p>
+</blockquote>
+<h3 id="10-7-2-2-对应关系（与-TensorFlow-版逐环对照）"><a href="#10-7-2-2-对应关系（与-TensorFlow-版逐环对照）" class="headerlink" title="10.7.2.2 对应关系（与 TensorFlow 版逐环对照）"></a>10.7.2.2 对应关系（与 TensorFlow 版逐环对照）</h3><table>
+<thead>
+<tr>
+<th>环节</th>
+<th>TensorFlow 版（10.4.2）</th>
+<th>PyTorch 版（10.7.2）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>造数据</td>
+<td><code>x = np.array([...])</code></td>
+<td><code>x = np.array([...])</code>（完全一样）</td>
+</tr>
+<tr>
+<td>参数初值</td>
+<td><code>np.random.seed(612)</code> + <code>tf.Variable(np.random.randn())</code></td>
+<td><code>torch.manual_seed(612)</code> + <code>torch.randn(1, requires_grad=True)</code></td>
+</tr>
+<tr>
+<td>前向</td>
+<td><code>pred = w*x + b</code></td>
+<td><code>pred = w*x + b</code></td>
+</tr>
+<tr>
+<td>损失</td>
+<td><code>0.5 * tf.reduce_mean(tf.square(y - pred))</code></td>
+<td><code>0.5 * torch.mean(torch.square(y - pred))</code></td>
+</tr>
+<tr>
+<td>求导</td>
+<td><code>dL_dw, dL_db = tape.gradient(Loss, [w, b])</code></td>
+<td><code>Loss.backward()</code>，梯度在 <code>w.grad</code> &#x2F; <code>b.grad</code></td>
+</tr>
+<tr>
+<td>更新</td>
+<td><code>w.assign_sub(learn_rate * dL_dw)</code></td>
+<td><code>optimizer = torch.optim.SGD([w, b], lr=...)</code> + <code>optimizer.step()</code></td>
+</tr>
+</tbody></table>
+<h3 id="10-7-2-3-完整可运行代码"><a href="#10-7-2-3-完整可运行代码" class="headerlink" title="10.7.2.3 完整可运行代码"></a>10.7.2.3 完整可运行代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.2 加载样本数据</span></span><br><span class="line">x = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">              <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">              <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.3 设置超参数</span></span><br><span class="line">learning_rate = <span class="number">0.00001</span>      <span class="comment"># 学习率</span></span><br><span class="line">num_epochs = <span class="number">10</span>              <span class="comment"># 迭代次数</span></span><br><span class="line">display_step = <span class="number">1</span>             <span class="comment"># 显示间隔</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.4 设置模型参数初值</span></span><br><span class="line">torch.manual_seed(<span class="number">612</span>)</span><br><span class="line">w = torch.randn(<span class="number">1</span>, requires_grad=<span class="literal">True</span>)     <span class="comment"># 取正态分布随机值作初值</span></span><br><span class="line">b = torch.randn(<span class="number">1</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.5 训练模型</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs + <span class="number">1</span>):</span><br><span class="line">    <span class="comment"># 前向传播</span></span><br><span class="line">    pred = w * x + b</span><br><span class="line">    Loss = <span class="number">0.5</span> * torch.mean(torch.square(y - pred))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 使用 SGD 优化器更新权重和偏置</span></span><br><span class="line">    optimizer = torch.optim.SGD([w, b], lr=learning_rate)</span><br><span class="line">    optimizer.zero_grad()      <span class="comment"># 梯度清零</span></span><br><span class="line">    Loss.backward()            <span class="comment"># 计算梯度</span></span><br><span class="line">    optimizer.step()           <span class="comment"># 更新参数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Epoch [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;, w: &#123;:.4f&#125;, b: &#123;:.4f&#125;&quot;</span></span><br><span class="line">              .<span class="built_in">format</span>(i, num_epochs, Loss.item(), w.item(), b.item()))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注（本节的推断补全，逐条对应课件抽取结果）</strong>：</p>
+<ul>
+<li>抽取出的是 <code>=[2].[5]([137.97,...)</code>，即 <strong>2 个小写字母的模块 + 5 个小写字母的函数</strong>，与 10.4 的 <code>np.array(...)</code> 完全吻合，故还原为 <code>x = np.array([...])</code>、<code>y = np.array([...])</code>；变量名 <code>x</code>&#x2F;<code>y</code> 在抽取中被整词丢弃（小写），此处沿用 10.4 的命名。</li>
+<li><code>torch.manual_seed(612)</code> 由 <code>.      _    (612)</code> 逐字符还原（<code>torch</code> 记为 5 空格、<code>manual</code> 记为 6 空格、<code>seed</code> 记为 4 空格）。</li>
+<li><code>w = torch.randn(1, requires_grad=True)</code> 由 <code>=     .     (1,</code> + <code>_    =T   )</code> 两行拼回（<code>torch</code> 5 空格、<code>randn</code> 5 空格、<code>requires_grad=True</code>）。</li>
+<li>三个超参数只抽到 <code>=0.00001 / =10 / =1</code> 三个数值，变量名丢失；其中迭代次数的名字可由循环行 <code>(num_epochs+1):</code> 反推为 <strong><code>num_epochs</code></strong>，另外两个按课件「设置学习率 &#x2F; 设置显示间隔」写作 <code>learning_rate</code>、<code>display_step</code>。</li>
+<li>损失函数抽取为 <code>=0.5*torch.mean(torch.square(      -    ))</code>：内层函数是 <strong>6 个小写字母</strong>＝<code>square</code>，外层是 4 个小写字母＝<code>mean</code>；被减的两个操作数在抽取中分别是 6 字符与 4 字符（小写变量名丢失后只剩空格数），<strong>课件里真正的变量名无法逐字还原</strong>，本文按 10.4 的命名写作 <code>y</code> 与 <code>pred</code>。</li>
+<li><code>optimizer.zero_grad()</code> &#x2F; <code>Loss.backward()</code> &#x2F; <code>optimizer.step()</code> 三行在抽取中<strong>整体缺失</strong>（只留下三行注释「#梯度清零 &#x2F; #计算梯度 &#x2F; #更新参数」），按其注释语义与 <code>torch.optim.SGD</code> 的用法补全。</li>
+<li>课件中 <code>optimizer = torch.optim.SGD([w, b], lr=...)</code> 出现在<strong>循环体内部</strong>（抽取顺序为：前向 → 损失 → SGD → 清 0 → 求导 → 更新 → 打印），本文照此保留；对<strong>无状态</strong>的普通 SGD 而言放在循环内与循环外等价，但换成带动量的优化器就必须移到循环外（见易错点 6）。</li>
+</ul>
+</blockquote>
+<h3 id="10-7-2-4-课件给出的运行结果"><a href="#10-7-2-4-课件给出的运行结果" class="headerlink" title="10.7.2.4 课件给出的运行结果"></a>10.7.2.4 课件给出的运行结果</h3><p><img src="/images/dl/dl10-pytorch/p02-01_561x311.jpg" alt="第2页 一元线性回归梯度下降的终端输出（Epoch 0~10）"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Epoch [0/10], Loss: 552.4573, w: 0.9545, b: -1.1849</span><br><span class="line">Epoch [1/10], Loss: 89.2435, w: 0.9582, b: -1.1848</span><br><span class="line">Epoch [2/10], Loss: 89.1735, w: 0.9583, b: -1.1847</span><br><span class="line">Epoch [3/10], Loss: 89.1734, w: 0.9583, b: -1.1847</span><br><span class="line">Epoch [4/10], Loss: 89.1734, w: 0.9583, b: -1.1846</span><br><span class="line">Epoch [5/10], Loss: 89.1734, w: 0.9583, b: -1.1846</span><br><span class="line">Epoch [6/10], Loss: 89.1734, w: 0.9583, b: -1.1845</span><br><span class="line">Epoch [7/10], Loss: 89.1734, w: 0.9583, b: -1.1845</span><br><span class="line">Epoch [8/10], Loss: 89.1733, w: 0.9583, b: -1.1844</span><br><span class="line">Epoch [9/10], Loss: 89.1733, w: 0.9583, b: -1.1844</span><br><span class="line">Epoch [10/10], Loss: 89.1733, w: 0.9583, b: -1.1843</span><br></pre></td></tr></table></figure>
+
+<p><strong>怎么读这张输出</strong>：</p>
+<ul>
+<li>一共 <strong>11 行</strong>，因为循环写的是 <code>range(num_epochs + 1)</code>（0 到 10 闭区间），这是本课件的固定写法；</li>
+<li>第 0 行 Loss 是 552.4573，第 1 行就降到 89.24，之后基本不再下降——<strong>说明学习率 0.00001 下，一步就基本到位，10 次迭代远未用满</strong>；</li>
+<li><code>w</code> 收敛到 <strong>0.9583</strong> 附近、<code>b</code> 收敛到 <strong>-1.1843</strong> 附近。斜率约 0.96、截距约 -1.18，与题面数据（面积 46.91<del>138.05，价格 45</del>145）是同一量级的合理结果；</li>
+<li>注意 <code>b</code> 的末位在变（-1.1849 → -1.1843），说明<strong>参数仍在极缓慢地更新</strong>，只是 Loss 已经看不出变化（<code>&#123;:.4f&#125;</code> 只有 4 位小数）。</li>
+</ul>
+<h3 id="10-7-2-5-易错点"><a href="#10-7-2-5-易错点" class="headerlink" title="10.7.2.5 易错点"></a>10.7.2.5 易错点</h3><ol>
+<li><strong><code>torch.randn(1, ...)</code> 得到的是形状 <code>(1,)</code> 的张量，不是标量</strong>。取值一律用 <code>.item()</code>；写成 <code>torch.randn(())</code> 或 <code>torch.tensor(np.random.randn())</code> 可得到 0 维张量，但打印与广播行为会略有差别。</li>
+<li><strong>只有浮点张量能求导</strong>：<code>torch.tensor([1,2], requires_grad=True)</code> 会直接报错（整型不能求导）。</li>
+<li><strong>numpy 数组与 torch 张量混算</strong>：<code>w * x</code> 里 <code>x</code> 是 <code>float64</code> 的 numpy 数组、<code>w</code> 是 <code>float32</code> 张量，结果会被<strong>提升成 float64</strong>。想避免就把数据也转成张量：<code>x = torch.tensor(x, dtype=torch.float32)</code>。</li>
+<li><strong>梯度累加</strong>：如果没有 <code>optimizer.zero_grad()</code>（或 <code>w.grad.data.zero_()</code>），下一轮 <code>backward()</code> 会把这一轮的梯度<strong>加上去</strong>，表现为 Loss 先降后飞。</li>
+<li><strong>求导前必须已经调用过 <code>backward()</code></strong>：第一轮就写 <code>w.grad.data.zero_()</code> 会报 <code>AttributeError: &#39;NoneType&#39; object has no attribute &#39;data&#39;</code>，因为此刻 <code>w.grad</code> 还是 <code>None</code>。</li>
+<li><strong>优化器建在循环内只对无状态优化器安全</strong>：<code>torch.optim.SGD</code>（无 momentum）每轮重建等价；<code>SGD(momentum=0.9)</code>、<code>Adam</code> 这类带状态的优化器会<strong>丢掉动量&#x2F;二阶矩</strong>，必须建在循环外。</li>
+<li><strong>打印别忘 <code>.item()</code></strong>：直接把张量塞进 <code>&quot;&#123;:.4f&#125;&quot;.format(...)</code> 在部分版本会报警告或格式错误，统一用 <code>.item()</code> 最稳。</li>
+</ol>
+<hr>
+<h2 id="10-7-3-PyTorch-实现梯度下降法（多元线性回归）"><a href="#10-7-3-PyTorch-实现梯度下降法（多元线性回归）" class="headerlink" title="10.7.3 PyTorch 实现梯度下降法（多元线性回归）"></a>10.7.3 PyTorch 实现梯度下降法（多元线性回归）</h2><h3 id="10-7-3-1-题目描述（照录）"><a href="#10-7-3-1-题目描述（照录）" class="headerlink" title="10.7.3.1 题目描述（照录）"></a>10.7.3.1 题目描述（照录）</h3><blockquote>
+<p>本实例根据梯度下降法的基本原理，完成借助 PyTorch 的自动求导机制实现梯度下降法求解多元线性回归问题。</p>
+<p>相关知识点详见 10.1：梯度下降法基本原理，TensorFlow 实现代码详见 10.4 实例：TensorFlow 实现梯度下降法；PyTorch 自动求导机制详见 10.7.1。</p>
+</blockquote>
+<h3 id="10-7-3-2-核心概念：多元回归为什么要”补一列-1-用矩阵乘”"><a href="#10-7-3-2-核心概念：多元回归为什么要”补一列-1-用矩阵乘”" class="headerlink" title="10.7.3.2 核心概念：多元回归为什么要”补一列 1 + 用矩阵乘”"></a>10.7.3.2 核心概念：多元回归为什么要”补一列 1 + 用矩阵乘”</h3><p>一元线性回归是 <code>y = w·x + b</code>，两个参数 <code>w</code>、<code>b</code> 是两个标量；<br>多元线性回归要把 <code>m</code> 个特征一起用上，写成矩阵形式最省事：</p>
+<p>$$\hat{Y} &#x3D; XW$$</p>
+<p>其中：</p>
+<ul>
+<li><code>X</code> 的形状是 <code>(n, 3)</code>：<strong>第 0 列固定为全 1（增广列，吸收偏置 b）</strong>，第 1 列是归一化后的面积，第 2 列是归一化后的房间数；</li>
+<li><code>W</code> 的形状是 <code>(3, 1)</code>：第 0 个分量就是偏置 <code>b</code>；</li>
+<li><code>Y</code> 的形状是 <code>(n, 1)</code>。</li>
+</ul>
+<p><strong>把偏置塞进权重向量，是第 9 讲的重点，这里再用一次</strong>：这样只需要维护<strong>一个</strong>待求导参数 <code>W</code>，求导与更新都变成一次操作。</p>
+<p>课件本节的三个关键 API：</p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>作用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>np.stack((x0, x1, x2), axis=1)</code></td>
+<td>拼出 <code>(n,3)</code> 的属性矩阵</td>
+<td>注意 <code>axis=1</code> 是<strong>按列拼</strong>，拼出来才是 “样本×特征”</td>
+</tr>
+<tr>
+<td><code>torch.from_numpy(X).float()</code></td>
+<td>numpy 数组 → float32 张量</td>
+<td><code>from_numpy</code> 与 numpy 数组<strong>共享内存</strong></td>
+</tr>
+<tr>
+<td><code>torch.matmul(X, W)</code></td>
+<td>矩阵乘法</td>
+<td>对应 TensorFlow 的 <code>tf.matmul</code>；<code>X(W)</code> 顺序不能反</td>
+</tr>
+</tbody></table>
+<h3 id="10-7-3-3-完整可运行代码"><a href="#10-7-3-3-完整可运行代码" class="headerlink" title="10.7.3.3 完整可运行代码"></a>10.7.3.3 完整可运行代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.2 加载样本数据</span></span><br><span class="line">area = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">                 <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">room = np.array([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">price = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">                  <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.3 数据预处理：数据归一化</span></span><br><span class="line">num = <span class="built_in">len</span>(area)</span><br><span class="line">x0 = np.ones(num)                                       <span class="comment"># 创建全 1 向量（增广列）</span></span><br><span class="line">x1 = (area - area.<span class="built_in">min</span>()) / (area.<span class="built_in">max</span>() - area.<span class="built_in">min</span>())    <span class="comment"># 面积归一化</span></span><br><span class="line">x2 = (room - room.<span class="built_in">min</span>()) / (room.<span class="built_in">max</span>() - room.<span class="built_in">min</span>())    <span class="comment"># 房间数归一化</span></span><br><span class="line">X = np.stack((x0, x1, x2), axis=<span class="number">1</span>)                      <span class="comment"># (16, 3) 属性矩阵</span></span><br><span class="line">Y = price.reshape(-<span class="number">1</span>, <span class="number">1</span>)                                <span class="comment"># (16, 1) 标签</span></span><br><span class="line">X = torch.from_numpy(X).<span class="built_in">float</span>()                         <span class="comment"># numpy -&gt; 张量</span></span><br><span class="line">Y = torch.from_numpy(Y).<span class="built_in">float</span>()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.4 设置模型参数初值</span></span><br><span class="line">learning_rate = <span class="number">0.2</span>      <span class="comment"># 超参数：学习率</span></span><br><span class="line">num_epochs = <span class="number">50</span>          <span class="comment"># 超参数：迭代次数</span></span><br><span class="line">display_step = <span class="number">10</span>        <span class="comment"># 超参数：显示间隔</span></span><br><span class="line"></span><br><span class="line">torch.manual_seed(<span class="number">612</span>)</span><br><span class="line">W = torch.randn(<span class="number">3</span>, <span class="number">1</span>, requires_grad=<span class="literal">True</span>)               <span class="comment"># (3,1)，取正态分布随机值作初值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2.5 训练模型</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs + <span class="number">1</span>):</span><br><span class="line">    <span class="comment"># 前向传播</span></span><br><span class="line">    PRED = torch.matmul(X, W)</span><br><span class="line">    Loss = <span class="number">0.5</span> * torch.mean((Y - PRED) ** <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 使用 SGD 优化器</span></span><br><span class="line">    optimizer = torch.optim.SGD([W], lr=learning_rate)</span><br><span class="line">    optimizer.zero_grad()      <span class="comment"># 梯度清零</span></span><br><span class="line">    Loss.backward()            <span class="comment"># 计算梯度</span></span><br><span class="line">    optimizer.step()           <span class="comment"># 更新参数</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Epoch [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;&quot;</span>.<span class="built_in">format</span>(i, num_epochs, Loss.item()))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注（本节的推断补全，逐条对应课件抽取结果）</strong>：</p>
+<ul>
+<li><code>X = np.stack((x0, x1, x2), axis=1)</code> 在抽取中被拆成 4 行：<code>X=[2].[5](( 0,</code> &#x2F; <code>1,</code> &#x2F; <code>2),</code> &#x2F; <code>=1)</code> —— 2 个小写字母的模块 + 5 个小写字母的函数＝<code>np.stack</code>，最后一行的 <code>=1)</code> 前是被吞掉的 <code>axis</code>。与 10.4.3 的 TensorFlow 版写法完全一致。</li>
+<li><code>Y = price.reshape(-1, 1)</code> 由「5 个小写字母 + <code>.</code> + 7 个小写字母 + <code>(-1,</code>」还原：<code>price</code>（5）与 <code>reshape</code>（7），意为把一维价格数组变成列向量。</li>
+<li><code>X = torch.from_numpy(X).float()</code>、<code>Y = torch.from_numpy(Y).float()</code> 由 <code>=[5].[4]_[5](X).[5]()</code> 还原：模块 5 个小写字母＝<code>torch</code>、方法 4+下划线+5 个小写字母＝<code>from_numpy</code>、最后的 <code>.[5]()</code> ＝<code>.float()</code>。</li>
+<li>三个超参数只抽到 <code>=0.2 / =50 / =10</code>，变量名丢失；迭代次数同样由循环行 <code>(num_epochs+1):</code> 反推为 <code>num_epochs</code>。</li>
+<li><code>W = torch.randn(3, 1, requires_grad=True)</code> 由 <code>W=[5].[5](3,</code> &#x2F; <code>1,</code> &#x2F; <code>_    =T   )</code> 拼回。</li>
+<li>训练循环里 <code>PRED = torch.matmul(X, W)</code> 只抽到尾部 <code>W)</code>（说明该行末尾是 <code>W)</code>，即矩阵乘法的第二个参数），损失行只抽到 <code>=0.5</code>，其余被吞掉；此处按 10.4.3 与 10.7.5 的写法补全为 <code>0.5*torch.mean((Y-PRED)**2)</code>。</li>
+<li><code>optimizer.zero_grad()</code>、<code>Loss.backward()</code>、<code>optimizer.step()</code> 三行在抽取中整体缺失（只剩三行注释「#梯度清零 &#x2F; #计算梯度 &#x2F; #更新参数」）。</li>
+<li>抽取顺序把 <code>X=torch.from_numpy(X).float()</code>、<code>Y=torch.from_numpy(Y).float()</code> 两行排到了第 2 页循环之后，按语义它们属于「2.3 数据预处理」，本文放回预处理段。</li>
+</ul>
+</blockquote>
+<h3 id="10-7-3-4-课件给出的运行结果"><a href="#10-7-3-4-课件给出的运行结果" class="headerlink" title="10.7.3.4 课件给出的运行结果"></a>10.7.3.4 课件给出的运行结果</h3><p><img src="/images/dl/dl10-pytorch/p02-01_350x187.jpg" alt="第2页 多元线性回归梯度下降的终端输出（Epoch 0~50，每 10 次一打印）"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Epoch [0/50], Loss: 4461.1069</span><br><span class="line">Epoch [10/50], Loss: 85.2030</span><br><span class="line">Epoch [20/50], Loss: 82.0065</span><br><span class="line">Epoch [30/50], Loss: 81.4104</span><br><span class="line">Epoch [40/50], Loss: 81.0684</span><br><span class="line">Epoch [50/50], Loss: 80.8676</span><br></pre></td></tr></table></figure>
+
+<p><strong>怎么读这张输出</strong>：</p>
+<ul>
+<li>因为 <code>display_step = 10</code>，只打印 6 行（0、10、20、30、40、50）；</li>
+<li>第 0 轮 Loss 高达 4461，第 10 轮就掉到 85.20——<strong>学习率 0.2 明显比一元回归那节的 0.00001 大得多</strong>，这是”归一化之后才敢用大学习率”的直接体现（见易错点 1）；</li>
+<li>之后 Loss 下降很慢（85.20 → 80.87），说明<strong>多元回归在归一化数据上的收敛比较平坦</strong>，50 次迭代还没到极限；</li>
+<li>注意：这里<strong>只打印了一个 Loss</strong>（没有像 10.7.4&#x2F;10.7.5 那样区分 Train&#x2F;Test），因为本节的 16 条样本<strong>没有划分训练集与测试集</strong>，全部样本既当训练又当评估。</li>
+</ul>
+<h3 id="10-7-3-5-易错点"><a href="#10-7-3-5-易错点" class="headerlink" title="10.7.3.5 易错点"></a>10.7.3.5 易错点</h3><ol>
+<li><strong>学习率必须跟着数据尺度走</strong>：一元回归用原始面积（几十~一百多）时学习率只能取 <code>0.00001</code>；本节把面积&#x2F;房间数都归一化到 <code>[0,1]</code> 后才敢取 <code>0.2</code>。<strong>不归一化 + 大学习率 &#x3D; 直接发散（Loss 变 nan）</strong>。</li>
+<li><strong><code>np.stack</code> 的 <code>axis=1</code> 不能写成 <code>axis=0</code></strong>：写成 0 得到的是 <code>(3,16)</code>，矩阵乘的形状对不上，会报 <code>mat1 and mat2 shapes cannot be multiplied</code>。</li>
+<li><strong><code>W</code> 必须是 <code>(3,1)</code> 而不是 <code>(3,)</code></strong>：<code>torch.randn(3, requires_grad=True)</code> 得到的是一维张量，与 <code>X(16,3)</code> 做 matmul 结果会是 <code>(16,)</code>，与 <code>Y(16,1)</code> 相减时<strong>广播成 (16,16)</strong>，Loss 数会大得离谱却<strong>不报错</strong>——这是最隐蔽的坑。</li>
+<li><strong>数据要转成 float</strong>：<code>torch.from_numpy(X)</code> 会保留 numpy 的 <code>float64</code>，而 <code>torch.randn</code> 产出的是 <code>float32</code>，两者混算虽然能跑，但会触发类型提升与潜在警告；课件统一加了 <code>.float()</code>。</li>
+<li><strong>增广列必须放在最前面且与 <code>W</code> 的第 0 个分量对应</strong>：如果 <code>X</code> 的列序与 <code>W</code> 的物理含义对不上，模型照样能收敛，但「哪个权重是偏置」就说不清了。</li>
+<li><strong><code>mean</code> 与 <code>sum</code> 的关系</strong>：<code>0.5*torch.mean(e²)</code> 与 <code>(1/(2n))*torch.sum(e²)</code> 等价；换成 <code>sum</code> 而不缩小，会等价于把学习率放大了 n 倍，同样容易发散。</li>
+</ol>
+<hr>
+<h2 id="10-7-4-PyTorch-实现波士顿房价预测（一元线性回归）"><a href="#10-7-4-PyTorch-实现波士顿房价预测（一元线性回归）" class="headerlink" title="10.7.4 PyTorch 实现波士顿房价预测（一元线性回归）"></a>10.7.4 PyTorch 实现波士顿房价预测（一元线性回归）</h2><h3 id="10-7-4-1-题目描述（照录）"><a href="#10-7-4-1-题目描述（照录）" class="headerlink" title="10.7.4.1 题目描述（照录）"></a>10.7.4.1 题目描述（照录）</h3><blockquote>
+<p>本实例基于 PyTorch 深度学习框架实现一元线性回归，完成波士顿房价预测。使用波士顿房价数据集中的<strong>房间数属性</strong>训练一元线性回归模型，并测试其性能，以可视化的形式展现训练测试的过程。</p>
+<p>相关知识点详见 10.1、10.3：梯度下降法，TensorFlow 实现代码详见 10.6.1 实例，波士顿房价预测（1）。</p>
+</blockquote>
+<h3 id="10-7-4-2-相关函数对比（课件表-1-照录）"><a href="#10-7-4-2-相关函数对比（课件表-1-照录）" class="headerlink" title="10.7.4.2 相关函数对比（课件表 1 照录）"></a>10.7.4.2 相关函数对比（课件表 1 照录）</h3><p>课件原文：「本实例主要使用了如表 1 中的 PyTorch 方法」。</p>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>PyTorch</th>
+<th>TensorFlow</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建张量</td>
+<td><code>torch.tensor()</code></td>
+<td><code>tf.constant()</code></td>
+</tr>
+<tr>
+<td>求平均值</td>
+<td><code>torch.mean()</code></td>
+<td><code>tf.mean()</code></td>
+</tr>
+<tr>
+<td>求和</td>
+<td><code>torch.sum()</code></td>
+<td><code>tf.sum()</code></td>
+</tr>
+<tr>
+<td>求导</td>
+<td><code>torch.autograd.backward()</code></td>
+<td><code>tf.GradientTape().gradient()</code></td>
+</tr>
+</tbody></table>
+<h3 id="10-7-4-3-数据准备：三个自定义函数（签名照录）"><a href="#10-7-4-3-数据准备：三个自定义函数（签名照录）" class="headerlink" title="10.7.4.3 数据准备：三个自定义函数（签名照录）"></a>10.7.4.3 数据准备：三个自定义函数（签名照录）</h3><p>课件没有直接调用 <code>tf.keras.datasets.boston_housing</code>（那是 TensorFlow 版的写法），而是<strong>自己从本地 CSV&#x2F;数据文件读</strong>，因此自定义了三个函数。课件给出的<strong>函数签名与功能说明</strong>（照录）：</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>课件说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>load_boston_housing_data(filename)</code></td>
+<td>加载波士顿房价数据集（读取已下载的波士顿房价数据集）</td>
+</tr>
+<tr>
+<td><code>split_train_test_data(data, test_size=0.2, random_state=42)</code></td>
+<td>将数据集拆分为训练集和测试集，<strong>训练集占比为 0.8</strong></td>
+</tr>
+<tr>
+<td><code>get_features_labels(data, label_column=&#39;MEDV&#39;)</code></td>
+<td>从数据中获取特征和标签</td>
+</tr>
+</tbody></table>
+<p>课件给出的数据集下载地址（照录）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data</span><br></pre></td></tr></table></figure>
+
+<p>课件给出的 14 个列名（照录，第 1 个到第 13 个是属性，最后一个是房价标签）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">&#x27;CRIM&#x27;</span>, <span class="string">&#x27;ZN&#x27;</span>, <span class="string">&#x27;INDUS&#x27;</span>, <span class="string">&#x27;CHAS&#x27;</span>, <span class="string">&#x27;NOX&#x27;</span>, <span class="string">&#x27;RM&#x27;</span>, <span class="string">&#x27;AGE&#x27;</span>, <span class="string">&#x27;DIS&#x27;</span>,</span><br><span class="line"> <span class="string">&#x27;RAD&#x27;</span>, <span class="string">&#x27;TAX&#x27;</span>, <span class="string">&#x27;PTRATIO&#x27;</span>, <span class="string">&#x27;B&#x27;</span>, <span class="string">&#x27;LSTAT&#x27;</span>, <span class="string">&#x27;MEDV&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：PDF 只抽取出<strong>函数签名、参数默认值与功能说明</strong>，<strong>函数体没有抽出来</strong>（抽取到的只剩每行末尾的 <code>=1)</code>、<code>=None)</code> 之类的尾巴）。上面的函数体是按「签名 + 功能说明 + 10.6.2 的 TensorFlow 版处理流程」补写的，属于推断。</p>
+</blockquote>
+<h3 id="10-7-4-4-完整可运行代码"><a href="#10-7-4-4-完整可运行代码" class="headerlink" title="10.7.4.4 完整可运行代码"></a>10.7.4.4 完整可运行代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 3.1 导入依赖库</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&#x27;KMP_DUPLICATE_LIB_OK&#x27;</span>] = <span class="string">&#x27;True&#x27;</span>    <span class="comment"># 规避 OpenMP 重复加载导致的崩溃</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.2 数据准备：读取、拆分、取特征/标签</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_boston_housing_data</span>(<span class="params">filename, delim_whitespace=<span class="literal">True</span>, names=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取已下载的波士顿房价数据集&quot;&quot;&quot;</span></span><br><span class="line">    data = pd.read_csv(filename, delim_whitespace=delim_whitespace, names=names)</span><br><span class="line">    data.columns = [<span class="string">&#x27;CRIM&#x27;</span>, <span class="string">&#x27;ZN&#x27;</span>, <span class="string">&#x27;INDUS&#x27;</span>, <span class="string">&#x27;CHAS&#x27;</span>, <span class="string">&#x27;NOX&#x27;</span>, <span class="string">&#x27;RM&#x27;</span>, <span class="string">&#x27;AGE&#x27;</span>, <span class="string">&#x27;DIS&#x27;</span>,</span><br><span class="line">                    <span class="string">&#x27;RAD&#x27;</span>, <span class="string">&#x27;TAX&#x27;</span>, <span class="string">&#x27;PTRATIO&#x27;</span>, <span class="string">&#x27;B&#x27;</span>, <span class="string">&#x27;LSTAT&#x27;</span>, <span class="string">&#x27;MEDV&#x27;</span>]</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">split_train_test_data</span>(<span class="params">data, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;划分数据集与训练集（训练集占比 0.8）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line">    <span class="keyword">return</span> train_test_split(data, test_size=test_size, random_state=random_state)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_features_labels</span>(<span class="params">data, label_column=<span class="string">&#x27;MEDV&#x27;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;获取属性和标签&quot;&quot;&quot;</span></span><br><span class="line">    features = data.drop(label_column, axis=<span class="number">1</span>)</span><br><span class="line">    labels = data[label_column]</span><br><span class="line">    <span class="keyword">return</span> features, labels</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载数据</span></span><br><span class="line">filename = <span class="string">&#x27;E:/boston_housing.csv&#x27;</span></span><br><span class="line">data = load_boston_housing_data(filename, delim_whitespace=<span class="literal">True</span>, names=<span class="literal">None</span>)</span><br><span class="line">train_data, test_data = split_train_test_data(data, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span>)</span><br><span class="line">train_x, train_y = get_features_labels(train_data, label_column=<span class="string">&#x27;MEDV&#x27;</span>)</span><br><span class="line">test_x, test_y = get_features_labels(test_data, label_column=<span class="string">&#x27;MEDV&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将属性与标签转化为张量</span></span><br><span class="line">train_x = torch.tensor(train_x.values, dtype=torch.float64)</span><br><span class="line">train_y = torch.tensor(train_y.values, dtype=torch.float64)</span><br><span class="line">test_x = torch.tensor(test_x.values, dtype=torch.float64)</span><br><span class="line">test_y = torch.tensor(test_y.values, dtype=torch.float64)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3 提取&quot;房间数&quot;属性（RM 是第 6 列，索引为 5）</span></span><br><span class="line">x_train = train_x[:, <span class="number">5</span>].reshape(-<span class="number">1</span>, <span class="number">1</span>).<span class="built_in">float</span>()      <span class="comment"># 提取训练集房间属性</span></span><br><span class="line">y_train = train_y.reshape(-<span class="number">1</span>, <span class="number">1</span>).<span class="built_in">float</span>()</span><br><span class="line">x_test = test_x[:, <span class="number">5</span>].reshape(-<span class="number">1</span>, <span class="number">1</span>).<span class="built_in">float</span>()        <span class="comment"># 提取测试集房间属性</span></span><br><span class="line">y_test = test_y.reshape(-<span class="number">1</span>, <span class="number">1</span>).<span class="built_in">float</span>()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.3 训练和测试模型</span></span><br><span class="line"><span class="comment"># （1）设置超参数</span></span><br><span class="line">learn_rate = <span class="number">0.005</span>          <span class="comment"># 设置学习率</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">2000</span>                 <span class="comment"># 设置迭代次数（注意：变量名与内置函数 iter 同名）</span></span><br><span class="line">display_step = <span class="number">200</span>          <span class="comment"># 设置显示间隔</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># （2）设置模型参数初值 w、b</span></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">w = torch.randn(<span class="number">1</span>, requires_grad=<span class="literal">True</span>)      <span class="comment"># 取正态分布随机值作初值</span></span><br><span class="line">b = torch.randn(<span class="number">1</span>, requires_grad=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># （3）训练模型</span></span><br><span class="line"><span class="comment"># 定义两个空列表，分别用来记录训练集与测试集每次迭代的平方损失</span></span><br><span class="line">mse_train = []</span><br><span class="line">mse_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line">    <span class="comment"># 预测值和损失函数</span></span><br><span class="line">    pred_train = w * x_train + b</span><br><span class="line">    Loss_train = <span class="number">0.5</span> * torch.mean((y_train - pred_train) ** <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    pred_test = w * x_test + b</span><br><span class="line">    Loss_test = <span class="number">0.5</span> * torch.mean((y_test - pred_test) ** <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 记录每一轮的损失值</span></span><br><span class="line">    mse_train.append(Loss_train.item())</span><br><span class="line">    mse_test.append(Loss_test.item())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将梯度清 0</span></span><br><span class="line">    <span class="keyword">if</span> w.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        w.grad.data.zero_()</span><br><span class="line">    <span class="keyword">if</span> b.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        b.grad.data.zero_()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 计算梯度</span></span><br><span class="line">    Loss_train.backward()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 梯度下降法更新模型参数</span></span><br><span class="line">    w.data = w.data - w.grad.data * learn_rate</span><br><span class="line">    b.data = b.data - b.grad.data * learn_rate</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出模型训练结果</span></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i:%d,Train Loss:%f,Test Loss:%f&quot;</span></span><br><span class="line">              % (i, Loss_train.item(), Loss_test.item()))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.4 可视化输出</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>]       <span class="comment"># 显示中文</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span>         <span class="comment"># 正常显示负号</span></span><br><span class="line">plt.figure(figsize=(<span class="number">20</span>, <span class="number">4</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制训练集与测试集损失函数</span></span><br><span class="line">plt.subplot(<span class="number">131</span>)</span><br><span class="line">plt.plot(mse_train, color=<span class="string">&quot;blue&quot;</span>, linewidth=<span class="number">3</span>)</span><br><span class="line">plt.plot(mse_test, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">1.5</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Loss&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制训练集的真实房价与预测房价的折线图</span></span><br><span class="line">plt.subplot(<span class="number">132</span>)</span><br><span class="line">plt.plot(y_train, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_train, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend(loc=<span class="number">1</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;房价&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制测试集的真实房价与预测房价的折线图</span></span><br><span class="line">plt.subplot(<span class="number">133</span>)</span><br><span class="line">plt.plot(y_test, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_test, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend(loc=<span class="number">1</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;房价&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注（本节的推断补全，逐条对应课件抽取结果）</strong>：</p>
+<ul>
+<li><code>os.environ[&#39;KMP_DUPLICATE_LIB_OK&#39;] = &#39;True&#39;</code> 由 <code>.[7][&#39;KMP_DUPLICATE_LIB_OK&#39;]</code> + <code>=&#39;T[3]&#39;</code> 逐字符还原（2 个小写字母的模块 <code>os</code> + <code>.environ</code>）。</li>
+<li>四条张量转换语句由 <code>=torch.tensor(train_x.values,dtype=torch.float64)</code> 的抽取形式（<code>=[5].[6]([5]_·.[6],[5]=[5].[5]64)</code>）逐段还原；其中 <code>[5]_·</code> 是 5 个小写字母 + 下划线 + 1 个小写字母＝<code>train_x</code>（同理 <code>test_x</code>），<code>dtype=torch.float64</code> 由 <code>[5]=[5].[5]64)</code> 还原。</li>
+<li><code>x_train = train_x[:,5].reshape(-1,1).float()</code> 由 <code>_[5]=[5]_·[:,5].[5]().[6]()</code> 还原（左侧是 <code>x_train</code>，右侧是 <code>train_x[:,5]</code> + 两个无参方法调用），<strong>两个方法的原始拼写无法 100% 确认</strong>，本文取最常用的 <code>.reshape(-1,1)</code> 与 <code>.float()</code> 组合；课件的行尾注释是「提取训练集房间属性 &#x2F; 提取测试集房间属性」，与「取第 5 列 RM 并整成 (n,1)」完全对应。</li>
+<li>超参数只有 <code>=0.005 / =2000 / =200</code>，变量名丢失；<code>=2000</code> 对应的循环行抽取为 <code>(0,    +1):</code>（4 个小写字母＝<code>iter</code>，与 10.6.1 的 TensorFlow 版命名一致），故写作 <code>iter</code>。</li>
+<li>参数初值：<code>np.random.seed(612)</code> 由 <code>.[6].[4](612)</code> 还原（2 个小写字母 <code>np</code> + <code>.random</code> + <code>.seed</code>，注意<strong>没有下划线</strong>，因此不是 <code>torch.manual_seed</code>）；<code>w = torch.randn(1, requires_grad=True)</code>、<code>b = ...</code> 只抽到尾行 <code>=T   )</code>，与 10.7.2 的写法一致。</li>
+<li>损失行 <code>Loss_train = 0.5*torch.mean((y_train-pred_train)**2)</code> 是完整抽出来的（<code>=0.5*[5].[4]((·_[5]-[4]_[5])**2)</code>）：<code>[5].[4]</code> ＝ <code>torch.mean</code>，两个操作数是 <code>y_train</code> 与 <code>pred_train</code> —— <strong>注意本节用的是 <code>**2</code>，不是 10.7.2 的 <code>torch.square</code></strong>。测试集损失行只抽到 <code>-pred_test)**2)</code>，形式与之对称。</li>
+<li>「将梯度清 0」段：抽取结果只剩两行 <code>N   :</code>（<code>N</code> + 3 个小写字母 + <code>:</code>，即 <code>None:</code>），对应两个参数 w、b 各一行；结合 10.7.1 的「在每轮计算梯度前，要将梯度清 0」与 10.7.5 中完整抽出的 <code>W.grad.data.zero_()</code>，此处还原为 <code>if w.grad is not None: w.grad.data.zero_()</code> 的形式——<strong><code>if ... is not None:</code> 这一守卫是推断补全的</strong>（第一轮 <code>w.grad</code> 仍是 <code>None</code>，直接调用 <code>.data</code> 会报错）。</li>
+<li><code>w.data = w.data - w.grad.data * learn_rate</code> 在抽取中整行缺失，按 10.7.5 抽到的 <code>W.grad.data*learn_rate</code> 形式补全。</li>
+<li>绘图部分还原度较高：<code>.[2]P[5][&#39;[4].[4]-[5]&#39;]</code> ＝ <code>plt.rcParams[&#39;font.sans-serif&#39;]</code>、<code>[&#39;S[2]H[2]&#39;]</code> ＝ <code>[&#39;SimHei&#39;]</code>、<code>.[2]P[5][&#39;[4].[7]_[5]&#39;]</code> ＝ <code>plt.rcParams[&#39;axes.unicode_minus&#39;]</code>、<code>.[6]([7]=(20,4))</code> ＝ <code>plt.figure(figsize=(20,4))</code>、<code>.[7](131)</code> ＝ <code>plt.subplot(131)</code>、<code>=3)</code> &#x2F; <code>=1.5)</code> ＝ <code>linewidth=3</code> &#x2F; <code>linewidth=1.5</code>、<code>&quot;I[8]&quot;</code> ＝ <code>&quot;Iteration&quot;</code>、<code>&quot;L[3]&quot;</code> ＝ <code>&quot;Loss&quot;</code>、<code>.[6]([3]=1)</code> ＝ <code>plt.legend(loc=1)</code>。三个子图的 <code>plt.plot(真实值/预测值, ...)</code> 行本身在抽取中缺失，按图例 true_price &#x2F; predict 补全。</li>
+</ul>
+</blockquote>
+<h3 id="10-7-4-5-课件给出的运行结果"><a href="#10-7-4-5-课件给出的运行结果" class="headerlink" title="10.7.4.5 课件给出的运行结果"></a>10.7.4.5 课件给出的运行结果</h3><p><img src="/images/dl/dl10-pytorch/p03-01_440x301.jpg" alt="第3页 一元回归训练输出（每 200 次一打印）"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">i:0,Train Loss:332.366684,Test Loss:295.503730</span><br><span class="line">i:200,Train Loss:29.150400,Test Loss:27.373817</span><br><span class="line">i:400,Train Loss:28.966146,Test Loss:27.235298</span><br><span class="line">i:600,Train Loss:28.786299,Test Loss:27.100587</span><br><span class="line">i:800,Train Loss:28.610754,Test Loss:26.969580</span><br><span class="line">i:1000,Train Loss:28.439408,Test Loss:26.842196</span><br><span class="line">i:1200,Train Loss:28.272160,Test Loss:26.718328</span><br><span class="line">i:1400,Train Loss:28.108913,Test Loss:26.597895</span><br><span class="line">i:1600,Train Loss:27.949568,Test Loss:26.480801</span><br><span class="line">i:1800,Train Loss:27.794035,Test Loss:26.366971</span><br><span class="line">i:2000,Train Loss:27.642223,Test Loss:26.256320</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/dl/dl10-pytorch/p05-01_1269x261.jpg" alt="第5页 一元回归可视化：损失曲线 + 训练&#x2F;测试真实房价 vs 预测房价"></p>
+<p><strong>怎么读这两张结果</strong>：</p>
+<ul>
+<li><strong>打印格式与 10.6.1 的 TensorFlow 版不同</strong>：这里是 <code>&quot;i:%d,Train Loss:%f,Test Loss:%f&quot;</code>（冒号后<strong>没有空格</strong>），所以输出是 <code>i:0,Train Loss:332.366684,...</code>；</li>
+<li>11 行输出对应 <code>i = 0, 200, 400, ... , 2000</code>，共 11 个点，与 <code>display_step = 200</code> 和 <code>range(0, iter+1)</code> 吻合；</li>
+<li><strong>Loss 下降极其缓慢</strong>：从 332 降到 27.6，且到 2000 轮仍在缓慢下降——一元回归只用一个特征 RM，拟合能力有限，属于「欠拟合」而非「发散」；</li>
+<li><strong>测试 Loss 一直略低于训练 Loss</strong>（26.26 vs 27.64），说明<strong>没有过拟合</strong>（一个参数的一元模型也没什么可过拟合的）；</li>
+<li>中间那张折线图：蓝点 <code>true_price</code> 抖动很大（房价本身方差大），红线 <code>predict</code> 是一条几乎水平的窄带——<strong>正是一元模型的典型表现：只学到一个平均斜率，无法解释房价的大波动</strong>；</li>
+<li>右图（测试集）形态相同，条数更少（测试集样本少），红蓝贴合程度与训练集相当。</li>
+</ul>
+<h3 id="10-7-4-6-易错点"><a href="#10-7-4-6-易错点" class="headerlink" title="10.7.4.6 易错点"></a>10.7.4.6 易错点</h3><ol>
+<li><strong><code>os.environ[&#39;KMP_DUPLICATE_LIB_OK&#39;]=&#39;True&#39;</code> 只是”止痛药”</strong>：它的作用是让 libiomp5md.dll 重复加载时不再直接崩溃，并不解决根因（同进程里混入了两份 OpenMP）；能修环境就别长期靠它。</li>
+<li><strong><code>train_x[:, 5]</code> 的下标要从 0 数</strong>：RM 是第 6 个属性，所以索引是 <code>5</code>；写成 <code>6</code> 会取到 DIS，模型照跑但结果是错的。</li>
+<li><strong>维度要对齐</strong>：<code>w*x_train + b</code> 中 <code>x_train</code> 是 <code>(n,1)</code>、<code>w</code> 是 <code>(1,)</code>，广播后得到 <code>(n,1)</code>，与 <code>y_train(n,1)</code> 相减没问题；如果 <code>w</code> 写成标量而 <code>y_train</code> 是 <code>(n,)</code>，Loss 会因为广播变成 <code>(n,n)</code> 的怪结果。</li>
+<li><strong>清零与求导的先后顺序</strong>：课件在<strong>求导之前</strong>清零（10.7.1 原话「在每轮计算梯度前，要将梯度清 0」）。这会带来一个副作用：<strong>第 0 轮时 <code>w.grad</code> 还是 <code>None</code></strong>，直接写 <code>w.grad.data.zero_()</code> 会抛 <code>AttributeError</code>，所以要加 <code>if w.grad is not None:</code> 守卫（或者把清零挪到 <code>backward()</code> 与更新之后）。</li>
+<li>** <code>.data.zero_()</code> 里的下划线**：PyTorch 里所有以 <code>_</code> 结尾的方法（<code>zero_</code>、<code>add_</code>、<code>requires_grad_</code>）都是<strong>原地修改</strong>，没有返回新张量；写成 <code>w.grad.zero()</code> 会报 <code>AttributeError</code>。</li>
+<li><strong>变量名 <code>iter</code> 覆盖内置函数</strong>：课件把迭代次数命名为 <code>iter</code>，这会遮住 Python 内置的 <code>iter()</code>；学习时无碍，工程里建议改成 <code>num_iter</code>&#x2F;<code>max_iter</code>。</li>
+<li>** matplotlib 中文与负号**：不设 <code>plt.rcParams[&#39;font.sans-serif&#39;]=[&#39;SimHei&#39;]</code>，中文会变方块；不设 <code>axes.unicode_minus=False</code>，负号会变方块。</li>
+<li><strong>dtype 混用</strong>：数据处理用 <code>float64</code>，而 <code>torch.randn</code> 产出 <code>float32</code>；课件的做法是在取 RM 列时用 <code>.float()</code> 统一成 <code>float32</code>，与参数一致。</li>
+</ol>
+<hr>
+<h2 id="10-7-5-PyTorch-实现波士顿房价预测（多元线性回归）"><a href="#10-7-5-PyTorch-实现波士顿房价预测（多元线性回归）" class="headerlink" title="10.7.5 PyTorch 实现波士顿房价预测（多元线性回归）"></a>10.7.5 PyTorch 实现波士顿房价预测（多元线性回归）</h2><h3 id="10-7-5-1-题目描述（照录）"><a href="#10-7-5-1-题目描述（照录）" class="headerlink" title="10.7.5.1 题目描述（照录）"></a>10.7.5.1 题目描述（照录）</h3><blockquote>
+<p>本实例基于 PyTorch 深度学习框架实现多元线性回归，完成波士顿房价预测。使用波士顿房价数据集中的<strong>所有属性</strong>训练多元线性回归模型，并测试其性能，以可视化的形式展现训练和测试的过程及结果。</p>
+<p>相关知识点详见 10.1、10.3：梯度下降法，TensorFlow 实现代码详见 10.6.2 实例：波士顿房价预测（2）。</p>
+</blockquote>
+<h3 id="10-7-5-2-相关函数对比（课件表-1-照录）"><a href="#10-7-5-2-相关函数对比（课件表-1-照录）" class="headerlink" title="10.7.5.2 相关函数对比（课件表 1 照录）"></a>10.7.5.2 相关函数对比（课件表 1 照录）</h3><p>课件原文：「本实例主要使用了如表 1 中的 PyTorch 方法」。</p>
+<table>
+<thead>
+<tr>
+<th>函数名</th>
+<th>PyTorch</th>
+<th>TensorFlow</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建张量</td>
+<td><code>torch.tensor()</code></td>
+<td><code>tf.constant()</code></td>
+</tr>
+<tr>
+<td>求平均值</td>
+<td><code>torch.mean()</code></td>
+<td><code>tf.mean()</code></td>
+</tr>
+<tr>
+<td>求和</td>
+<td><code>torch.sum()</code></td>
+<td><code>tf.sum()</code></td>
+</tr>
+<tr>
+<td>向量乘法</td>
+<td><code>torch.matmul()</code></td>
+<td><code>tf.matmul()</code></td>
+</tr>
+<tr>
+<td>合并</td>
+<td><code>torch.cat()</code></td>
+<td><code>tf.concat</code></td>
+</tr>
+<tr>
+<td>求导</td>
+<td><code>torch.autograd.backward()</code></td>
+<td><code>tf.GradientTape().gradient()</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>比 10.7.4 的表 1 多了两行：<strong>向量乘法</strong>和<strong>合并</strong>——因为多元回归要用矩阵乘、还要把”全 1 列”和属性矩阵合并起来。</p>
+</blockquote>
+<h3 id="10-7-5-3-核心概念：全-1-列-torch-cat-拼出-n-14-的属性矩阵"><a href="#10-7-5-3-核心概念：全-1-列-torch-cat-拼出-n-14-的属性矩阵" class="headerlink" title="10.7.5.3 核心概念：全 1 列 + torch.cat 拼出 (n,14) 的属性矩阵"></a>10.7.5.3 核心概念：全 1 列 + <code>torch.cat</code> 拼出 <code>(n,14)</code> 的属性矩阵</h3><p>波士顿房价数据集的属性有 <strong>13 个</strong>（CRIM、ZN、INDUS、CHAS、NOX、RM、AGE、DIS、RAD、TAX、PTRATIO、B、LSTAT），再把<strong>全 1 列</strong>拼在最前面，就得到 <strong>14 列</strong>的属性矩阵；参数向量 <code>W</code> 相应地是 <code>(14,1)</code>：</p>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>代码</th>
+<th>形状</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 归一化后的 13 个属性</td>
+<td><code>x_train</code></td>
+<td><code>(404, 13)</code></td>
+</tr>
+<tr>
+<td>② 全 1 列（增广列，吸收偏置）</td>
+<td><code>x0_train = torch.ones([num_train,1])</code></td>
+<td><code>(404, 1)</code></td>
+</tr>
+<tr>
+<td>③ 按列合并</td>
+<td><code>torch.cat([x0_train, x_train], dim=1)</code></td>
+<td><code>(404, 14)</code></td>
+</tr>
+<tr>
+<td>④ 参数</td>
+<td><code>W = torch.tensor(np.random.randn(14,1), requires_grad=True)</code></td>
+<td><code>(14, 1)</code></td>
+</tr>
+<tr>
+<td>⑤ 前向</td>
+<td><code>torch.matmul(X_train, W)</code></td>
+<td><code>(404, 1)</code></td>
+</tr>
+</tbody></table>
+<p><strong><code>torch.cat</code> 与 <code>np.stack</code> 的差别</strong>：<code>cat</code> 是”沿已有维度拼接”（要指定 <code>dim</code>），<code>stack</code> 是”新建一个维度再堆叠”；这里是把两个 <code>(n,1)</code> 拼成 <code>(n,14)</code>，所以用 <code>cat(..., dim=1)</code>。</p>
+<h3 id="10-7-5-4-完整可运行代码"><a href="#10-7-5-4-完整可运行代码" class="headerlink" title="10.7.5.4 完整可运行代码"></a>10.7.5.4 完整可运行代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 3.1 导入依赖库</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&#x27;KMP_DUPLICATE_LIB_OK&#x27;</span>] = <span class="string">&#x27;True&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.2 数据准备（三个自定义函数与 10.7.4 完全相同）</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_boston_housing_data</span>(<span class="params">filename, delim_whitespace=<span class="literal">True</span>, names=<span class="literal">None</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;读取已下载的波士顿房价数据集&quot;&quot;&quot;</span></span><br><span class="line">    data = pd.read_csv(filename, delim_whitespace=delim_whitespace, names=names)</span><br><span class="line">    data.columns = [<span class="string">&#x27;CRIM&#x27;</span>, <span class="string">&#x27;ZN&#x27;</span>, <span class="string">&#x27;INDUS&#x27;</span>, <span class="string">&#x27;CHAS&#x27;</span>, <span class="string">&#x27;NOX&#x27;</span>, <span class="string">&#x27;RM&#x27;</span>, <span class="string">&#x27;AGE&#x27;</span>, <span class="string">&#x27;DIS&#x27;</span>,</span><br><span class="line">                    <span class="string">&#x27;RAD&#x27;</span>, <span class="string">&#x27;TAX&#x27;</span>, <span class="string">&#x27;PTRATIO&#x27;</span>, <span class="string">&#x27;B&#x27;</span>, <span class="string">&#x27;LSTAT&#x27;</span>, <span class="string">&#x27;MEDV&#x27;</span>]</span><br><span class="line">    <span class="keyword">return</span> data</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">split_train_test_data</span>(<span class="params">data, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;划分数据集与训练集（训练集占比 0.8）&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line">    <span class="keyword">return</span> train_test_split(data, test_size=test_size, random_state=random_state)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_features_labels</span>(<span class="params">data, label_column=<span class="string">&#x27;MEDV&#x27;</span></span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;获取属性和标签&quot;&quot;&quot;</span></span><br><span class="line">    features = data.drop(label_column, axis=<span class="number">1</span>)</span><br><span class="line">    labels = data[label_column]</span><br><span class="line">    <span class="keyword">return</span> features, labels</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 加载数据</span></span><br><span class="line">filename = <span class="string">&#x27;E:/boston_housing.csv&#x27;</span></span><br><span class="line">data = load_boston_housing_data(filename, delim_whitespace=<span class="literal">True</span>, names=<span class="literal">None</span>)</span><br><span class="line">train_data, test_data = split_train_test_data(data, test_size=<span class="number">0.2</span>, random_state=<span class="number">42</span>)</span><br><span class="line">train_x, train_y = get_features_labels(train_data, label_column=<span class="string">&#x27;MEDV&#x27;</span>)</span><br><span class="line">test_x, test_y = get_features_labels(test_data, label_column=<span class="string">&#x27;MEDV&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3 数据预处理</span></span><br><span class="line"><span class="comment"># 将属性与标签转化为张量</span></span><br><span class="line">train_x = torch.tensor(train_x.values, dtype=torch.float64)</span><br><span class="line">train_y = torch.tensor(train_y.values, dtype=torch.float64)</span><br><span class="line">test_x = torch.tensor(test_x.values, dtype=torch.float64)</span><br><span class="line">test_y = torch.tensor(test_y.values, dtype=torch.float64)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据归一化（按列 min-max，x_train / y_train / x_test / y_test 都归一化到 [0,1]）</span></span><br><span class="line">x_train = (train_x - train_x.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>]) / (train_x.<span class="built_in">max</span>(dim=<span class="number">0</span>)[<span class="number">0</span>] - train_x.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>])</span><br><span class="line">y_train = (train_y - train_y.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>]) / (train_y.<span class="built_in">max</span>(dim=<span class="number">0</span>)[<span class="number">0</span>] - train_y.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>])</span><br><span class="line">x_test = (test_x - test_x.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>]) / (test_x.<span class="built_in">max</span>(dim=<span class="number">0</span>)[<span class="number">0</span>] - test_x.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>])</span><br><span class="line">y_test = (test_y - test_y.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>]) / (test_y.<span class="built_in">max</span>(dim=<span class="number">0</span>)[<span class="number">0</span>] - test_y.<span class="built_in">min</span>(dim=<span class="number">0</span>)[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建全张量（全 1 列，作为增广列吸收偏置）</span></span><br><span class="line">num_train = <span class="built_in">len</span>(x_train)</span><br><span class="line">num_test = <span class="built_in">len</span>(x_test)</span><br><span class="line">x0_train = torch.ones([num_train, <span class="number">1</span>])</span><br><span class="line">x0_test = torch.ones([num_test, <span class="number">1</span>]).reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成多元模型属性矩阵</span></span><br><span class="line">X_train = torch.tensor(torch.cat([x0_train, x_train], dim=<span class="number">1</span>))</span><br><span class="line">X_test = torch.tensor(torch.cat([x0_test, x_test], dim=<span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(X_train.shape, X_test.shape)</span><br><span class="line"></span><br><span class="line">Y_train = torch.tensor(y_train.reshape(-<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line">Y_test = torch.tensor(y_test.reshape(-<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(Y_train.shape, Y_test.shape)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.3 训练和测试模型</span></span><br><span class="line"><span class="comment"># （1）设置超参数</span></span><br><span class="line">learn_rate = <span class="number">0.01</span>           <span class="comment"># 设置学习率</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">2000</span>                 <span class="comment"># 设置迭代次数</span></span><br><span class="line">display_step = <span class="number">200</span>          <span class="comment"># 设置显示间隔</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># （2）设置模型参数初值 W（13 个属性 + 1 个偏置 = 14）</span></span><br><span class="line">W = torch.tensor(np.random.randn(<span class="number">14</span>, <span class="number">1</span>), requires_grad=<span class="literal">True</span>)    <span class="comment"># 取正态分布随机值作初值</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># （3）训练模型</span></span><br><span class="line"><span class="comment"># 定义两个空列表，分别用来记录测试集与训练集每次迭代的平方损失</span></span><br><span class="line">mse_train = []</span><br><span class="line">mse_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span> + <span class="number">1</span>):</span><br><span class="line">    <span class="comment"># 预测值和损失函数</span></span><br><span class="line">    pred_train = torch.matmul(X_train, W)</span><br><span class="line">    Loss_train = <span class="number">0.5</span> * torch.mean((Y_train - pred_train) ** <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    pred_test = torch.matmul(X_test, W)</span><br><span class="line">    Loss_test = <span class="number">0.5</span> * torch.mean((Y_test - pred_test) ** <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 记录每一轮的损失值</span></span><br><span class="line">    mse_train.append(Loss_train.item())</span><br><span class="line">    mse_test.append(Loss_test.item())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 将梯度清 0</span></span><br><span class="line">    <span class="keyword">if</span> W.grad <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        W.grad.data.zero_()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 计算梯度</span></span><br><span class="line">    Loss_train.backward()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 梯度下降法更新模型参数</span></span><br><span class="line">    W.data = W.data - W.grad.data * learn_rate</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 输出模型训练结果</span></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i:%d,Train Loss:%f,Test Loss:%f&quot;</span></span><br><span class="line">              % (i, Loss_train.item(), Loss_test.item()))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3.4 可视化输出</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>]</span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span></span><br><span class="line">plt.figure(figsize=(<span class="number">20</span>, <span class="number">4</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制训练集与测试集损失函数</span></span><br><span class="line">plt.subplot(<span class="number">131</span>)</span><br><span class="line">plt.plot(mse_train, color=<span class="string">&quot;blue&quot;</span>, linewidth=<span class="number">3</span>)</span><br><span class="line">plt.plot(mse_test, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">1.5</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Loss&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制训练集的真实房价与预测房价的折线图</span></span><br><span class="line">plt.subplot(<span class="number">132</span>)</span><br><span class="line">plt.plot(Y_train, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_train, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;房价&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.legend(loc=<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制测试集的真实房价与预测房价的折线图</span></span><br><span class="line">plt.subplot(<span class="number">133</span>)</span><br><span class="line">plt.plot(Y_test, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&quot;o&quot;</span>, label=<span class="string">&quot;true_price&quot;</span>)</span><br><span class="line">plt.plot(pred_test, color=<span class="string">&quot;red&quot;</span>, marker=<span class="string">&quot;.&quot;</span>, label=<span class="string">&quot;predict&quot;</span>)</span><br><span class="line">plt.legend(loc=<span class="number">1</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;房价&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注（本节的推断补全，逐条对应课件抽取结果）</strong>：</p>
+<ul>
+<li><code>x0_train = torch.ones([num_train, 1])</code> 由 <code>0_[5]=[5].[4]([3]_[5],1])</code> 还原：左侧 <code>x0_train</code>（<code>x</code> 被吞掉，留下 <code>0_train</code>）、右侧模块 5 个小写字母＝<code>torch</code>、方法 4 个小写字母＝<code>ones</code>、参数 <code>[num_train,1]</code>。</li>
+<li><code>x0_test = torch.ones([num_test, 1]).reshape(-1, 1)</code> 由 <code>0_[4]=[5].[4]([3]_[4]).[7](-1,1)</code> 还原（<code>num_test</code> + 7 个小写字母的方法＝<code>reshape</code>）。</li>
+<li><code>X_train = torch.tensor(torch.cat([x0_train, x_train], dim=1))</code> 由 <code>X_</code> + <code>=[5].[6]([5].[3](·0_[5],·_[5]],[4]=1))</code> 还原：外层 <code>torch.tensor</code>、内层 <code>torch.cat</code>、两个被拼接对象是 <code>x0_train</code> 与 <code>x_train</code>、<code>dim=1</code>；<code>X_test</code> 一行完全对称。</li>
+<li><code>print(X_train.shape, X_test.shape)</code> 由 <code>(X_[5].[5],X_[4].[5])</code> 还原（<code>shape</code> 是 5 个小写字母）；<code>print(Y_train.shape, Y_test.shape)</code> 同理。</li>
+<li><code>Y_train = torch.tensor(y_train.reshape(-1,1))</code> 由 <code>Y_[5]=[5].[6](·_[5].[7](-1,1))</code> 还原。</li>
+<li><strong>数据归一化四行</strong>在抽取中只剩下 4 个 <code>=0)</code> 片段（即行尾是 <code>axis=0)</code> 或 <code>dim=0)</code>），<strong>无法逐字还原</strong>。本文写在”转张量”之后，因此必须用<strong>张量版的按列 min-max</strong>：<code>x.min(dim=0)[0]</code>（取 <code>values</code>，索引 <code>[0]</code>），不能直接写 <code>x.min(axis=0)</code>——后者在 2 维张量上返回的是 <code>(values, indices)</code> 命名元组，无法参与算术。若原文是在 pandas 的 DataFrame 上做归一化（pandas 的 <code>.min(axis=0)</code> 返回按列的 Series，可直接广播），那就应把归一化放到”转张量”<strong>之前</strong>。这两种放置方式的结果完全一致。</li>
+<li><code>W = torch.tensor(np.random.randn(14, 1), requires_grad=True)</code> 由 <code>W=[5].[6]([2].[6].[5](14,1),[8]_</code> + <code>=T[3])</code> 还原（<code>np.random.randn</code> &#x3D; 2 个小写字母 + <code>.random</code> + <code>.randn</code>；<code>requires_grad=True</code> 跨行）。</li>
+<li>参数初值用 <code>np.random.randn</code> 而不是 10.7.2&#x2F;10.7.3 的 <code>torch.manual_seed(612) + torch.randn</code>：<strong>本节没有随机种子</strong>（抽取中只有 <code>.[6].[4](612)</code> 的种子设置，即 <code>np.random.seed(612)</code>；若程序里确实写了种子，就没有这个 <code>.[6].[4](612)</code> 之外的证据），本文照抽取保留 <code>np.random.randn(14,1)</code>。</li>
+<li><code>pred_train = torch.matmul(X_train, W)</code>、<code>pred_test = torch.matmul(X_test, W)</code> 与两条 Loss 行是<strong>完整抽出来的</strong>（<code>=[5].[6](X_[5],W)</code>、<code>=0.5*[5].[4]((Y_[5]-[4]_[5])**2)</code>），命名按课件原文作 <code>pred_train</code>&#x2F;<code>pred_test</code>（注意比 10.7.4 的参数名多了一层小写）。</li>
+<li>梯度清零的守卫 <code>if W.grad is not None:</code> 由两行片段 <code>W.</code> 与 <code>N   :</code> 合成（<code>W</code> + <code>.</code> + … + <code>None:</code>，中间全是小写字母所以只剩空格），后一行 <code>W.grad.data.zero_()</code> 是<strong>完整抽出来的</strong>。</li>
+<li>更新行只抽到 <code>W.grad.data*learn_rate</code>，说明课件写的是 <strong><code>W.data = W.data - W.grad.data*learn_rate</code></strong>（梯度在前、学习率在后），本文照此。</li>
+<li><code>torch.tensor(torch.cat([...]))</code> 这种”把张量再包一层 torch.tensor”的写法是课件原文；能跑，但会触发 <code>UserWarning: To copy construct from a tensor...</code>，工程上直接写 <code>X_train = torch.cat([x0_train, x_train], dim=1)</code> 即可。</li>
+</ul>
+</blockquote>
+<h3 id="10-7-5-5-课件给出的运行结果"><a href="#10-7-5-5-课件给出的运行结果" class="headerlink" title="10.7.5.5 课件给出的运行结果"></a>10.7.5.5 课件给出的运行结果</h3><p><img src="/images/dl/dl10-pytorch/p04-01_575x236.jpg" alt="第4页 多元回归训练输出（每 200 次一打印）"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">i:200,Train Loss:35.412336,Test Loss:42.949856</span><br><span class="line">i:400,Train Loss:28.122695,Test Loss:32.002984</span><br><span class="line">i:600,Train Loss:24.820099,Test Loss:27.360469</span><br><span class="line">i:800,Train Loss:22.756437,Test Loss:24.720618</span><br><span class="line">i:1000,Train Loss:21.192975,Test Loss:22.867138</span><br><span class="line">i:1200,Train Loss:19.909842,Test Loss:21.421077</span><br><span class="line">i:1400,Train Loss:18.825282,Test Loss:20.241744</span><br><span class="line">i:1600,Train Loss:17.897525,Test Loss:19.262321</span><br><span class="line">i:1800,Train Loss:17.098834,Test Loss:18.442487</span><br><span class="line">i:2000,Train Loss:16.408128,Test Loss:17.753642</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>说明：课件截图是从 <code>i:200</code> 那一行开始截的，<strong><code>i:0</code> 那一行在截图上方被裁掉了</strong>，本笔记不替它补数值。</p>
+</blockquote>
+<p><img src="/images/dl/dl10-pytorch/p04-02_1254x250.jpg" alt="第4页 多元回归可视化：损失曲线 + 训练&#x2F;测试真实房价 vs 预测房价"></p>
+<p><strong>把 10.7.4（一元）与 10.7.5（多元）放在一起比，是这一讲最有价值的部分</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>10.7.4 一元（只用 RM）</th>
+<th>10.7.5 多元（13 个属性全用）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学习率</td>
+<td><code>learn_rate = 0.005</code></td>
+<td><code>learn_rate = 0.01</code></td>
+</tr>
+<tr>
+<td>参数</td>
+<td><code>w</code>、<code>b</code> 两个标量</td>
+<td><code>W</code> 一个 <code>(14,1)</code> 矩阵</td>
+</tr>
+<tr>
+<td>更新</td>
+<td>两次 <code>.data</code> 赋值</td>
+<td>一次 <code>.data</code> 赋值</td>
+</tr>
+<tr>
+<td>第 2000 轮训练 Loss</td>
+<td><strong>27.642223</strong></td>
+<td><strong>16.408128</strong></td>
+</tr>
+<tr>
+<td>第 2000 轮测试 Loss</td>
+<td><strong>26.256320</strong></td>
+<td><strong>17.753642</strong></td>
+</tr>
+<tr>
+<td>损失曲线形态</td>
+<td>早期骤降后<strong>几乎水平</strong></td>
+<td>一直<strong>持续下降</strong>，到 2000 轮仍未走平</td>
+</tr>
+<tr>
+<td>预测折线</td>
+<td>红线是一条窄带，与蓝点贴合差</td>
+<td>红线<strong>明显跟着蓝点上下起伏</strong>，贴合好得多</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：把 13 个属性都用上之后，训练 Loss 从 27.6 降到 16.4（约降 40%），测试 Loss 从 26.3 降到 17.8 —— <strong>多特征确实显著提升了拟合能力</strong>；同时测试 Loss 始终略高于训练 Loss，说明<strong>有轻微过拟合但不严重</strong>。这正好解释了为什么”一元线性回归做波士顿房价预测”在 10.6.1 里只够用来演示流程，而真正做预测要用 10.6.2 &#x2F; 10.7.5 的多元模型。</p>
+<h3 id="10-7-5-6-易错点"><a href="#10-7-5-6-易错点" class="headerlink" title="10.7.5.6 易错点"></a>10.7.5.6 易错点</h3><ol>
+<li><strong><code>torch.cat</code> 的 <code>dim</code> 必须写对</strong>：<code>torch.cat([x0_train, x_train], dim=0)</code> 会变成 <code>(2n, 13)</code> 而不是 <code>(n, 14)</code>，接着 <code>matmul</code> 直接报形状错误；<code>dim=1</code> 才是”按列拼”。</li>
+<li><strong>全 1 列必须与 <code>W</code> 的分量个数匹配</strong>：13 个属性 → 属性矩阵 14 列 → <code>W</code> 必须是 <code>(14,1)</code>。写成 <code>(13,1)</code> 会报 <code>mat1 and mat2 shapes cannot be multiplied</code>。</li>
+<li><strong>归一化的方向</strong>：课件把<strong>特征和标签都</strong>做了 min-max 归一化（<code>y_train</code> 也归一化），因此打印出来的 Loss（16.4 这种量级）是<strong>归一化后的</strong>数值，不能与 10.6.2 里未归一化的 Loss（几到几十）直接比大小。</li>
+<li><strong>在张量上别用 pandas 的 <code>axis=0</code></strong>：<code>x.min(axis=0)</code> 在 2 维张量上返回命名元组，直接参与算术会报 <code>TypeError</code>；张量上要么写 <code>x.min(dim=0)[0]</code>，要么把归一化放到转张量之前用 pandas 做。</li>
+<li><strong><code>torch.tensor(已有张量)</code>会告警</strong>：课件写成 <code>torch.tensor(torch.cat([...]))</code>，运行时会提示”这里发生了拷贝”；直接 <code>torch.cat</code> 返回的就是张量，不必再包一层。</li>
+<li><strong>梯度清零的位置</strong>：和 10.7.4 一样，清零在 <code>backward()</code> <strong>之前</strong>，第一轮 <code>W.grad</code> 是 <code>None</code>，必须加 <code>if W.grad is not None:</code> 守卫。</li>
+<li><strong><code>W.data = W.data - ...</code> 之后别忘了 <code>W.grad</code> 还在</strong>：因为是在下一次循环开头清零，所以更新的那一轮 <code>W.grad</code> 一直是可用的，顺序不能颠倒成”先更新后求导”。</li>
+<li><strong><code>np.random.randn</code> 没有固定种子</strong>：本节参数初值是随机的，<strong>每次运行结果会有细微差别</strong>；若要与课件输出完全一致，需要自己补 <code>np.random.seed(612)</code>（课件在 10.7.4&#x2F;10.7.5 里确实出现过 <code>np.random.seed(612)</code> 的调用片段，但抽取顺序显示它属于 10.7.4 的参数初值段）。</li>
+</ol>
+<hr>
+<h2 id="附录-A：本子篇-PyTorch-关键-API-速查"><a href="#附录-A：本子篇-PyTorch-关键-API-速查" class="headerlink" title="附录 A：本子篇 PyTorch 关键 API 速查"></a>附录 A：本子篇 PyTorch 关键 API 速查</h2><table>
+<thead>
+<tr>
+<th>需求</th>
+<th>PyTorch 写法</th>
+<th>对应 TensorFlow</th>
+<th>本子篇出现处</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>造张量</td>
+<td><code>torch.tensor([...])</code> &#x2F; <code>torch.tensor(np数组)</code></td>
+<td><code>tf.constant()</code></td>
+<td>10.7.4 &#x2F; 10.7.5</td>
+</tr>
+<tr>
+<td>造可求导参数</td>
+<td><code>torch.randn(1, requires_grad=True)</code></td>
+<td><code>tf.Variable(np.random.randn())</code></td>
+<td>10.7.2 &#x2F; 10.7.3 &#x2F; 10.7.4</td>
+</tr>
+<tr>
+<td>造可求导的矩阵参数</td>
+<td><code>torch.tensor(np.random.randn(14,1), requires_grad=True)</code></td>
+<td><code>tf.Variable(np.random.randn(3,1))</code></td>
+<td>10.7.5</td>
+</tr>
+<tr>
+<td>固定随机种子</td>
+<td><code>torch.manual_seed(612)</code> &#x2F; <code>np.random.seed(612)</code></td>
+<td><code>np.random.seed(612)</code></td>
+<td>10.7.2 用前者；10.7.4&#x2F;10.7.5 用后者</td>
+</tr>
+<tr>
+<td>numpy → 张量</td>
+<td><code>torch.from_numpy(X).float()</code></td>
+<td>直接喂 numpy</td>
+<td>10.7.3</td>
+</tr>
+<tr>
+<td>求导</td>
+<td><code>Loss.backward()</code></td>
+<td><code>tape.gradient(Loss, w)</code></td>
+<td>全部</td>
+</tr>
+<tr>
+<td>求导（返回梯度）</td>
+<td><code>torch.autograd.grad(outputs=z, inputs=x)</code></td>
+<td><code>tape.gradient(y, x)</code></td>
+<td>10.7.1</td>
+</tr>
+<tr>
+<td>清梯度</td>
+<td><code>optimizer.zero_grad()</code> &#x2F; <code>w.grad.data.zero_()</code></td>
+<td>自动</td>
+<td>10.7.2&#x2F;10.7.3 用前者；10.7.4&#x2F;10.7.5 用后者</td>
+</tr>
+<tr>
+<td>优化器更新</td>
+<td><code>torch.optim.SGD([w,b], lr=...); optimizer.step()</code></td>
+<td><code>apply_gradients</code></td>
+<td>10.7.2 &#x2F; 10.7.3</td>
+</tr>
+<tr>
+<td>手写更新</td>
+<td><code>w.data = w.data - lr * w.grad.data</code></td>
+<td><code>w.assign_sub(lr * dL_dw)</code></td>
+<td>10.7.4 &#x2F; 10.7.5</td>
+</tr>
+<tr>
+<td>均值&#x2F;平方</td>
+<td><code>torch.mean(...)</code> &#x2F; <code>(...)**2</code>、<code>torch.square(...)</code></td>
+<td><code>tf.reduce_mean</code> &#x2F; <code>tf.square</code></td>
+<td>全部</td>
+</tr>
+<tr>
+<td>矩阵乘</td>
+<td><code>torch.matmul(X, W)</code></td>
+<td><code>tf.matmul(X, W)</code></td>
+<td>10.7.3 &#x2F; 10.7.5</td>
+</tr>
+<tr>
+<td>拼接</td>
+<td><code>torch.cat([a, b], dim=1)</code></td>
+<td><code>tf.concat</code></td>
+<td>10.7.5</td>
+</tr>
+<tr>
+<td>全 1 张量</td>
+<td><code>torch.ones([n,1])</code></td>
+<td><code>np.ones(n)</code></td>
+<td>10.7.5</td>
+</tr>
+<tr>
+<td>取标量值</td>
+<td><code>Loss.item()</code> &#x2F; <code>w.item()</code></td>
+<td><code>loss.numpy()</code></td>
+<td>全部</td>
+</tr>
+</tbody></table>
+<h2 id="附录-B：本子篇未能从-PDF-还原的内容（不确定处汇总）"><a href="#附录-B：本子篇未能从-PDF-还原的内容（不确定处汇总）" class="headerlink" title="附录 B：本子篇未能从 PDF 还原的内容（不确定处汇总）"></a>附录 B：本子篇未能从 PDF 还原的内容（不确定处汇总）</h2><p><strong>一、系统性丢失（影响所有代码）</strong></p>
+<ol>
+<li><strong>所有小写字母在代码字体中丢失</strong>。因此所有变量名（<code>x</code>、<code>y</code>、<code>w</code>、<code>b</code>、<code>W</code>、<code>X</code>、<code>Y</code>、<code>pred</code>、<code>Loss</code> 等）的<strong>原始拼写无法从抽取文本逐字恢复</strong>，本文的命名依据是：<ul>
+<li>同讲 TensorFlow 版（10.4、10.6.1、10.6.2，见《第10讲-梯度下降法.md》）的变量命名；以及</li>
+<li>抽取中<strong>保留下来</strong>的部分：大写字母、下划线、数字、括号、点号。</li>
+</ul>
+</li>
+<li><strong>语句跨行碎裂</strong>：一条语句可能被拆成 1~4 行，个别行整体消失。本文只能按注释（课件代码里保留了 <code>#前向传播</code>、<code>#梯度清零</code>、<code>#计算梯度</code>、<code>#更新参数</code> 等中文注释）和 API 语义补全。</li>
+</ol>
+<p><strong>二、逐处清单（按小节）</strong></p>
+<table>
+<thead>
+<tr>
+<th>位置</th>
+<th>抽取到的内容</th>
+<th>无法确定的部分</th>
+<th>本文的处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>10.7.1 举例一</td>
+<td><code>x=torch.tensor(2.,requires_grad=True)</code>、<code>y=torch.tensor(3.,requires_grad=True)</code>、结果 <code>(12.)(4.)</code></td>
+<td><strong>中间量 z 的定义行整行丢失</strong></td>
+<td>由 <code>∂z/∂x=12、∂z/∂y=4</code> 反推 <code>z = x**2*y</code>，已加注</td>
+</tr>
+<tr>
+<td>10.7.1 举例二</td>
+<td>两次 <code>.requires_grad_()</code>、一次 <code>torch.autograd.grad(outputs=z,inputs=x,create_graph=True)</code>、结果 <code>(tensor(12.),)(tensor(4.),)</code></td>
+<td>对 y 求导的那次调用行丢失</td>
+<td>对称补全，已加注</td>
+</tr>
+<tr>
+<td>10.7.2 数据</td>
+<td><code>=[2].[5]([137.97,...)</code></td>
+<td>变量名；<code>np.array</code> 的小写部分</td>
+<td>还原为 <code>x = np.array([...])</code></td>
+</tr>
+<tr>
+<td>10.7.2 损失</td>
+<td><code>=0.5*torch.mean(torch.square(       -    ))</code></td>
+<td><strong>两个操作数的变量名（抽取后只剩 6 个空格与 4 个空格）</strong></td>
+<td>写作 <code>y</code>、<code>pred</code></td>
+</tr>
+<tr>
+<td>10.7.2 训练</td>
+<td>三行注释「#梯度清零&#x2F;#计算梯度&#x2F;#更新参数」</td>
+<td><code>optimizer.zero_grad()</code>、<code>Loss.backward()</code>、<code>optimizer.step()</code> 三行整体缺失</td>
+<td>按注释与 SGD 用法补全</td>
+</tr>
+<tr>
+<td>10.7.2 超参数</td>
+<td><code>=0.00001 / =10 / =1</code></td>
+<td>三个变量名</td>
+<td>迭代次数由 <code>(num_epochs+1)</code> 确定为 <code>num_epochs</code>，其余写作 <code>learning_rate</code>、<code>display_step</code></td>
+</tr>
+<tr>
+<td>10.7.3 预处理</td>
+<td><code>X=…((x0,1,2),=1)</code>、<code>Y=…(-1,1)</code>、<code>=torch.from_numpy(X).float()</code></td>
+<td><code>x0/x1/x2/num</code> 的定义行；<code>axis=1</code> 与 <code>dim=1</code> 二选一</td>
+<td>按 10.4.3 的 TensorFlow 版补全为 <code>axis=1</code></td>
+</tr>
+<tr>
+<td>10.7.3 训练</td>
+<td><code>W)</code>、<code>=0.5</code></td>
+<td>前向与损失行的主体</td>
+<td>按 10.7.5 补全为 <code>torch.matmul(X,W)</code> 与 <code>0.5*torch.mean((Y-PRED)**2)</code></td>
+</tr>
+<tr>
+<td>10.7.4 自定义函数</td>
+<td>三个函数<strong>签名与参数默认值</strong>、14 个列名、功能说明</td>
+<td><strong>三个函数的函数体全部没有抽取到</strong></td>
+<td>按签名 + 功能说明 + TensorFlow 版流程补写，已加注</td>
+</tr>
+<tr>
+<td>10.7.4 取特征</td>
+<td><code>x_train = train_x[:,5].&lt;5字母方法&gt;().&lt;6字母方法&gt;()</code></td>
+<td>两个无参方法的<strong>确切拼写</strong>（抽取后是 5 个空格与 6 个空格）</td>
+<td>取最常用的 <code>.reshape(-1,1)</code> 与 <code>.float()</code>，已加注</td>
+</tr>
+<tr>
+<td>10.7.4 清梯度</td>
+<td>两行 <code>N   :</code>（<code>None:</code>）</td>
+<td>守卫写法与 <code>w.grad.data.zero_()</code>、<code>b.grad.data.zero_()</code> 这两行本身</td>
+<td>还原为 <code>if w.grad is not None: w.grad.data.zero_()</code>，已加注</td>
+</tr>
+<tr>
+<td>10.7.4 更新参数</td>
+<td>整行缺失</td>
+<td><code>w.data = w.data - w.grad.data*learn_rate</code> 的具体顺序</td>
+<td>按 10.7.5 抽到的 <code>W.grad.data*learn_rate</code> 形式补全</td>
+</tr>
+<tr>
+<td>10.7.4&#x2F;10.7.5 记录损失</td>
+<td>注释「并转换为numpy数组」、<code>mse_train.append()</code></td>
+<td>是 <code>.item()</code> 还是 <code>.data.numpy()</code></td>
+<td>统一写 <code>.item()</code>（两者都可，已加注）</td>
+</tr>
+<tr>
+<td>10.7.5 归一化</td>
+<td>4 个 <code>=0)</code> 片段</td>
+<td>是 <code>axis=0</code> 还是 <code>dim=0</code>；归一化在”转张量”之前还是之后</td>
+<td>写在之后并用张量版 <code>dim=0)[0]</code>，两种放置方式的等价说明已加注</td>
+</tr>
+<tr>
+<td>10.7.4&#x2F;10.7.5 绘图</td>
+<td>大部分可逐字符还原</td>
+<td>三个子图里「预测值」的那条 <code>plt.plot</code> 行</td>
+<td>按图例 <code>true_price</code> &#x2F; <code>predict</code> 补全</td>
+</tr>
+<tr>
+<td>10.7.5 参数初值</td>
+<td><code>W=torch.tensor(np.random.randn(14,1),requires_grad=True)</code></td>
+<td>是否有 <code>np.random.seed(612)</code></td>
+<td>照抽取保留（无种子），已加注</td>
+</tr>
+</tbody></table>
+<p><strong>三、本笔记”没有做”的事</strong></p>
+<ul>
+<li><strong>没有编造任何运行结果</strong>：文中所有终端输出都来自课件截图（10.7.2 的第 2 页图、10.7.3 的第 2 页图、10.7.4 的第 3 页图、10.7.5 的第 4 页图），10.7.5 截图中被裁掉的 <code>i:0</code> 行<strong>没有补写</strong>。</li>
+<li><strong>没有为了”好看”改数据</strong>：商品房 16 组样本、房间数向量、波士顿 14 个列名均按抽取原文抄录。</li>
+<li><strong>没有把推断写成事实</strong>：凡属推断的变量名、函数体、守卫语句，都在正文对应位置用「&gt; 注：」标明，并在本附录汇总。</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>一句话总结这一篇</strong>：TensorFlow 版（10.3~10.6）把「求导」交给 <code>GradientTape</code>，PyTorch 版（10.7.x）把它交给 <code>backward()</code> + <code>.grad</code>；TensorFlow 版把「更新」交给 <code>assign_sub</code> &#x2F; 优化器，PyTorch 版既可以交给 <code>torch.optim.SGD().step()</code>（10.7.2、10.7.3），也可以手写 <code>w.data = w.data - lr*w.grad.data</code>（10.7.4、10.7.5）。<strong>唯一必须自己记住的差别是：PyTorch 的梯度会累加，每轮求导前一定要清零。</strong></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/06/%E7%AC%AC10%E8%AE%B2-PyTorch%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" title="第10讲 PyTorch梯度下降实现（子篇）">http://example.com/2026/10/06/第10讲-PyTorch梯度下降实现（子篇）/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"># PyTorch</a>
+              <a href="/tags/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/" rel="tag"># 梯度下降</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/06/%E7%AC%AC10%E8%AE%B2-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95/" rel="prev" title="第10讲 梯度下降法">
+      <i class="fa fa-chevron-left"></i> 第10讲 梯度下降法
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/06/%E7%AC%AC8%E8%AE%B2-PyTorch%E5%9F%BA%E7%A1%80%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" rel="next" title="第8讲 PyTorch基础（子篇）">
+      第8讲 PyTorch基础（子篇） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-10-%E8%AE%B2-PyTorch-%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%9A10-7-1-10-7-5%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 10 讲 PyTorch 梯度下降实现（子篇：10.7.1 ~ 10.7.5）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#0-%E4%B8%8E-TensorFlow-%E7%89%88%E7%9A%84%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB%EF%BC%88%E8%BF%99%E4%B8%80%E7%AF%87%E7%9A%84%E5%AE%9A%E4%BD%8D%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">0. 与 TensorFlow 版的对应关系（这一篇的定位）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-1-%E4%B8%80%E5%8F%A5%E8%AF%9D%E5%AF%B9%E7%85%A7%EF%BC%9A%E5%90%8C%E4%B8%80%E4%BB%B6%E4%BA%8B%EF%BC%8C%E4%B8%A4%E5%A5%97-API"><span class="nav-number">1.1.1.</span> <span class="nav-text">0.1 一句话对照：同一件事，两套 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0-2-%E6%9C%AC%E5%AD%90%E7%AF%87%E9%80%9F%E8%A7%88"><span class="nav-number">1.1.2.</span> <span class="nav-text">0.2 本子篇速览</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-1-PyTorch-%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC%E6%9C%BA%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">10.7.1 PyTorch 自动求导机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC"><span class="nav-number">1.2.1.</span> <span class="nav-text">10.7.1.1 什么是自动求导</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-2-Tensor-%E4%B8%AD%E9%80%9A%E5%B8%B8%E8%AE%B0%E5%BD%95%E7%9A%84%E5%B1%9E%E6%80%A7%EF%BC%88%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.2.2.</span> <span class="nav-text">10.7.1.2 Tensor 中通常记录的属性（照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-3-torch-autograd-backward-%EF%BC%88%E5%8F%82%E6%95%B0%E8%A1%A8%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.2.3.</span> <span class="nav-text">10.7.1.3 torch.autograd.backward()（参数表照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-4-torch-autograd-grad-%EF%BC%88%E5%8F%82%E6%95%B0%E8%A1%A8%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.2.4.</span> <span class="nav-text">10.7.1.4 torch.autograd.grad()（参数表照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-5-PyTorch-%E4%B8%8E-TensorFlow-%E8%87%AA%E5%8A%A8%E6%B1%82%E5%AF%BC%E6%9C%BA%E5%88%B6%E5%AF%B9%E6%AF%94%EF%BC%88%E8%A1%A8-1-%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.2.5.</span> <span class="nav-text">10.7.1.5 PyTorch 与 TensorFlow 自动求导机制对比（表 1 照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-1-6-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.2.6.</span> <span class="nav-text">10.7.1.6 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-2-PyTorch-%E5%AE%9E%E7%8E%B0%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%88%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">10.7.2 PyTorch 实现梯度下降法（一元线性回归）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-2-1-%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%88%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.3.1.</span> <span class="nav-text">10.7.2.1 题目描述（照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-2-2-%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB%EF%BC%88%E4%B8%8E-TensorFlow-%E7%89%88%E9%80%90%E7%8E%AF%E5%AF%B9%E7%85%A7%EF%BC%89"><span class="nav-number">1.3.2.</span> <span class="nav-text">10.7.2.2 对应关系（与 TensorFlow 版逐环对照）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-2-3-%E5%AE%8C%E6%95%B4%E5%8F%AF%E8%BF%90%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.3.</span> <span class="nav-text">10.7.2.3 完整可运行代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-2-4-%E8%AF%BE%E4%BB%B6%E7%BB%99%E5%87%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.3.4.</span> <span class="nav-text">10.7.2.4 课件给出的运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-2-5-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.3.5.</span> <span class="nav-text">10.7.2.5 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-3-PyTorch-%E5%AE%9E%E7%8E%B0%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%88%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">10.7.3 PyTorch 实现梯度下降法（多元线性回归）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-3-1-%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%88%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.4.1.</span> <span class="nav-text">10.7.3.1 题目描述（照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-3-2-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%EF%BC%9A%E5%A4%9A%E5%85%83%E5%9B%9E%E5%BD%92%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E2%80%9D%E8%A1%A5%E4%B8%80%E5%88%97-1-%E7%94%A8%E7%9F%A9%E9%98%B5%E4%B9%98%E2%80%9D"><span class="nav-number">1.4.2.</span> <span class="nav-text">10.7.3.2 核心概念：多元回归为什么要”补一列 1 + 用矩阵乘”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-3-3-%E5%AE%8C%E6%95%B4%E5%8F%AF%E8%BF%90%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="nav-number">1.4.3.</span> <span class="nav-text">10.7.3.3 完整可运行代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-3-4-%E8%AF%BE%E4%BB%B6%E7%BB%99%E5%87%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.4.4.</span> <span class="nav-text">10.7.3.4 课件给出的运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-3-5-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.4.5.</span> <span class="nav-text">10.7.3.5 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-4-PyTorch-%E5%AE%9E%E7%8E%B0%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E9%A2%84%E6%B5%8B%EF%BC%88%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">10.7.4 PyTorch 实现波士顿房价预测（一元线性回归）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-1-%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%88%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.5.1.</span> <span class="nav-text">10.7.4.1 题目描述（照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-2-%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0%E5%AF%B9%E6%AF%94%EF%BC%88%E8%AF%BE%E4%BB%B6%E8%A1%A8-1-%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.5.2.</span> <span class="nav-text">10.7.4.2 相关函数对比（课件表 1 照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-3-%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87%EF%BC%9A%E4%B8%89%E4%B8%AA%E8%87%AA%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%EF%BC%88%E7%AD%BE%E5%90%8D%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.5.3.</span> <span class="nav-text">10.7.4.3 数据准备：三个自定义函数（签名照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-4-%E5%AE%8C%E6%95%B4%E5%8F%AF%E8%BF%90%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="nav-number">1.5.4.</span> <span class="nav-text">10.7.4.4 完整可运行代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-5-%E8%AF%BE%E4%BB%B6%E7%BB%99%E5%87%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.5.5.</span> <span class="nav-text">10.7.4.5 课件给出的运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-4-6-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.5.6.</span> <span class="nav-text">10.7.4.6 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-7-5-PyTorch-%E5%AE%9E%E7%8E%B0%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E9%A2%84%E6%B5%8B%EF%BC%88%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89"><span class="nav-number">1.6.</span> <span class="nav-text">10.7.5 PyTorch 实现波士顿房价预测（多元线性回归）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-1-%E9%A2%98%E7%9B%AE%E6%8F%8F%E8%BF%B0%EF%BC%88%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.6.1.</span> <span class="nav-text">10.7.5.1 题目描述（照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-2-%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0%E5%AF%B9%E6%AF%94%EF%BC%88%E8%AF%BE%E4%BB%B6%E8%A1%A8-1-%E7%85%A7%E5%BD%95%EF%BC%89"><span class="nav-number">1.6.2.</span> <span class="nav-text">10.7.5.2 相关函数对比（课件表 1 照录）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-3-%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%EF%BC%9A%E5%85%A8-1-%E5%88%97-torch-cat-%E6%8B%BC%E5%87%BA-n-14-%E7%9A%84%E5%B1%9E%E6%80%A7%E7%9F%A9%E9%98%B5"><span class="nav-number">1.6.3.</span> <span class="nav-text">10.7.5.3 核心概念：全 1 列 + torch.cat 拼出 (n,14) 的属性矩阵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-4-%E5%AE%8C%E6%95%B4%E5%8F%AF%E8%BF%90%E8%A1%8C%E4%BB%A3%E7%A0%81"><span class="nav-number">1.6.4.</span> <span class="nav-text">10.7.5.4 完整可运行代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-5-%E8%AF%BE%E4%BB%B6%E7%BB%99%E5%87%BA%E7%9A%84%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="nav-number">1.6.5.</span> <span class="nav-text">10.7.5.5 课件给出的运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-7-5-6-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.6.6.</span> <span class="nav-text">10.7.5.6 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95-A%EF%BC%9A%E6%9C%AC%E5%AD%90%E7%AF%87-PyTorch-%E5%85%B3%E9%94%AE-API-%E9%80%9F%E6%9F%A5"><span class="nav-number">1.7.</span> <span class="nav-text">附录 A：本子篇 PyTorch 关键 API 速查</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95-B%EF%BC%9A%E6%9C%AC%E5%AD%90%E7%AF%87%E6%9C%AA%E8%83%BD%E4%BB%8E-PDF-%E8%BF%98%E5%8E%9F%E7%9A%84%E5%86%85%E5%AE%B9%EF%BC%88%E4%B8%8D%E7%A1%AE%E5%AE%9A%E5%A4%84%E6%B1%87%E6%80%BB%EF%BC%89"><span class="nav-number">1.8.</span> <span class="nav-text">附录 B：本子篇未能从 PDF 还原的内容（不确定处汇总）</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第1讲 人工智能的起源和发展 说明：本讲课件（1.1 &#x2F; 1.2 &#x2F; 1.3）也已导入工作区，这里一并整理成本笔记，方便与第 3–6 讲衔接复习。  本讲速览    小节 核心内容    1.1 人工智能的诞生 图灵机模型、信息科学奠基、图灵测试、达特茅斯会议   1.2 人工智能的发展 人工智能的定义、交叉学科属性、三次浪潮   1.3 机智过人 or 技不如人？ 人机对弈三">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第1讲 人工智能的起源和发展">
+<meta property="og:url" content="http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第1讲 人工智能的起源和发展 说明：本讲课件（1.1 &#x2F; 1.2 &#x2F; 1.3）也已导入工作区，这里一并整理成本笔记，方便与第 3–6 讲衔接复习。  本讲速览    小节 核心内容    1.1 人工智能的诞生 图灵机模型、信息科学奠基、图灵测试、达特茅斯会议   1.2 人工智能的发展 人工智能的定义、交叉学科属性、三次浪潮   1.3 机智过人 or 技不如人？ 人机对弈三">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-04T08:04:23.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:49.493Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="人工智能">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第1讲 人工智能的起源和发展 | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第1讲 人工智能的起源和发展
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-04 16:04:23" itemprop="dateCreated datePublished" datetime="2026-10-04T16:04:23+08:00">2026-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-06 23:43:49" itemprop="dateModified" datetime="2026-10-06T23:43:49+08:00">2026-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第1讲-人工智能的起源和发展"><a href="#第1讲-人工智能的起源和发展" class="headerlink" title="第1讲 人工智能的起源和发展"></a>第1讲 人工智能的起源和发展</h1><blockquote>
+<p>说明：本讲课件（1.1 &#x2F; 1.2 &#x2F; 1.3）也已导入工作区，这里一并整理成本笔记，方便与第 3–6 讲衔接复习。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1.1 人工智能的诞生</td>
+<td>图灵机模型、信息科学奠基、图灵测试、达特茅斯会议</td>
+</tr>
+<tr>
+<td>1.2 人工智能的发展</td>
+<td>人工智能的定义、交叉学科属性、三次浪潮</td>
+</tr>
+<tr>
+<td>1.3 机智过人 or 技不如人？</td>
+<td>人机对弈三阶段、人工智能与生活、强弱人工智能</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="1-1-人工智能的诞生"><a href="#1-1-人工智能的诞生" class="headerlink" title="1.1 人工智能的诞生"></a>1.1 人工智能的诞生</h2><h3 id="1-1-1-图灵机模型"><a href="#1-1-1-图灵机模型" class="headerlink" title="1.1.1 图灵机模型"></a>1.1.1 图灵机模型</h3><ul>
+<li><strong>1936 年</strong>，阿兰·图灵（A.M. Turing）发表《论可计算数及其在判定性问题上的应用》（<em>On Computable Numbers, with an Application to the Entscheidungsproblem</em>），提出<strong>图灵机模型</strong>。</li>
+<li>意义：<ul>
+<li>被称为<strong>现代计算机的灵魂</strong>；</li>
+<li>其<strong>计算能力是人类能够完成的所有计算的全集</strong>；</li>
+<li><strong>图灵完备</strong>：指一个计算系统是否能够解决所有在算法上可计算的问题。</li>
+</ul>
+</li>
+</ul>
+<h3 id="1-1-2-信息科学的奠基"><a href="#1-1-2-信息科学的奠基" class="headerlink" title="1.1.2 信息科学的奠基"></a>1.1.2 信息科学的奠基</h3><table>
+<thead>
+<tr>
+<th>年份</th>
+<th>人物</th>
+<th>贡献</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1936</td>
+<td>A.M. Turing</td>
+<td>图灵机模型</td>
+</tr>
+<tr>
+<td>1945</td>
+<td>冯·贝塔朗菲</td>
+<td>系统论</td>
+</tr>
+<tr>
+<td>1946</td>
+<td>—</td>
+<td>电子数字计算机 ENIAC</td>
+</tr>
+<tr>
+<td>1948</td>
+<td>N. Wiener</td>
+<td>控制论</td>
+</tr>
+<tr>
+<td>1948</td>
+<td>C.E. Shannon</td>
+<td>信息论</td>
+</tr>
+</tbody></table>
+<h3 id="1-1-3-图灵测试"><a href="#1-1-3-图灵测试" class="headerlink" title="1.1.3 图灵测试"></a>1.1.3 图灵测试</h3><ul>
+<li><strong>1950 年</strong>，阿兰·图灵发表《计算机器和智能》（<em>Computing Machinery and Intelligence</em>），提出<strong>图灵测试</strong>，图灵因此被称为”人工智能之父”。</li>
+<li>现实中的<strong>验证码（CAPTCHA）</strong> 正是图灵测试思想的应用，其全称是 <strong>Completely Automated Public Turing test to tell Computers and Humans Apart</strong>（全自动区分计算机和人类的图灵测试）。</li>
+</ul>
+<h3 id="1-1-4-人工智能的正式诞生"><a href="#1-1-4-人工智能的正式诞生" class="headerlink" title="1.1.4 人工智能的正式诞生"></a>1.1.4 人工智能的正式诞生</h3><ul>
+<li><strong>1956 年 8 月</strong>，<strong>达特茅斯（Dartmouth）人工智能夏季研讨会</strong>上，”人工智能（Artificial Intelligence）”这一术语<strong>第一次被正式提出</strong>，标志着人工智能学科的诞生。</li>
+</ul>
+<hr>
+<h2 id="1-2-人工智能的发展"><a href="#1-2-人工智能的发展" class="headerlink" title="1.2 人工智能的发展"></a>1.2 人工智能的发展</h2><h3 id="1-2-1-上节回顾"><a href="#1-2-1-上节回顾" class="headerlink" title="1.2.1 上节回顾"></a>1.2.1 上节回顾</h3><p>1956 年前的关键节点串联：1936 图灵机模型 → 1946 ENIAC → 1948 控制论、信息论 → 1950 图灵测试（”计算机能思维吗？”）→ 1956 达特茅斯会议。</p>
+<h3 id="1-2-2-人工智能的定义"><a href="#1-2-2-人工智能的定义" class="headerlink" title="1.2.2 人工智能的定义"></a>1.2.2 人工智能的定义</h3><p>课件引用《人工智能：一种现代的方法》的定义：</p>
+<blockquote>
+<p><strong>人工智能是能感知环境，并为获得最佳结果，采取理性行动的智能体。</strong></p>
+</blockquote>
+<p>课件补充说明：</p>
+<ul>
+<li>人工智能<strong>并不是复制人类大脑</strong>，而是通过探索人的感觉和思维的规律来<strong>模拟</strong>人的智能活动，从而达到<strong>对等的结果</strong>；</li>
+<li>其目标是<strong>替代人类</strong>实现<strong>识别、认知、分类和决策</strong>等多种功能。</li>
+</ul>
+<h3 id="1-2-3-交叉学科属性"><a href="#1-2-3-交叉学科属性" class="headerlink" title="1.2.3 交叉学科属性"></a>1.2.3 交叉学科属性</h3><p>人工智能是一门融合了<strong>计算机科学、数学、生物学、脑神经学、心理学和哲学</strong>等多种学科的<strong>综合性学科</strong>。</p>
+<h3 id="1-2-4-人工智能的三次浪潮"><a href="#1-2-4-人工智能的三次浪潮" class="headerlink" title="1.2.4 人工智能的三次浪潮"></a>1.2.4 人工智能的三次浪潮</h3><table>
+<thead>
+<tr>
+<th>浪潮</th>
+<th>代表性技术</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>第一次</td>
+<td>逻辑推理</td>
+</tr>
+<tr>
+<td>第二次</td>
+<td>专家系统</td>
+</tr>
+<tr>
+<td>第三次</td>
+<td>机器学习、<strong>深度学习</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="1-3-机智过人-or-技不如人？"><a href="#1-3-机智过人-or-技不如人？" class="headerlink" title="1.3 机智过人 or 技不如人？"></a>1.3 机智过人 or 技不如人？</h2><h3 id="1-3-1-人机对弈的三个阶段"><a href="#1-3-1-人机对弈的三个阶段" class="headerlink" title="1.3.1 人机对弈的三个阶段"></a>1.3.1 人机对弈的三个阶段</h3><table>
+<thead>
+<tr>
+<th>时间</th>
+<th>事件</th>
+<th>关键技术</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1962</td>
+<td>西洋跳棋：Arthur Samuel 在 IBM 7090 上实现</td>
+<td><strong>机器学习</strong>（强化学习、对抗学习）</td>
+</tr>
+<tr>
+<td>1997.5</td>
+<td>国际象棋：IBM <strong>深蓝</strong> 战胜卡斯帕罗夫</td>
+<td><strong>知识库 + 搜索</strong></td>
+</tr>
+<tr>
+<td>2016.3</td>
+<td>围棋：Google DeepMind <strong>AlphaGo</strong> 战胜李世石</td>
+<td><strong>深度学习、强化学习、蒙特卡洛树搜索</strong></td>
+</tr>
+</tbody></table>
+<p><strong>AlphaGo 系列战绩（课件补充）</strong></p>
+<ul>
+<li>2016.3 AlphaGo vs 李世石：<strong>4:1</strong></li>
+<li>2017.5 AlphaGo Master vs 柯洁：<strong>3:0</strong></li>
+<li>AlphaGo Zero vs AlphaGo：<strong>100:0</strong></li>
+</ul>
+<h3 id="1-3-2-强弱人工智能"><a href="#1-3-2-强弱人工智能" class="headerlink" title="1.3.2 强弱人工智能"></a>1.3.2 强弱人工智能</h3><ul>
+<li><strong>弱人工智能（Artificial Narrow Intelligence, ANI）</strong>：拥有某种<strong>特定领域</strong>的智能行为，替代人类从事某些活动。</li>
+<li><strong>强人工智能（Artificial General Intelligence, AGI）</strong>：具有<strong>人类的心智和意识</strong>，具有<strong>自主的选择行为</strong>，且拥有<strong>超越人类智慧水平</strong>的人工智能。</li>
+</ul>
+<hr>
+<h2 id="本讲与后续内容的衔接"><a href="#本讲与后续内容的衔接" class="headerlink" title="本讲与后续内容的衔接"></a>本讲与后续内容的衔接</h2><ul>
+<li>第 1 讲解决”人工智能是什么、从哪来”的问题；</li>
+<li>第 3、4 讲补齐 <strong>Python 编程基础</strong>（本课程后续所有实验的工具）；</li>
+<li>第 5 讲 <strong>NumPy</strong> 负责多维数组与数值计算；</li>
+<li>第 6 讲 <strong>Matplotlib</strong> 负责把数据和结果可视化；</li>
+<li>之后进入**神经网络与深度学习（TensorFlow 2.x）**的实战部分。</li>
+</ul>
+<blockquote>
+<p>原始课件位置：<code>课件/第1讲/</code>（1.1 人工智能的诞生、1.2 人工智能的发展、1.3 机智过人 or 技不如人？）。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/04/%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95/" title="第1讲 人工智能的起源和发展">http://example.com/2026/10/04/第1讲-人工智能的起源和发展/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD/" rel="tag"># 人工智能</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/03/05/python%E7%AC%94%E8%AE%B0/" rel="prev" title="python笔记">
+      <i class="fa fa-chevron-left"></i> python笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/04/%E7%AC%AC5%E8%AE%B2-NumPy%E7%A7%91%E5%AD%A6%E8%AE%A1%E7%AE%97%E5%BA%93/" rel="next" title="第5讲 NumPy科学计算库">
+      第5讲 NumPy科学计算库 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC1%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%B5%B7%E6%BA%90%E5%92%8C%E5%8F%91%E5%B1%95"><span class="nav-number">1.</span> <span class="nav-text">第1讲 人工智能的起源和发展</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E8%AF%9E%E7%94%9F"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 人工智能的诞生</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-1-%E5%9B%BE%E7%81%B5%E6%9C%BA%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.1.1 图灵机模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-2-%E4%BF%A1%E6%81%AF%E7%A7%91%E5%AD%A6%E7%9A%84%E5%A5%A0%E5%9F%BA"><span class="nav-number">1.1.2.</span> <span class="nav-text">1.1.2 信息科学的奠基</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-3-%E5%9B%BE%E7%81%B5%E6%B5%8B%E8%AF%95"><span class="nav-number">1.1.3.</span> <span class="nav-text">1.1.3 图灵测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-4-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E6%AD%A3%E5%BC%8F%E8%AF%9E%E7%94%9F"><span class="nav-number">1.1.4.</span> <span class="nav-text">1.1.4 人工智能的正式诞生</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E5%8F%91%E5%B1%95"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 人工智能的发展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E4%B8%8A%E8%8A%82%E5%9B%9E%E9%A1%BE"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.2.1 上节回顾</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.2.2.</span> <span class="nav-text">1.2.2 人工智能的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-%E4%BA%A4%E5%8F%89%E5%AD%A6%E7%A7%91%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.3.</span> <span class="nav-text">1.2.3 交叉学科属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-4-%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E7%9A%84%E4%B8%89%E6%AC%A1%E6%B5%AA%E6%BD%AE"><span class="nav-number">1.2.4.</span> <span class="nav-text">1.2.4 人工智能的三次浪潮</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-%E6%9C%BA%E6%99%BA%E8%BF%87%E4%BA%BA-or-%E6%8A%80%E4%B8%8D%E5%A6%82%E4%BA%BA%EF%BC%9F"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 机智过人 or 技不如人？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-1-%E4%BA%BA%E6%9C%BA%E5%AF%B9%E5%BC%88%E7%9A%84%E4%B8%89%E4%B8%AA%E9%98%B6%E6%AE%B5"><span class="nav-number">1.3.1.</span> <span class="nav-text">1.3.1 人机对弈的三个阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-2-%E5%BC%BA%E5%BC%B1%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD"><span class="nav-number">1.3.2.</span> <span class="nav-text">1.3.2 强弱人工智能</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E4%B8%8E%E5%90%8E%E7%BB%AD%E5%86%85%E5%AE%B9%E7%9A%84%E8%A1%94%E6%8E%A5"><span class="nav-number">1.4.</span> <span class="nav-text">本讲与后续内容的衔接</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

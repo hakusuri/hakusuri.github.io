@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 6 讲 Matplotlib 数据可视化 导读：本讲解决”用 Python 把数据画出来”的问题，含 5 个小节：6.1 Matplotlib 绘图基础（画布、子图、中文字体、标题、自动布局）、6.2 散点图（scatter()、marker、图例）、6.3 折线图和柱状图（plot()、bar()）、6.4 波士顿房价数据集可视化、6.5 鸢尾花数据集可视化（下载数据集、Pandas 读 c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第6讲 Matplotlib数据可视化">
+<meta property="og:url" content="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 6 讲 Matplotlib 数据可视化 导读：本讲解决”用 Python 把数据画出来”的问题，含 5 个小节：6.1 Matplotlib 绘图基础（画布、子图、中文字体、标题、自动布局）、6.2 散点图（scatter()、marker、图例）、6.3 折线图和柱状图（plot()、bar()）、6.4 波士顿房价数据集可视化、6.5 鸢尾花数据集可视化（下载数据集、Pandas 读 c">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-02_826x148.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p10-01_543x259.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p10-02_873x491.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p12-01_381x286.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p16-01_873x446.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p16-02_739x499.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p02-01_382x251.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p08-01_859x468.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p05-01_690x498.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p11-01_848x467.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-02_664x495.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p02-01_600x291.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p05-01_871x448.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p04-01_660x488.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-01_1012x340.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p08-01_645x462.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p10-01_1732x366.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p06-02_946x121.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-02_842x65.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p08-02_878x66.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-01_711x400.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p10-01_1125x457.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p11-01_1057x344.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p13-01_363x350.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p14-01_1003x371.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p14-02_447x432.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p16-01_1127x710.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p15-01_795x806.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-01_1001x63.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p08-01_728x474.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-01_484x405.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p11-02_1058x65.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p03-02_1032x90.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p06-01_748x63.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-02_725x66.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-01_281x180.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-01_1213x89.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-02_449x184.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p10-01_500x300.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p13-01_493x267.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p14-01_343x223.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p15-01_632x196.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p16-01_537x196.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p16-03_1081x251.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p04-02_518x347.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p05-01_591x197.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p05-02_505x344.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p06-03_528x351.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-01_937x372.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p07-02_562x421.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-02_1304x357.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p09-01_995x219.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl06-matplotlib/p12-01_1498x737.jpg">
+<meta property="article:published_time" content="2026-10-04T08:04:23.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:50.637Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="Matplotlib">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl06-matplotlib/p07-02_826x148.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第6讲 Matplotlib数据可视化 | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第6讲 Matplotlib数据可视化
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-04 16:04:23" itemprop="dateCreated datePublished" datetime="2026-10-04T16:04:23+08:00">2026-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-06 23:43:50" itemprop="dateModified" datetime="2026-10-06T23:43:50+08:00">2026-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-6-讲-Matplotlib-数据可视化"><a href="#第-6-讲-Matplotlib-数据可视化" class="headerlink" title="第 6 讲 Matplotlib 数据可视化"></a>第 6 讲 Matplotlib 数据可视化</h1><blockquote>
+<p><strong>导读</strong>：本讲解决”用 Python 把数据画出来”的问题，含 5 个小节：<strong>6.1 Matplotlib 绘图基础</strong>（画布、子图、中文字体、标题、自动布局）、<strong>6.2 散点图</strong>（scatter()、marker、图例）、<strong>6.3 折线图和柱状图</strong>（plot()、bar()）、<strong>6.4 波士顿房价数据集可视化</strong>、<strong>6.5 鸢尾花数据集可视化</strong>（下载数据集、Pandas 读 csv、按类别着色画散点图），文末为 <code>tight_layout()</code> 参数补充说明。</p>
+</blockquote>
+<hr>
+<span id="more"></span>
+
+<h2 id="6-1-Matplotlib-绘图基础"><a href="#6-1-Matplotlib-绘图基础" class="headerlink" title="6.1 Matplotlib 绘图基础"></a>6.1 Matplotlib 绘图基础</h2><h3 id="6-1-1-为什么可视化-·-安装与导入"><a href="#6-1-1-为什么可视化-·-安装与导入" class="headerlink" title="6.1.1 为什么可视化 · 安装与导入"></a>6.1.1 为什么可视化 · 安装与导入</h3><p>数据可视化贯穿三个阶段：<strong>数据分析阶段</strong>（理解数据、洞察数据之间的关系）、<strong>算法调试阶段</strong>（发现问题、优化算法）、<strong>项目总结阶段</strong>（展示项目成果）。<strong>Matplotlib 是第三方库</strong>，可快速方便地生成高质量图表（直方图、柱形图、折线图、散点图、气泡图、三维图等）。</p>
+<ul>
+<li>安装：Anaconda 装好后 Matplotlib 已就绪；也可 <code>pip</code> 安装。</li>
+<li>导入：<code>import matplotlib.pyplot as plt</code></li>
+</ul>
+<h3 id="6-1-2-Figure-对象：创建画布"><a href="#6-1-2-Figure-对象：创建画布" class="headerlink" title="6.1.2 Figure 对象：创建画布"></a>6.1.2 Figure 对象：创建画布</h3><p><strong>Figure 对象就是画布</strong>，用 <code>plt.figure()</code> 创建。流程为<strong>创建画布 → 绘制图形 → 显示绘图</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>num</code></td>
+<td>图形编号或名称，取值为数字 &#x2F; 字符串</td>
+</tr>
+<tr>
+<td><code>figsize</code></td>
+<td>绘图对象的宽和高，单位为英寸</td>
+</tr>
+<tr>
+<td><code>dpi</code></td>
+<td>分辨率，缺省值为 80</td>
+</tr>
+<tr>
+<td><code>facecolor</code> &#x2F; <code>edgecolor</code></td>
+<td>背景颜色 &#x2F; 边框颜色</td>
+</tr>
+<tr>
+<td><code>frameon</code></td>
+<td>是否显示边框</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">3</span>, <span class="number">2</span>), facecolor=<span class="string">&quot;green&quot;</span>)   <span class="comment"># 3×2 英寸、绿色背景画布</span></span><br><span class="line">plt.plot()                                       <span class="comment"># 绘制空白图形</span></span><br><span class="line">plt.show()                                       <span class="comment"># 显示绘图</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p07-02_826x148.jpg" alt="第 7 页 创建画布与显示绘图"></p>
+<p>常用颜色缩略字符：blue <code>b</code>、black <code>k</code>、green <code>g</code>、white <code>w</code>、red <code>r</code>、cyan <code>c</code>、yellow <code>y</code>、magenta <code>m</code>。</p>
+<h3 id="6-1-3-划分子图：subplot-与轴域（Axes）"><a href="#6-1-3-划分子图：subplot-与轴域（Axes）" class="headerlink" title="6.1.3 划分子图：subplot() 与轴域（Axes）"></a>6.1.3 划分子图：subplot() 与轴域（Axes）</h3><p><strong>轴域（Axes）</strong> 是真正画图的区域，一个 Figure 上可放多个轴域。<strong>语法</strong>：<code>subplot(行数, 列数, 子图序号)</code>。</p>
+<ul>
+<li>每个 <code>subplot()</code> <strong>只创建一个子图</strong>；要创建 4 个子图就需要 4 条语句。</li>
+<li>3 个参数<strong>都小于 10</strong> 时，可省略逗号，用一个 3 位数表示（<code>subplot(221)</code> 等价于 <code>subplot(2,2,1)</code>）。</li>
+<li>序号排布：1×2 → <code>1 2</code>；1×3 → <code>1 2 3</code>；2×2 → <code>1 2 / 3 4</code>；2×3 → <code>1 2 3 / 4 5 6</code>。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>)      <span class="comment"># 完整写法</span></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.subplot(<span class="number">221</span>)          <span class="comment"># 简写（三参数均小于 10）</span></span><br><span class="line">plt.subplot(<span class="number">222</span>)</span><br></pre></td></tr></table></figure>
+<p>例：将画布划分为 2×2 子图区域并绘制 3 个子图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">fig = plt.figure()</span><br><span class="line">plt.subplot(<span class="number">221</span>)          <span class="comment"># 第 1 个子图（左上）</span></span><br><span class="line">plt.subplot(<span class="number">222</span>)          <span class="comment"># 第 2 个子图（右上）</span></span><br><span class="line">plt.subplot(<span class="number">223</span>)          <span class="comment"># 第 3 个子图（左下），第 4 个位置留空</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p10-01_543x259.jpg" alt="第 10 页 绘制 3 个子图的代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p10-02_873x491.jpg" alt="第 10 页 运行结果：2×2 区域中的 3 个子图"></p>
+<h3 id="6-1-4-设置中文字体"><a href="#6-1-4-设置中文字体" class="headerlink" title="6.1.4 设置中文字体"></a>6.1.4 设置中文字体</h3><p>Matplotlib 默认字体不含中文，需通过<strong>运行配置参数 rcParams</strong>（指定图表各种默认属性的全局变量）设置：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.rcParams[<span class="string">&quot;font.sans-serif&quot;</span>] = <span class="string">&quot;SimHei&quot;</span>   <span class="comment"># 指定默认字体为中文黑体</span></span><br><span class="line">plt.rcParams[<span class="string">&quot;axes.unicode_minus&quot;</span>] = <span class="literal">False</span>   <span class="comment"># 正常显示负号</span></span><br></pre></td></tr></table></figure>
+<p>常用中文字体英文描述：宋体 SimSun、楷体 KaiTi、黑体 SimHei、仿宋 FangSong、微软雅黑 Microsoft YaHei、隶书 LiSu、微软正黑体 Microsoft JhengHei、幼圆 YouYuan。也可直接写 <code>plt.rcParams[&quot;font.family&quot;] = &quot;SimHei&quot;</code>。</p>
+<h3 id="6-1-5-标题：suptitle-与-title"><a href="#6-1-5-标题：suptitle-与-title" class="headerlink" title="6.1.5 标题：suptitle() 与 title()"></a>6.1.5 标题：suptitle() 与 title()</h3><p><code>suptitle()</code> 添加<strong>全局标题</strong>；<code>title()</code> 给<strong>当前子图</strong>添加子标题。</p>
+<p>suptitle() 主要参数：<code>x</code>（默认 0.5）、<code>y</code>（默认 0.98）、<code>color</code>（黑）、<code>backgroundcolor</code>、<code>fontsize</code>、<code>fontweight</code>（light&#x2F;normal&#x2F;medium&#x2F;semibold&#x2F;bold&#x2F;heavy&#x2F;black，默认 normal）、<code>fontstyle</code>（normal&#x2F;italic&#x2F;oblique）、<code>horizontalalignment</code>（默认 center）、<code>verticalalignment</code>（默认 top）。</p>
+<p>title() 主要参数：<code>loc</code>（left&#x2F;right&#x2F;center）、<code>rotation</code>（旋转角度）、<code>color</code>、<code>fontsize</code>、<code>fontweight</code>、<code>fontstyle</code>、<code>fontdict</code>（设置参数字典）。</p>
+<p><img src="/images/dl/dl06-matplotlib/p12-01_381x286.jpg" alt="第 12 页 全局标题与 4 个子标题"></p>
+<h3 id="6-1-6-tight-layout-自动调整子图"><a href="#6-1-6-tight-layout-自动调整子图" class="headerlink" title="6.1.6 tight_layout() 自动调整子图"></a>6.1.6 tight_layout() 自动调整子图</h3><p><code>tight_layout()</code> 会<strong>检查坐标轴标签、刻度标签和子图标题，自动调整子图</strong>，使之填充整个绘图区域并<strong>消除子图之间的重叠</strong>。<code>rect=[left, bottom, right, top]</code>（0~1 归一化坐标）指定子图区域，默认 <code>(0, 0, 1, 1)</code>。</p>
+<h3 id="6-1-7-综合示例"><a href="#6-1-7-综合示例" class="headerlink" title="6.1.7 综合示例"></a>6.1.7 综合示例</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&quot;font.family&quot;</span>] = <span class="string">&quot;SimHei&quot;</span>            <span class="comment"># 中文黑体</span></span><br><span class="line">fig = plt.figure(facecolor=<span class="string">&quot;lightgrey&quot;</span>)           <span class="comment"># 浅灰画布</span></span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;子标题1&#x27;</span>)</span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;子标题2&#x27;</span>, loc=<span class="string">&quot;left&quot;</span>, color=<span class="string">&quot;b&quot;</span>)        <span class="comment"># 左对齐、蓝色</span></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">myfontdict = &#123;<span class="string">&quot;fontsize&quot;</span>:<span class="number">12</span>, <span class="string">&quot;color&quot;</span>:<span class="string">&quot;g&quot;</span>, <span class="string">&quot;rotation&quot;</span>:<span class="number">30</span>&#125;</span><br><span class="line">plt.title(<span class="string">&#x27;子标题3&#x27;</span>, fontdict=myfontdict)          <span class="comment"># 字典一次设多个属性</span></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">4</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;子标题4&#x27;</span>, color=<span class="string">&#x27;white&#x27;</span>, backgroundcolor=<span class="string">&quot;black&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.suptitle(<span class="string">&quot;全局标题&quot;</span>, fontsize=<span class="number">20</span>, color=<span class="string">&quot;red&quot;</span>, backgroundcolor=<span class="string">&quot;yellow&quot;</span>)</span><br><span class="line">plt.tight_layout(rect=[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0.9</span>])             <span class="comment"># 给全局标题留空间</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p16-01_873x446.jpg" alt="第 16 页 综合示例代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p16-02_739x499.jpg" alt="第 16 页 综合示例运行结果"></p>
+<h3 id="6-1-易错点"><a href="#6-1-易错点" class="headerlink" title="6.1 易错点"></a>6.1 易错点</h3><ul>
+<li>忘记 <code>plt.show()</code>，图形不会显示；一个 <code>subplot()</code> 只画一个子图。</li>
+<li>中文字体不设置会显示方块；设字体后负号可能异常，需同时设 <code>axes.unicode_minus=False</code>。</li>
+<li><code>suptitle()</code> 是画布级标题、<code>title()</code> 是子图标题，不要混用；子图重叠用 <code>tight_layout()</code>。</li>
+</ul>
+<hr>
+<h2 id="6-2-散点图"><a href="#6-2-散点图" class="headerlink" title="6.2 散点图"></a>6.2 散点图</h2><h3 id="6-2-1-概念与-scatter-函数"><a href="#6-2-1-概念与-scatter-函数" class="headerlink" title="6.2.1 概念与 scatter() 函数"></a>6.2.1 概念与 scatter() 函数</h3><p><strong>散点图（Scatter）</strong> 是数据点在直角坐标系中的分布图，用于发现数据的<strong>分布规律</strong>、<strong>变化趋势</strong>与<strong>分组</strong>。</p>
+<p><img src="/images/dl/dl06-matplotlib/p02-01_382x251.jpg" alt="第 2 页 散点图示例：销售面积与销售价格"></p>
+<p><strong>语法</strong>：<code>scatter(x, y, scale=..., color=..., marker=..., label=...)</code></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code> &#x2F; <code>y</code></td>
+<td>数据点的 x &#x2F; y 坐标</td>
+<td>不可省略</td>
+</tr>
+<tr>
+<td><code>scale</code></td>
+<td>数据点的大小</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>数据点的颜色</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>marker</code></td>
+<td>数据点的样式</td>
+<td><code>&#39;o&#39;</code>（圆点）</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>图例文字</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p><strong>marker 常用取值</strong>：<code>-</code> 实线、<code>--</code> 虚线、<code>:</code> 点线、<code>-.</code> 点虚线、<code>s</code> 正方形、<code>p</code> 五角形、<code>o</code> 圆形、<code>|</code> 垂直线、<code>_</code> 水平线、<code>v/^/&lt;/&gt;</code> 朝下&#x2F;上&#x2F;左&#x2F;右的三角形、<code>D</code> 钻石形、<code>d</code> 小版钻石形、<code>*</code> 星型、<code>+</code> 加号、<code>x</code> x 号、<code>1</code>&#x2F;<code>H</code> 六角形。</p>
+<h3 id="6-2-2-文本与坐标轴设置"><a href="#6-2-2-文本与坐标轴设置" class="headerlink" title="6.2.2 文本与坐标轴设置"></a>6.2.2 文本与坐标轴设置</h3><p><strong>text() 函数</strong>：<code>text(x, y, s, fontsize=..., color=...)</code>，其中 <code>x</code>、<code>y</code>、<code>s</code>（显示文本）<strong>均不可省略</strong>，<code>color</code> 默认黑色。</p>
+<p><strong>坐标轴设置</strong>：<code>xlabel()</code> 设置 x 轴标签；<code>ylabel()</code> 设置 y 轴标签；<code>xlim(xmin, xmax)</code> &#x2F; <code>ylim(ymin, ymax)</code> 设置坐标范围；<code>tick_params(labelsize)</code> 设置刻度文字字号。</p>
+<h3 id="6-2-3-完整示例：标准正态分布散点图"><a href="#6-2-3-完整示例：标准正态分布散点图" class="headerlink" title="6.2.3 完整示例：标准正态分布散点图"></a>6.2.3 完整示例：标准正态分布散点图</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = <span class="string">&quot;SimHei&quot;</span>       <span class="comment"># 默认字体中文黑体</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span>       <span class="comment"># 正常显示负号</span></span><br><span class="line"></span><br><span class="line">n = <span class="number">1024</span>                                         <span class="comment"># 随机点个数</span></span><br><span class="line">x = np.random.normal(<span class="number">0</span>, <span class="number">1</span>, n)                    <span class="comment"># 数据点 x 坐标</span></span><br><span class="line">y = np.random.normal(<span class="number">0</span>, <span class="number">1</span>, n)                    <span class="comment"># 数据点 y 坐标</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x, y, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&#x27;*&#x27;</span>)      <span class="comment"># 绘制数据点</span></span><br><span class="line">plt.title(<span class="string">&quot;标准正态分布&quot;</span>, fontsize=<span class="number">20</span>)             <span class="comment"># 设置标题</span></span><br><span class="line">plt.text(<span class="number">2.5</span>, <span class="number">2.5</span>, <span class="string">&quot;均  值：0\n标准差：1&quot;</span>)         <span class="comment"># 显示文本（\n 换行）</span></span><br><span class="line">plt.xlim(-<span class="number">4</span>, <span class="number">4</span>)                                  <span class="comment"># x 轴范围</span></span><br><span class="line">plt.ylim(-<span class="number">4</span>, <span class="number">4</span>)                                  <span class="comment"># y 轴范围</span></span><br><span class="line">plt.xlabel(<span class="string">&#x27;横坐标x&#x27;</span>, fontsize=<span class="number">14</span>)                <span class="comment"># x 轴标签文本</span></span><br><span class="line">plt.ylabel(<span class="string">&#x27;纵坐标y&#x27;</span>, fontsize=<span class="number">14</span>)                <span class="comment"># y 轴标签文本</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>预期输出：中心密集、四周稀疏的星形散点图，右上角标注”均值：0 &#x2F; 标准差：1”。</p>
+<p><img src="/images/dl/dl06-matplotlib/p08-01_859x468.jpg" alt="第 8 页 标准正态分布散点图完整代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p05-01_690x498.jpg" alt="第 5 页 运行结果"></p>
+<h3 id="6-2-4-多组数据与图例-legend"><a href="#6-2-4-多组数据与图例-legend" class="headerlink" title="6.2.4 多组数据与图例 legend()"></a>6.2.4 多组数据与图例 legend()</h3><p>用绘图函数的 <code>label</code> 指定图例内容，再用 <code>plt.legend()</code> 显示；<code>loc</code> 指定位置：0 best、1 upper right、2 upper left、3 lower left、4 lower right、5 right、6 center left、7 center right、8 lower center、9 upper center、10 center。</p>
+<p>例：同时绘制标准正态分布与均匀分布两组散点。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = <span class="string">&quot;SimHei&quot;</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">n = <span class="number">1024</span></span><br><span class="line">x1 = np.random.normal(<span class="number">0</span>, <span class="number">1</span>, n)                   <span class="comment"># 正态分布 x</span></span><br><span class="line">y1 = np.random.normal(<span class="number">0</span>, <span class="number">1</span>, n)                   <span class="comment"># 正态分布 y</span></span><br><span class="line">x2 = np.random.uniform(-<span class="number">4</span>, <span class="number">4</span>, (<span class="number">1</span>, n))            <span class="comment"># 均匀分布 x</span></span><br><span class="line">y2 = np.random.uniform(-<span class="number">4</span>, <span class="number">4</span>, (<span class="number">1</span>, n))            <span class="comment"># 均匀分布 y</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x1, y1, color=<span class="string">&quot;blue&quot;</span>, marker=<span class="string">&#x27;*&#x27;</span>, label=<span class="string">&quot;正态分布&quot;</span>)</span><br><span class="line">plt.scatter(x2, y2, color=<span class="string">&quot;yellow&quot;</span>, marker=<span class="string">&#x27;o&#x27;</span>, label=<span class="string">&quot;均匀分布&quot;</span>)</span><br><span class="line">plt.legend()                                     <span class="comment"># 显示图例</span></span><br><span class="line">plt.title(<span class="string">&quot;标准正态分布&quot;</span>, fontsize=<span class="number">20</span>)</span><br><span class="line">plt.xlim(-<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">plt.ylim(-<span class="number">4</span>, <span class="number">4</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p11-01_848x467.jpg" alt="第 11 页 两组散点 + 图例的完整代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p09-02_664x495.jpg" alt="第 9 页 运行结果：正态分布与均匀分布叠加"></p>
+<h3 id="6-2-易错点"><a href="#6-2-易错点" class="headerlink" title="6.2 易错点"></a>6.2 易错点</h3><ul>
+<li><code>scatter()</code> 的 <code>x</code>、<code>y</code> 与 <code>text()</code> 的 <code>x</code>、<code>y</code>、<code>s</code> 不可省略；<code>text()</code> 换行用字符串 <code>\n</code>。</li>
+<li>只写 <code>legend()</code> 而绘图时没有 <code>label=</code>，图例为空。</li>
+</ul>
+<hr>
+<h2 id="6-3-折线图和柱状图"><a href="#6-3-折线图和柱状图" class="headerlink" title="6.3 折线图和柱状图"></a>6.3 折线图和柱状图</h2><h3 id="6-3-1-折线图与-plot-函数"><a href="#6-3-1-折线图与-plot-函数" class="headerlink" title="6.3.1 折线图与 plot() 函数"></a>6.3.1 折线图与 plot() 函数</h3><p><strong>折线图（Line Chart）</strong>：在散点图基础上，<strong>将相邻的点用线段相连接</strong>，描述<strong>变量变化的趋势</strong>。</p>
+<p><img src="/images/dl/dl06-matplotlib/p02-01_600x291.jpg" alt="第 2 页 折线图示例：随时间变化的指数走势"></p>
+<p><strong>plot() 函数</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code></td>
+<td>数据点的 x 坐标</td>
+<td>0,1,2,3…（可省略）</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td>数据点的 y 坐标</td>
+<td>不可省略</td>
+</tr>
+<tr>
+<td><code>color</code> &#x2F; <code>marker</code></td>
+<td>颜色 &#x2F; 数据点样式</td>
+<td>marker 默认 <code>&#39;o&#39;</code></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>图例文字</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>linewidth</code> &#x2F; <code>markersize</code></td>
+<td>折线宽度 &#x2F; 数据点大小</td>
+<td>—</td>
+</tr>
+</tbody></table>
+<p>例：绘制温度和湿度数据的折线图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = <span class="string">&#x27;SimHei&#x27;</span></span><br><span class="line"></span><br><span class="line">n = <span class="number">24</span></span><br><span class="line">y1 = np.random.randint(<span class="number">27</span>, <span class="number">37</span>, n)                <span class="comment"># 生成随机数列：温度</span></span><br><span class="line">y2 = np.random.randint(<span class="number">40</span>, <span class="number">60</span>, n)                <span class="comment"># 生成随机数列：湿度</span></span><br><span class="line"></span><br><span class="line">plt.plot(y1, label=<span class="string">&#x27;温度&#x27;</span>)                        <span class="comment"># 绘制折线图（x 省略，自动取 0~23）</span></span><br><span class="line">plt.plot(y2, label=<span class="string">&#x27;湿度&#x27;</span>)</span><br><span class="line">plt.xlim(<span class="number">0</span>, <span class="number">23</span>)</span><br><span class="line">plt.ylim(<span class="number">20</span>, <span class="number">70</span>)</span><br><span class="line">plt.xlabel(<span class="string">&#x27;小时&#x27;</span>, fontsize=<span class="number">12</span>)</span><br><span class="line">plt.ylabel(<span class="string">&#x27;测量值&#x27;</span>, fontsize=<span class="number">12</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;24小时温度湿度统计&#x27;</span>, fontsize=<span class="number">16</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p05-01_871x448.jpg" alt="第 5 页 温度、湿度折线图代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p04-01_660x488.jpg" alt="第 4 页 运行结果"></p>
+<h3 id="6-3-2-柱形图与-bar-函数"><a href="#6-3-2-柱形图与-bar-函数" class="headerlink" title="6.3.2 柱形图与 bar() 函数"></a>6.3.2 柱形图与 bar() 函数</h3><p><strong>柱形图（Bar Chart）</strong>：由一系列<strong>高度不等的柱形条纹</strong>表示数据分布的情况。<strong>bar() 函数</strong>关键参数：<code>left</code>（条纹 left 坐标，用 <code>range(len(y))</code> 自动生成序列）、<code>height</code>（条纹高度）、<code>width</code>（条纹宽度，示例取 0.8，即每隔 1cm 开始画一个条纹）、<code>facecolor</code>、<code>edgecolor</code>、<code>label</code>。</p>
+<p>例：绘制柱形图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = <span class="string">&quot;SimHei&quot;</span></span><br><span class="line">plt.rcParams[<span class="string">&quot;axes.unicode_minus&quot;</span>] = <span class="literal">False</span>       <span class="comment"># 负值柱形需正常显示负号</span></span><br><span class="line"></span><br><span class="line">y1 = [<span class="number">32</span>, <span class="number">25</span>, <span class="number">16</span>, <span class="number">30</span>, <span class="number">24</span>, <span class="number">45</span>, <span class="number">40</span>, <span class="number">33</span>, <span class="number">28</span>, <span class="number">17</span>, <span class="number">24</span>, <span class="number">20</span>]</span><br><span class="line">y2 = [-<span class="number">23</span>, -<span class="number">35</span>, -<span class="number">26</span>, -<span class="number">35</span>, -<span class="number">45</span>, -<span class="number">43</span>, -<span class="number">35</span>, -<span class="number">32</span>, -<span class="number">23</span>, -<span class="number">17</span>, -<span class="number">22</span>, -<span class="number">28</span>]</span><br><span class="line"></span><br><span class="line">plt.bar(<span class="built_in">range</span>(<span class="built_in">len</span>(y1)), y1, width=<span class="number">0.8</span>, facecolor=<span class="string">&#x27;green&#x27;</span>, edgecolor=<span class="string">&#x27;white&#x27;</span>, label=<span class="string">&#x27;统计量1&#x27;</span>)</span><br><span class="line">plt.bar(<span class="built_in">range</span>(<span class="built_in">len</span>(y2)), y2, width=<span class="number">0.8</span>, facecolor=<span class="string">&#x27;red&#x27;</span>,   edgecolor=<span class="string">&#x27;white&#x27;</span>, label=<span class="string">&#x27;统计量2&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&quot;柱状图&quot;</span>, fontsize=<span class="number">20</span>)</span><br><span class="line">plt.legend()</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p>预期输出：绿色柱向上、红色柱向下（负值），两组”统计量”共用同一坐标系。</p>
+<p><img src="/images/dl/dl06-matplotlib/p09-01_1012x340.jpg" alt="第 9 页 柱状图代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p08-01_645x462.jpg" alt="第 8 页 运行结果：正负两组柱形图"></p>
+<h3 id="6-3-3-参考资源：Matplotlib-官网-Gallery"><a href="#6-3-3-参考资源：Matplotlib-官网-Gallery" class="headerlink" title="6.3.3 参考资源：Matplotlib 官网 Gallery"></a>6.3.3 参考资源：Matplotlib 官网 Gallery</h3><p>官网 <a target="_blank" rel="noopener" href="http://matplotlib.org/">http://matplotlib.org</a>；函数索引 <a target="_blank" rel="noopener" href="https://matplotlib.org/genindex.html">https://matplotlib.org/genindex.html</a>；<strong>Gallery 页面</strong> <a target="_blank" rel="noopener" href="https://matplotlib.org/gallery.html">https://matplotlib.org/gallery.html</a>：缩略图列表，点进详细页面可看到清晰大图与源码。</p>
+<p><img src="/images/dl/dl06-matplotlib/p10-01_1732x366.jpg" alt="第 10 页 Matplotlib Gallery 缩略图"></p>
+<h3 id="6-3-易错点"><a href="#6-3-易错点" class="headerlink" title="6.3 易错点"></a>6.3 易错点</h3><ul>
+<li><code>plot()</code> 的 <code>x</code> 可省略（默认 0,1,2…），<code>y</code> 不可省略。</li>
+<li><code>bar()</code> 不写 <code>left</code> 时柱形会全部堆在 0 处；画负值柱形需设 <code>axes.unicode_minus=False</code>。</li>
+<li>多条折线&#x2F;柱形分别设 <code>label</code> 后统一调用一次 <code>plt.legend()</code>。</li>
+</ul>
+<hr>
+<h2 id="6-4-波士顿房价数据集可视化"><a href="#6-4-波士顿房价数据集可视化" class="headerlink" title="6.4 波士顿房价数据集可视化"></a>6.4 波士顿房价数据集可视化</h2><h3 id="6-4-1-Keras-与内置数据集"><a href="#6-4-1-Keras-与内置数据集" class="headerlink" title="6.4.1 Keras 与内置数据集"></a>6.4.1 Keras 与内置数据集</h3><p>Keras 是<strong>高层的神经网络和深度学习库</strong>，可<strong>快速搭建神经网络模型</strong>、<strong>易于调试和扩展</strong>，是 <strong>TensorFlow 的官方 API</strong>，内置常用公共数据集，可通过 <code>keras.datasets</code> 模块加载访问：boston_housing（波士顿房价）、CIFAR10（10 类图片集）、CIFAR100（100 类图片集）、MNIST（手写数字图片集）、Fashion-MNIST（10 种时尚类别图片集）、IMDB（电影点评）、reuters（路透社新闻）。</p>
+<h3 id="6-4-2-波士顿房价数据集"><a href="#6-4-2-波士顿房价数据集" class="headerlink" title="6.4.2 波士顿房价数据集"></a>6.4.2 波士顿房价数据集</h3><p>来自卡内基梅隆大学 StatLib 库，<strong>1978 年</strong>；涵盖麻省波士顿 <strong>506 个</strong>不同郊区的房屋数据；默认 <strong>404 条训练数据、102 条测试数据</strong>；每条数据 13 个属性 + 1 个房价平均值。</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>变量名</th>
+<th>说明</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>CRIM</td>
+<td>城镇人均犯罪率</td>
+<td>0.00632</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ZN</td>
+<td>超过 25000 平方英尺的住宅用地所占比例</td>
+<td>18.0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>INDUS</td>
+<td>城镇非零售业的商业用地所占比例</td>
+<td>2.31</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CHAS</td>
+<td>是否被 Charles 河流穿过（1 是 &#x2F; 0 否）</td>
+<td>0</td>
+</tr>
+<tr>
+<td>5</td>
+<td>NOX</td>
+<td>一氧化氮浓度</td>
+<td>0.538</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>RM</strong></td>
+<td><strong>每栋住宅的平均房间数</strong></td>
+<td>6.575</td>
+</tr>
+<tr>
+<td>7</td>
+<td>AGE</td>
+<td>早于 1940 年建成的自住房屋比例</td>
+<td>65.2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>DIS</td>
+<td>到波士顿 5 个中心区域的加权平均距离</td>
+<td>4.0900</td>
+</tr>
+<tr>
+<td>9</td>
+<td>RAD</td>
+<td>到达高速公路的便利指数</td>
+<td>—</td>
+</tr>
+<tr>
+<td>10</td>
+<td>TAX</td>
+<td>每 10000 美元的全值财产税率</td>
+<td>296</td>
+</tr>
+<tr>
+<td>11</td>
+<td>PTRATIO</td>
+<td>城镇中师生比例</td>
+<td>15.3</td>
+</tr>
+<tr>
+<td>12</td>
+<td>B</td>
+<td>反映城镇黑人比例的指标：B &#x3D; 1000*(BK-0.63)，BK 是黑人比例</td>
+<td>396.90</td>
+</tr>
+<tr>
+<td>13</td>
+<td>LSTAT</td>
+<td>低收入人口的比例</td>
+<td>7.68</td>
+</tr>
+<tr>
+<td>—</td>
+<td>MEDV</td>
+<td>自住房屋房价的平均值（单位 1000 美元）</td>
+<td>24.0</td>
+</tr>
+</tbody></table>
+<h3 id="6-4-3-加载数据集：load-data"><a href="#6-4-3-加载数据集：load-data" class="headerlink" title="6.4.3 加载数据集：load_data()"></a>6.4.3 加载数据集：load_data()</h3><p><strong>语法</strong>：<code>数据集名称.load_data()</code>。首次运行会从网络下载并缓存到本地（形如 <code>C:\Users\&lt;当前用户名&gt;\.keras\datasets\</code>）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">boston_housing = tf.keras.datasets.boston_housing      <span class="comment"># 方法前缀.数据集名称</span></span><br><span class="line">(train_x, train_y), (test_x, test_y) = boston_housing.load_data()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p06-02_946x121.jpg" alt="第 6 页 load_data() 代码"></p>
+<p>默认 <code>test_split=0.2</code> 时查看训练集&#x2F;测试集大小：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Training set:&quot;</span>, <span class="built_in">len</span>(train_x))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Testing set:&quot;</span>, <span class="built_in">len</span>(test_x))</span><br><span class="line"><span class="comment"># 运行结果：</span></span><br><span class="line"><span class="comment"># Training set: 404</span></span><br><span class="line"><span class="comment"># Testing set: 102</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p07-02_842x65.jpg" alt="第 7 页 运行结果（404 &#x2F; 102）"></p>
+<p><strong>改变数据集划分比例</strong>：提取全部数据作为训练集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># test_split=0 表示全部数据都作为训练集</span></span><br><span class="line">(train_x, train_y), (test_x, test_y) = boston_housing.load_data(test_split=<span class="number">0</span>)</span><br><span class="line"><span class="comment"># 运行结果：Training set: 506 / Testing set: 0</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p08-02_878x66.jpg" alt="第 8 页 改变划分比例后的运行结果（506 &#x2F; 0）"></p>
+<blockquote>
+<p>注：课件第 8 页只给出运行结果 506&#x2F;0 与打印语句，<code>test_split=0</code> 是按该结果推断出的参数写法。</p>
+</blockquote>
+<h3 id="6-4-4-访问数据集中的数据"><a href="#6-4-4-访问数据集中的数据" class="headerlink" title="6.4.4 访问数据集中的数据"></a>6.4.4 访问数据集中的数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(train_x)</span><br><span class="line">numpy.ndarray</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(train_y)</span><br><span class="line">numpy.ndarray</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(<span class="string">&quot;Dim of train_x:&quot;</span>, train_x.ndim)     <span class="comment"># 2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(<span class="string">&quot;Shape of train_x:&quot;</span>, train_x.shape)  <span class="comment"># (506, 13)</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(<span class="string">&quot;Dim of train_y:&quot;</span>, train_y.ndim)     <span class="comment"># 1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(<span class="string">&quot;Shape of train_y:&quot;</span>, train_y.shape)  <span class="comment"># (506,)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(train_x[<span class="number">0</span>:<span class="number">5</span>])       <span class="comment"># 输出 train_x 中的前 5 行数据</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(train_x[:, <span class="number">5</span>])      <span class="comment"># 输出 train_x 中的第 6 列数据（RM 平均房间数）</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">print</span>(train_y)            <span class="comment"># 输出 train_y 中的全部房价</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p09-01_711x400.jpg" alt="第 9 页 查看 train_x &#x2F; train_y 的类型与形状"></p>
+<p><img src="/images/dl/dl06-matplotlib/p10-01_1125x457.jpg" alt="第 10 页 train_x 前 5 行输出"></p>
+<p><img src="/images/dl/dl06-matplotlib/p11-01_1057x344.jpg" alt="第 11 页 train_x 第 6 列（RM）输出"></p>
+<h3 id="6-4-5-例：平均房间数与房价之间的关系可视化"><a href="#6-4-5-例：平均房间数与房价之间的关系可视化" class="headerlink" title="6.4.5 例：平均房间数与房价之间的关系可视化"></a>6.4.5 例：平均房间数与房价之间的关系可视化</h3><p>思路：<strong>RM（平均房间数）→ 房价</strong>，用散点图展示两者关系。</p>
+<p><img src="/images/dl/dl06-matplotlib/p13-01_363x350.jpg" alt="第 13 页 平均房间数与房价关系的散点图"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">boston_housing = tf.keras.datasets.boston_housing</span><br><span class="line">(train_x, train_y), (_, _) = boston_housing.load_data(test_split=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">5</span>, <span class="number">5</span>))                    <span class="comment"># 设置绘图尺寸</span></span><br><span class="line">plt.scatter(train_x[:, <span class="number">5</span>], train_y)           <span class="comment"># 绘制散点图</span></span><br><span class="line">plt.xlabel(<span class="string">&quot;RM&quot;</span>)                              <span class="comment"># 设置 x 轴标签文本</span></span><br><span class="line">plt.ylabel(<span class="string">&quot;Price($1000&#x27;s)&quot;</span>)                  <span class="comment"># 设置 y 轴标签文本</span></span><br><span class="line">plt.title(<span class="string">&quot;5. RM-Price&quot;</span>)                      <span class="comment"># 设置标题</span></span><br><span class="line">plt.show()                                    <span class="comment"># 显示绘图</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p14-01_1003x371.jpg" alt="第 14 页 代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p14-02_447x432.jpg" alt="第 14 页 运行结果"></p>
+<h3 id="6-4-6-例：所有属性与房价之间的关系可视化"><a href="#6-4-6-例：所有属性与房价之间的关系可视化" class="headerlink" title="6.4.6 例：所有属性与房价之间的关系可视化"></a>6.4.6 例：所有属性与房价之间的关系可视化</h3><p>用”循环 + 子图”一次画出 13 个属性与房价的散点图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">boston_housing = tf.keras.datasets.boston_housing</span><br><span class="line">(train_x, train_y), (_, _) = boston_housing.load_data(test_split=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>]</span><br><span class="line">plt.rcParams[<span class="string">&#x27;axes.unicode_minus&#x27;</span>] = <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">titles = [<span class="string">&quot;CRIM&quot;</span>, <span class="string">&quot;ZN&quot;</span>, <span class="string">&quot;INDUS&quot;</span>, <span class="string">&quot;CHAS&quot;</span>, <span class="string">&quot;NOX&quot;</span>, <span class="string">&quot;RM&quot;</span>, <span class="string">&quot;AGE&quot;</span>,</span><br><span class="line">          <span class="string">&quot;DIS&quot;</span>, <span class="string">&quot;RAD&quot;</span>, <span class="string">&quot;TAX&quot;</span>, <span class="string">&quot;PTRATIO&quot;</span>, <span class="string">&quot;B-1000&quot;</span>, <span class="string">&quot;LSTAT&quot;</span>, <span class="string">&quot;MEDV&quot;</span>]</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">12</span>, <span class="number">12</span>))</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">13</span>):</span><br><span class="line">    plt.subplot(<span class="number">4</span>, <span class="number">4</span>, (i + <span class="number">1</span>))                <span class="comment"># 4×4 网格中依次占用子图</span></span><br><span class="line">    plt.scatter(train_x[:, i], train_y)       <span class="comment"># 第 i 个属性与房价</span></span><br><span class="line">    plt.xlabel(titles[i])</span><br><span class="line">    plt.ylabel(<span class="string">&quot;Price($1000&#x27;s)&quot;</span>)</span><br><span class="line">    plt.title(<span class="built_in">str</span>(i + <span class="number">1</span>) + <span class="string">&quot;.&quot;</span> + titles[i] + <span class="string">&quot; - Price&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.tight_layout()                            <span class="comment"># 消除子图重叠</span></span><br><span class="line">plt.suptitle(<span class="string">&quot;各个属性与房价的关系&quot;</span>, x=<span class="number">0.5</span>, y=<span class="number">1.02</span>, fontsize=<span class="number">20</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p16-01_1127x710.jpg" alt="第 16 页 代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p15-01_795x806.jpg" alt="第 15 页 运行结果：13 个属性与房价的关系（4×4 布局）"></p>
+<h3 id="6-4-易错点"><a href="#6-4-易错点" class="headerlink" title="6.4 易错点"></a>6.4 易错点</h3><ul>
+<li><code>load_data()</code> 默认 <code>test_split=0.2</code>（404&#x2F;102）；改成 0 才是 506&#x2F;0。</li>
+<li>索引从 0 开始：第 6 列 RM 写作 <code>train_x[:, 5]</code>；<code>train_y</code> 是一维数组（shape <code>(506,)</code>）。</li>
+<li>中文标题不设字体显示方块；<code>suptitle</code> 的 <code>y=1.02</code> 超出画布，需配合 <code>tight_layout()</code>。</li>
+</ul>
+<hr>
+<h2 id="6-5-鸢尾花数据集可视化"><a href="#6-5-鸢尾花数据集可视化" class="headerlink" title="6.5 鸢尾花数据集可视化"></a>6.5 鸢尾花数据集可视化</h2><h3 id="6-5-1-下载鸢尾花数据集"><a href="#6-5-1-下载鸢尾花数据集" class="headerlink" title="6.5.1 下载鸢尾花数据集"></a>6.5.1 下载鸢尾花数据集</h3><p><strong>Iris 数据集</strong>：又名 Anderson’s Iris Data Set，1936 年由 Ronald Fisher 发表（The use of multiple measurements in taxonomic problems）；采样条件严格（加拿大的加斯帕半岛、同一天的同一个时间段、相同牧场、同一个人、相同的测量仪器）。共 <strong>3 种</strong>类别：山鸢尾 Setosa、变色鸢尾 Versicolour、维吉尼亚鸢尾 Virginica，<strong>每类 50 个样本</strong>；每个样本含 <strong>4 个属性</strong>（花萼长度 Sepal Length、花萼宽度 Sepal Width、花瓣长度 Petal Length、花瓣宽度 Petal Width）和 <strong>1 个标签</strong>（品种）。</p>
+<p><strong>get_file() 函数</strong>：<code>tf.keras.utils.get_file(fname, origin, cache_dir=...)</code></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fname</code></td>
+<td>下载后的文件名</td>
+</tr>
+<tr>
+<td><code>origin</code></td>
+<td>文件的 URL 地址</td>
+</tr>
+<tr>
+<td><code>cache_dir</code></td>
+<td>下载后文件的存储位置</td>
+</tr>
+</tbody></table>
+<p><strong>返回值</strong>：下载后的文件在本地磁盘中的<strong>绝对路径</strong>。数据集分训练集 <code>iris_training.csv</code>（<strong>120 条</strong>）与测试集 <code>iris_test.csv</code>（30 条）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(<span class="string">&quot;iris_training.csv&quot;</span>, TRAIN_URL)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p07-01_1001x63.jpg" alt="第 7 页 下载训练数据集的代码"></p>
+<p><strong>csv 文件内容</strong>：第 1 行是说明行（120 个样本、4 个属性、3 个类别名），其后每行为”4 个属性 + 1 个标签”；标签用数字编号：<strong>0-山鸢尾、1-变色鸢尾、2-维吉尼亚鸢尾</strong>。</p>
+<p><img src="/images/dl/dl06-matplotlib/p08-01_728x474.jpg" alt="第 8 页 csv 文件（记事本）"></p>
+<p><img src="/images/dl/dl06-matplotlib/p09-01_484x405.jpg" alt="第 9 页 数据集内容（电子表格视图）"></p>
+<p><strong>split() 函数</strong>：通过指定的分隔符对字符串切片并返回<strong>列表</strong>；用它自动获取文件名，<strong>下载其他数据集时只要改变 URL 地址即可</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">fname_list = TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)          <span class="comment"># 按 / 切分，返回列表</span></span><br><span class="line">fname_list[-<span class="number">1</span>]                             <span class="comment"># 取最后一个元素 &quot;iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p11-02_1058x65.jpg" alt="第 11 页 自动获取文件名并下载"></p>
+<h3 id="6-5-2-Pandas-访问-csv-数据集"><a href="#6-5-2-Pandas-访问-csv-数据集" class="headerlink" title="6.5.2 Pandas 访问 csv 数据集"></a>6.5.2 Pandas 访问 csv 数据集</h3><p><strong>Pandas 库</strong>（Panel Data + Data Analysis）用于<strong>数据统计和分析</strong>，可高效、方便地操作大型数据集。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写法一：直接使用绝对路径</span></span><br><span class="line">df_iris = pd.read_csv(<span class="string">&quot;C:/Users/Administrator/.keras/datasets/iris_training.csv&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写法二：使用 get_file() 的返回值</span></span><br><span class="line">train_path = tf.keras.utils.get_file(<span class="string">&quot;iris_training.csv&quot;</span>, TRAIN_URL)</span><br><span class="line">df_iris = pd.read_csv(train_path)</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(df_iris)</span><br><span class="line">pandas.core.frame.DataFrame      <span class="comment"># DataFrame：Pandas 常用的二维数据表类型</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p03-02_1032x90.jpg" alt="第 3 页 用 get_file() 返回值读取 csv"></p>
+<p><strong>设置列标题：header 参数</strong>（取值是<strong>行号，从 0 开始</strong>）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">df_iris = pd.read_csv(train_path, header=<span class="number">0</span>)    <span class="comment"># header=0（默认）：第1行数据作为列标题</span></span><br><span class="line">df_iris = pd.read_csv(train_path, header=<span class="literal">None</span>) <span class="comment"># 没有列标题，自动加 0,1,2,3,4；第一行作为数据样本</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p06-01_748x63.jpg" alt="第 6 页 header&#x3D;0 的代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p07-02_725x66.jpg" alt="第 7 页 header&#x3D;None 的代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p07-01_281x180.jpg" alt="第 7 页 header&#x3D;None 运行结果：自动列标题 0~4"></p>
+<p><strong>设置列标题：names 参数</strong>（自定义列标题，代替 header 指定的列标题）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">COLUMN_NAMES = [<span class="string">&#x27;SepalLength&#x27;</span>, <span class="string">&#x27;SepalWidth&#x27;</span>, <span class="string">&#x27;PetalLength&#x27;</span>, <span class="string">&#x27;PetalWidth&#x27;</span>, <span class="string">&#x27;Species&#x27;</span>]</span><br><span class="line">df_iris = pd.read_csv(train_path, names=COLUMN_NAMES, header=<span class="number">0</span>)</span><br><span class="line">df_iris.head()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p09-01_1213x89.jpg" alt="第 9 页 names 参数代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p09-02_449x184.jpg" alt="第 9 页 指定列标题后的运行结果"></p>
+<p><strong>访问数据</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法 &#x2F; 属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>head(n)</code></td>
+<td>读取<strong>前 n 行</strong>，参数为空时默认读前 5 行</td>
+</tr>
+<tr>
+<td><code>tail(n)</code></td>
+<td>读取<strong>后 n 行</strong></td>
+</tr>
+<tr>
+<td><code>df[10:16]</code></td>
+<td>使用索引和切片，读取索引值 10~15 的行</td>
+</tr>
+<tr>
+<td><code>describe()</code></td>
+<td>显示统计信息：总数、平均值、标准差、最小值、1&#x2F;4、1&#x2F;2、3&#x2F;4、最大值</td>
+</tr>
+<tr>
+<td><code>ndim</code> &#x2F; <code>shape</code> &#x2F; <code>size</code></td>
+<td>数据表的维数 &#x2F; 形状 &#x2F; 元素总个数</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">df_iris.head()          <span class="comment"># 前 5 行</span></span><br><span class="line">df_iris.tail()          <span class="comment"># 后 5 行</span></span><br><span class="line">df_iris[<span class="number">10</span>:<span class="number">16</span>]          <span class="comment"># 索引 10~15 的行</span></span><br><span class="line">df_iris.describe()      <span class="comment"># 统计信息</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>df_iris.ndim</span><br><span class="line"><span class="number">2</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>df_iris.shape</span><br><span class="line">(<span class="number">120</span>, <span class="number">5</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>df_iris.size        <span class="comment"># 课件第 14 页此处标注为 shape，按其值 600 应为 size</span></span><br><span class="line"><span class="number">600</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p10-01_500x300.jpg" alt="第 10 页 head() 运行结果"></p>
+<p><img src="/images/dl/dl06-matplotlib/p13-01_493x267.jpg" alt="第 13 页 describe() 运行结果"></p>
+<p><img src="/images/dl/dl06-matplotlib/p14-01_343x223.jpg" alt="第 14 页 ndim &#x2F; shape &#x2F; size 运行结果"></p>
+<p><strong>转化为 NumPy 数组</strong>：使用 NumPy 的创建数组函数 <code>array()</code>，或使用 DataFrame 的 <code>values</code> 方法 &#x2F; <code>as_matrix()</code> 方法。<strong>注：<code>as_matrix()</code> 方法在 2020 年 1 月 29 日已被移除。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">iris = np.array(df_iris)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(df_iris)</span><br><span class="line">pandas.core.frame.DataFrame</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="built_in">type</span>(iris)</span><br><span class="line">numpy.ndarray</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p15-01_632x196.jpg" alt="第 15 页 转化为 NumPy 数组"></p>
+<p><strong>数组元素的索引和切片</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>iris[<span class="number">0</span>:<span class="number">6</span>]           <span class="comment"># 二维切片：读取前 6 行</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iris[:, <span class="number">4</span>]          <span class="comment"># 一维切片：所有行中的鸢尾花种类（标签）</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iris[:, <span class="number">0</span>:<span class="number">4</span>]        <span class="comment"># 二维切片：前 6 行中的前 4 列（属性）</span></span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p16-01_537x196.jpg" alt="第 16 页 数组切片（前 6 行）"></p>
+<p><img src="/images/dl/dl06-matplotlib/p16-03_1081x251.jpg" alt="第 16 页 一维切片取鸢尾花种类"></p>
+<h3 id="6-5-3-鸢尾花数据集可视化"><a href="#6-5-3-鸢尾花数据集可视化" class="headerlink" title="6.5.3 鸢尾花数据集可视化"></a>6.5.3 鸢尾花数据集可视化</h3><p><strong>思路</strong>：用<strong>花瓣长度（第 3 列，索引 2）</strong> 作 x 轴、<strong>花瓣宽度（第 4 列，索引 3）</strong> 作 y 轴画散点图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(iris[:, <span class="number">2</span>], iris[:, <span class="number">3</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p04-02_518x347.jpg" alt="第 4 页 简单散点图运行结果"></p>
+<p><strong>色彩映射</strong>：将参数 <code>c</code> 指定为一个<strong>列表或数组</strong>，图形颜色随其中元素的值变换，变换对应的颜色由参数 <code>cmap</code> 提供。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">10</span>)</span><br><span class="line">y = np.arange(<span class="number">10</span>)</span><br><span class="line">dot_color = [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>]     <span class="comment"># 每个点的颜色编号</span></span><br><span class="line"></span><br><span class="line">plt.scatter(x, y, c=dot_color, cmap=<span class="string">&#x27;brg&#x27;</span>)</span><br><span class="line">plt.scatter(iris[:, <span class="number">2</span>], iris[:, <span class="number">3</span>], c=iris[:, <span class="number">4</span>], cmap=<span class="string">&#x27;brg&#x27;</span>)   <span class="comment"># 按品种着色</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p05-01_591x197.jpg" alt="第 5 页 色彩映射演示代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p05-02_505x344.jpg" alt="第 5 页 色彩映射运行结果"></p>
+<p><img src="/images/dl/dl06-matplotlib/p06-03_528x351.jpg" alt="第 6 页 按种类着色运行结果（蓝&#x3D;山鸢尾，红&#x3D;变色鸢尾，绿&#x3D;维吉尼亚鸢尾）"></p>
+<p><strong>带标题、坐标轴标签的完整代码</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br><span class="line"></span><br><span class="line">COLUMN_NAMES = [<span class="string">&#x27;SepalLength&#x27;</span>, <span class="string">&#x27;SepalWidth&#x27;</span>, <span class="string">&#x27;PetalLength&#x27;</span>, <span class="string">&#x27;PetalWidth&#x27;</span>, <span class="string">&#x27;Species&#x27;</span>]</span><br><span class="line">df_iris = pd.read_csv(train_path, names=COLUMN_NAMES, header=<span class="number">0</span>)</span><br><span class="line">iris = np.array(df_iris)</span><br><span class="line"></span><br><span class="line">plt.scatter(iris[:, <span class="number">2</span>], iris[:, <span class="number">3</span>], c=iris[:, <span class="number">4</span>], cmap=<span class="string">&#x27;brg&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&quot;Anderson&#x27;s Iris Data Set\n(Bule-&gt;Setosa | Red-&gt;Versicolor | Green-&gt;Virginica)&quot;</span>)</span><br><span class="line">plt.xlabel(COLUMN_NAMES[<span class="number">2</span>])</span><br><span class="line">plt.ylabel(COLUMN_NAMES[<span class="number">3</span>])</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p07-01_937x372.jpg" alt="第 7 页 完整可视化代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p07-02_562x421.jpg" alt="第 7 页 运行结果"></p>
+<blockquote>
+<p>注：课件标题字符串中写作 “Bule”，即课程原文如此（应为 Blue）。</p>
+</blockquote>
+<p><strong>1×4 子图</strong>：第 1 个子图用 <code>text()</code> 只写属性名作说明，其余子图画”当前属性 vs 花萼长度”的散点图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">fig = plt.figure(<span class="string">&#x27;Iris Data&#x27;</span>, figsize=(<span class="number">15</span>, <span class="number">3</span>))</span><br><span class="line">fig.suptitle(<span class="string">&quot;Anderson&#x27;s Iris Data Set\n(Bule-&gt;Setosa | Red-&gt;Versicolor | Green-&gt;Virginica)&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    plt.subplot(<span class="number">1</span>, <span class="number">4</span>, i + <span class="number">1</span>)</span><br><span class="line">    <span class="keyword">if</span>(i == <span class="number">0</span>):</span><br><span class="line">        plt.text(<span class="number">0.3</span>, <span class="number">0.5</span>, COLUMN_NAMES[<span class="number">0</span>], fontsize=<span class="number">15</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        plt.scatter(iris[:, i], iris[:, <span class="number">0</span>], c=iris[:, <span class="number">4</span>], cmap=<span class="string">&#x27;brg&#x27;</span>)</span><br><span class="line">    plt.title(COLUMN_NAMES[i])</span><br><span class="line">    plt.ylabel(COLUMN_NAMES[<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">plt.tight_layout(rect=[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0.9</span>])       <span class="comment"># 为全局标题预留空间</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p09-02_1304x357.jpg" alt="第 9 页 1×4 子图代码"></p>
+<p><img src="/images/dl/dl06-matplotlib/p09-01_995x219.jpg" alt="第 9 页 1×4 子图运行结果"></p>
+<p><strong>4×4 全属性散点图矩阵</strong>：<strong>子图序号公式 <code>4*i + (j+1)</code></strong>，即</p>
+<table>
+<thead>
+<tr>
+<th>序号矩阵</th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>6</td>
+<td>7</td>
+<td>8</td>
+</tr>
+<tr>
+<td>9</td>
+<td>10</td>
+<td>11</td>
+<td>12</td>
+</tr>
+<tr>
+<td>13</td>
+<td>14</td>
+<td>15</td>
+<td>16</td>
+</tr>
+</tbody></table>
+<p>对角线（i&#x3D;&#x3D;j）用 <code>text()</code> 写属性名，非对角线画两两属性的散点图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br><span class="line"></span><br><span class="line">COLUMN_NAMES = [<span class="string">&#x27;SepalLength&#x27;</span>, <span class="string">&#x27;SepalWidth&#x27;</span>, <span class="string">&#x27;PetalLength&#x27;</span>, <span class="string">&#x27;PetalWidth&#x27;</span>, <span class="string">&#x27;Species&#x27;</span>]</span><br><span class="line">df_iris = pd.read_csv(train_path, names=COLUMN_NAMES, header=<span class="number">0</span>)</span><br><span class="line">iris = np.array(df_iris)</span><br><span class="line"></span><br><span class="line">fig = plt.figure(<span class="string">&#x27;Iris Data&#x27;</span>, figsize=(<span class="number">15</span>, <span class="number">15</span>))</span><br><span class="line">fig.suptitle(<span class="string">&quot;Anderson&#x27;s Iris Data Set\n(Bule-&gt;Setosa | Red-&gt;Versicolor | Green-&gt;Virginica)&quot;</span>, fontsize=<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">        plt.subplot(<span class="number">4</span>, <span class="number">4</span>, <span class="number">4</span>*i + (j + <span class="number">1</span>))         <span class="comment"># 子图序号公式</span></span><br><span class="line">        <span class="keyword">if</span>(i == j):</span><br><span class="line">            plt.text(<span class="number">0.3</span>, <span class="number">0.4</span>, COLUMN_NAMES[i], fontsize=<span class="number">15</span>)   <span class="comment"># 对角线写属性名</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            plt.scatter(iris[:, j], iris[:, i], c=iris[:, <span class="number">4</span>], cmap=<span class="string">&#x27;brg&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span>(i == <span class="number">0</span>):</span><br><span class="line">            plt.title(COLUMN_NAMES[j])            <span class="comment"># 第 1 行加子标题</span></span><br><span class="line">        <span class="keyword">if</span>(j == <span class="number">0</span>):</span><br><span class="line">            plt.ylabel(COLUMN_NAMES[i])           <span class="comment"># 第 1 列加 y 轴标签</span></span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+<p><img src="/images/dl/dl06-matplotlib/p12-01_1498x737.jpg" alt="第 12 页 4×4 散点图矩阵完整代码"></p>
+<h3 id="6-5-易错点"><a href="#6-5-易错点" class="headerlink" title="6.5 易错点"></a>6.5 易错点</h3><ul>
+<li><code>get_file()</code> 返回<strong>本地绝对路径</strong>而非文件内容；课件第 11 页把 <code>split</code> 误写成 <code>spit</code>（原文如此），实际必须写 <code>split(&#39;/&#39;)</code>。</li>
+<li><code>header</code> 取值是行号且从 0 开始；<code>names</code> 会<strong>覆盖</strong> <code>header</code> 指定的列标题。</li>
+<li><code>as_matrix()</code> 已移除，新代码用 <code>DataFrame.values</code> 或 <code>np.array(df)</code>。</li>
+<li>4×4 矩阵子图序号不能写 <code>i*4+j</code>（第 1 个会变 0），应为 <code>4*i+(j+1)</code>；对角线应用 <code>text()</code> 而非 <code>scatter()</code>。</li>
+</ul>
+<hr>
+<h2 id="附录：matplotlib-tight-layout-参数补充说明"><a href="#附录：matplotlib-tight-layout-参数补充说明" class="headerlink" title="附录：matplotlib.tight_layout() 参数补充说明"></a>附录：matplotlib.tight_layout() 参数补充说明</h2><p>参考：<a target="_blank" rel="noopener" href="https://matplotlib.org/stable/api/tight_layout_api.html">https://matplotlib.org/stable/api/tight_layout_api.html</a></p>
+<p>画布中有多个子图时，<code>tight_layout()</code> 会自动调整子图参数使之填充整个图像区域；但<strong>默认参数并不一定达到想要的效果</strong>，此时需设置其参数。默认值形如：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tight_layout(pad=1.08, h_pad=None, w_pad=None, rect=None)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>rect</code>：指定子图区域（<code>[left, bottom, right, top]</code>，0~1）；设置后所有子图都调整到该矩形区域中（见 6.1 小节）。</li>
+<li><code>pad</code>：设置画布与子图之间的间距，默认为 1.08。</li>
+<li><code>h_pad</code>、<code>w_pad</code>：设置相邻子图之间的间距。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/" title="第6讲 Matplotlib数据可视化">http://example.com/2026/10/04/第6讲-Matplotlib数据可视化/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/Matplotlib/" rel="tag"># Matplotlib</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/" rel="prev" title="第4讲 Python语言基础（2）">
+      <i class="fa fa-chevron-left"></i> 第4讲 Python语言基础（2）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/" rel="next" title="第3讲 Python语言基础（1）">
+      第3讲 Python语言基础（1） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-6-%E8%AE%B2-Matplotlib-%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">第 6 讲 Matplotlib 数据可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-Matplotlib-%E7%BB%98%E5%9B%BE%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">6.1 Matplotlib 绘图基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AF%E8%A7%86%E5%8C%96-%C2%B7-%E5%AE%89%E8%A3%85%E4%B8%8E%E5%AF%BC%E5%85%A5"><span class="nav-number">1.1.1.</span> <span class="nav-text">6.1.1 为什么可视化 · 安装与导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-2-Figure-%E5%AF%B9%E8%B1%A1%EF%BC%9A%E5%88%9B%E5%BB%BA%E7%94%BB%E5%B8%83"><span class="nav-number">1.1.2.</span> <span class="nav-text">6.1.2 Figure 对象：创建画布</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-3-%E5%88%92%E5%88%86%E5%AD%90%E5%9B%BE%EF%BC%9Asubplot-%E4%B8%8E%E8%BD%B4%E5%9F%9F%EF%BC%88Axes%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">6.1.3 划分子图：subplot() 与轴域（Axes）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-4-%E8%AE%BE%E7%BD%AE%E4%B8%AD%E6%96%87%E5%AD%97%E4%BD%93"><span class="nav-number">1.1.4.</span> <span class="nav-text">6.1.4 设置中文字体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-5-%E6%A0%87%E9%A2%98%EF%BC%9Asuptitle-%E4%B8%8E-title"><span class="nav-number">1.1.5.</span> <span class="nav-text">6.1.5 标题：suptitle() 与 title()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-6-tight-layout-%E8%87%AA%E5%8A%A8%E8%B0%83%E6%95%B4%E5%AD%90%E5%9B%BE"><span class="nav-number">1.1.6.</span> <span class="nav-text">6.1.6 tight_layout() 自动调整子图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-7-%E7%BB%BC%E5%90%88%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.7.</span> <span class="nav-text">6.1.7 综合示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.1.8.</span> <span class="nav-text">6.1 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-%E6%95%A3%E7%82%B9%E5%9B%BE"><span class="nav-number">1.2.</span> <span class="nav-text">6.2 散点图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-1-%E6%A6%82%E5%BF%B5%E4%B8%8E-scatter-%E5%87%BD%E6%95%B0"><span class="nav-number">1.2.1.</span> <span class="nav-text">6.2.1 概念与 scatter() 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-2-%E6%96%87%E6%9C%AC%E4%B8%8E%E5%9D%90%E6%A0%87%E8%BD%B4%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.2.2.</span> <span class="nav-text">6.2.2 文本与坐标轴设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-3-%E5%AE%8C%E6%95%B4%E7%A4%BA%E4%BE%8B%EF%BC%9A%E6%A0%87%E5%87%86%E6%AD%A3%E6%80%81%E5%88%86%E5%B8%83%E6%95%A3%E7%82%B9%E5%9B%BE"><span class="nav-number">1.2.3.</span> <span class="nav-text">6.2.3 完整示例：标准正态分布散点图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-4-%E5%A4%9A%E7%BB%84%E6%95%B0%E6%8D%AE%E4%B8%8E%E5%9B%BE%E4%BE%8B-legend"><span class="nav-number">1.2.4.</span> <span class="nav-text">6.2.4 多组数据与图例 legend()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.2.5.</span> <span class="nav-text">6.2 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-%E6%8A%98%E7%BA%BF%E5%9B%BE%E5%92%8C%E6%9F%B1%E7%8A%B6%E5%9B%BE"><span class="nav-number">1.3.</span> <span class="nav-text">6.3 折线图和柱状图</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-1-%E6%8A%98%E7%BA%BF%E5%9B%BE%E4%B8%8E-plot-%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.1.</span> <span class="nav-text">6.3.1 折线图与 plot() 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-2-%E6%9F%B1%E5%BD%A2%E5%9B%BE%E4%B8%8E-bar-%E5%87%BD%E6%95%B0"><span class="nav-number">1.3.2.</span> <span class="nav-text">6.3.2 柱形图与 bar() 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-3-%E5%8F%82%E8%80%83%E8%B5%84%E6%BA%90%EF%BC%9AMatplotlib-%E5%AE%98%E7%BD%91-Gallery"><span class="nav-number">1.3.3.</span> <span class="nav-text">6.3.3 参考资源：Matplotlib 官网 Gallery</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.3.4.</span> <span class="nav-text">6.3 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E6%95%B0%E6%8D%AE%E9%9B%86%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.4.</span> <span class="nav-text">6.4 波士顿房价数据集可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-1-Keras-%E4%B8%8E%E5%86%85%E7%BD%AE%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.4.1.</span> <span class="nav-text">6.4.1 Keras 与内置数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-2-%E6%B3%A2%E5%A3%AB%E9%A1%BF%E6%88%BF%E4%BB%B7%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.4.2.</span> <span class="nav-text">6.4.2 波士顿房价数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-3-%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%9Aload-data"><span class="nav-number">1.4.3.</span> <span class="nav-text">6.4.3 加载数据集：load_data()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-4-%E8%AE%BF%E9%97%AE%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.4.</span> <span class="nav-text">6.4.4 访问数据集中的数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-5-%E4%BE%8B%EF%BC%9A%E5%B9%B3%E5%9D%87%E6%88%BF%E9%97%B4%E6%95%B0%E4%B8%8E%E6%88%BF%E4%BB%B7%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.4.5.</span> <span class="nav-text">6.4.5 例：平均房间数与房价之间的关系可视化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-6-%E4%BE%8B%EF%BC%9A%E6%89%80%E6%9C%89%E5%B1%9E%E6%80%A7%E4%B8%8E%E6%88%BF%E4%BB%B7%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.4.6.</span> <span class="nav-text">6.4.6 例：所有属性与房价之间的关系可视化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.4.7.</span> <span class="nav-text">6.4 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-5-%E9%B8%A2%E5%B0%BE%E8%8A%B1%E6%95%B0%E6%8D%AE%E9%9B%86%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.5.</span> <span class="nav-text">6.5 鸢尾花数据集可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5-1-%E4%B8%8B%E8%BD%BD%E9%B8%A2%E5%B0%BE%E8%8A%B1%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.5.1.</span> <span class="nav-text">6.5.1 下载鸢尾花数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5-2-Pandas-%E8%AE%BF%E9%97%AE-csv-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.5.2.</span> <span class="nav-text">6.5.2 Pandas 访问 csv 数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5-3-%E9%B8%A2%E5%B0%BE%E8%8A%B1%E6%95%B0%E6%8D%AE%E9%9B%86%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.5.3.</span> <span class="nav-text">6.5.3 鸢尾花数据集可视化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-5-%E6%98%93%E9%94%99%E7%82%B9"><span class="nav-number">1.5.4.</span> <span class="nav-text">6.5 易错点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9Amatplotlib-tight-layout-%E5%8F%82%E6%95%B0%E8%A1%A5%E5%85%85%E8%AF%B4%E6%98%8E"><span class="nav-number">1.6.</span> <span class="nav-text">附录：matplotlib.tight_layout() 参数补充说明</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

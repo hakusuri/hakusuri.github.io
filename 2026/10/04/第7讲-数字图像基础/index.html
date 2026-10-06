@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集） 本讲对应课件：7.1 数字图像基本概念 → 7.2 Pillow 图像处理库 → 7.3 手写数字数据集。这是深度学习实战前的”图像数据”准备篇：先搞清数字图像在计算机里到底怎么存（像素、位深度、色彩模式、格式），再学会用 Pillow 把图像读进来、看属性、转色彩模式、拆通道、转成 NumPy 数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第7讲 数字图像基础">
+<meta property="og:url" content="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集） 本讲对应课件：7.1 数字图像基本概念 → 7.2 Pillow 图像处理库 → 7.3 手写数字数据集。这是深度学习实战前的”图像数据”准备篇：先搞清数字图像在计算机里到底怎么存（像素、位深度、色彩模式、格式），再学会用 Pillow 把图像读进来、看属性、转色彩模式、拆通道、转成 NumPy 数">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p06-01_512x512.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p12-01_349x276.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p20-01_1200x508.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p06-03_492x175.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p08-02_842x292.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p09-02_458x146.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p10-01_686x613.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl07-image/p12-01_1103x156.jpg">
+<meta property="article:published_time" content="2026-10-04T10:35:35.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:50.743Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="数字图像">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl07-image/p06-01_512x512.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第7讲 数字图像基础 | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第7讲 数字图像基础
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2026-10-04 18:35:35" itemprop="dateCreated datePublished" datetime="2026-10-04T18:35:35+08:00">2026-10-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-10-06 23:43:50" itemprop="dateModified" datetime="2026-10-06T23:43:50+08:00">2026-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）"><a href="#第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）" class="headerlink" title="第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集）"></a>第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集）</h1><blockquote>
+<p>本讲对应课件：<strong>7.1 数字图像基本概念 → 7.2 Pillow 图像处理库 → 7.3 手写数字数据集</strong>。<br>这是深度学习实战前的”图像数据”准备篇：先搞清数字图像在计算机里到底怎么存（像素、位深度、色彩模式、格式），再学会用 <strong>Pillow</strong> 把图像读进来、看属性、转色彩模式、拆通道、转成 NumPy 数组、缩放旋转裁剪，最后用经典的 <strong>MNIST 手写数字数据集</strong> 把整条链路跑通。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7.1 数字图像基本概念</td>
+<td>图像离散化、像素与位图、位深度、二值&#x2F;灰度&#x2F;RGB&#x2F;RGBA&#x2F;256 色图像、图像格式、色彩模式、序列图像、深度图像</td>
+</tr>
+<tr>
+<td>7.2 Pillow 图像处理库</td>
+<td>打开&#x2F;保存图像、图像对象属性、显示图像、转换色彩模式、通道分离与合并、转 NumPy 数组、颜色反向、缩放旋转镜像、裁剪</td>
+</tr>
+<tr>
+<td>7.3 手写数字数据集</td>
+<td>MNIST 数据集介绍、下载、训练&#x2F;测试集形状、显示单张与随机 4 张手写数字</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="7-1-数字图像基本概念"><a href="#7-1-数字图像基本概念" class="headerlink" title="7.1 数字图像基本概念"></a>7.1 数字图像基本概念</h2><h3 id="7-1-1-图像的离散化"><a href="#7-1-1-图像的离散化" class="headerlink" title="7.1.1 图像的离散化"></a>7.1.1 图像的离散化</h3><ul>
+<li><strong>连续图像</strong>：人眼直接感受到的图像。</li>
+<li><strong>数字图像</strong>：把连续图像<strong>数字化、离散化</strong>之后得到的图像，它是对连续图像的<strong>一种近似</strong>。</li>
+</ul>
+<blockquote>
+<p>一句话理解：计算机存不下”连续”的光，只能把它按网格切成一个个点、再把每个点的亮度&#x2F;颜色量化成有限的整数——这就是数字图像。</p>
+</blockquote>
+<h3 id="7-1-2-像素、位图与位深度"><a href="#7-1-2-像素、位图与位深度" class="headerlink" title="7.1.2 像素、位图与位深度"></a>7.1.2 像素、位图与位深度</h3><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>像素（Pixel）</strong></td>
+<td>图像中的<strong>一个最小单位</strong></td>
+</tr>
+<tr>
+<td><strong>位图（bitmap）</strong></td>
+<td>通过<strong>记录每一个像素值</strong>来存储和表达的图像</td>
+</tr>
+<tr>
+<td><strong>色彩深度 &#x2F; 位深度</strong></td>
+<td>位图中<strong>每个像素点用多少个二进制位</strong>来表示</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>BMP</strong>：Windows 系统的标准位图格式。</li>
+</ul>
+<p>课件给出的存储量计算示例（<strong>务必掌握这个换算</strong>）：</p>
+<table>
+<thead>
+<tr>
+<th>图像类型</th>
+<th>位深度</th>
+<th>512×512 图像的存储量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>二进制（二值）</td>
+<td>1 位&#x2F;像素</td>
+<td>512×512 bit &#x3D; 256 Kb &#x3D; <strong>32 KB</strong></td>
+</tr>
+<tr>
+<td>灰度图像</td>
+<td>8 位&#x2F;像素（1 字节）</td>
+<td>512×512×8 bit &#x3D; <strong>256 KB</strong></td>
+</tr>
+<tr>
+<td>24 位彩色 RGB</td>
+<td>24 位&#x2F;像素（3 字节）</td>
+<td>512×512×24 bit &#x3D; <strong>768 KB</strong></td>
+</tr>
+</tbody></table>
+<p>记忆要点：<strong>1 字节 &#x3D; 8 位</strong>；二进制只有 1 位，所以二值图像最省空间。</p>
+<h3 id="7-1-3-五类常见图像"><a href="#7-1-3-五类常见图像" class="headerlink" title="7.1.3 五类常见图像"></a>7.1.3 五类常见图像</h3><h4 id="（1）二值图像（Binary-Image）"><a href="#（1）二值图像（Binary-Image）" class="headerlink" title="（1）二值图像（Binary Image）"></a>（1）二值图像（Binary Image）</h4><ul>
+<li>每个像素只有 <strong>2 种可能取值</strong>，用 <strong>1 位二进制</strong>表示，<strong>位深度为 1</strong>。</li>
+<li><strong>黑白图像</strong>：只有黑色和白色两种颜色。在图像处理和分析时，常常首先对图像进行<strong>二值化处理</strong>。</li>
+<li>只要是<strong>仅有两种颜色</strong>的图像，都可以被称为二值图像（不一定是黑白色）。</li>
+</ul>
+<h4 id="（2）灰度图像（Gray-Image）"><a href="#（2）灰度图像（Gray-Image）" class="headerlink" title="（2）灰度图像（Gray Image）"></a>（2）灰度图像（Gray Image）</h4><ul>
+<li>每个像素使用 <strong>1 个字节</strong>表示，<strong>位深度为 8</strong>，可以表示 <strong>256 种级别的灰度</strong>。</li>
+<li><strong>0 表示黑色，255 表示白色</strong>；数值表示<strong>光学强度</strong>，255 是光学强度最大的状态，0 是黑色。</li>
+</ul>
+<p><img src="/images/dl/dl07-image/p06-01_512x512.jpg" alt="第 6 页：黑白&#x2F;灰度&#x2F;彩色对比"></p>
+<h4 id="（3）彩色图像（RGB）"><a href="#（3）彩色图像（RGB）" class="headerlink" title="（3）彩色图像（RGB）"></a>（3）彩色图像（RGB）</h4><ul>
+<li>每个像素都有<strong>红（R）、绿（G）、蓝（B）三个分量</strong>。</li>
+<li>1 个像素点使用 <strong>3 个字节</strong>，<strong>位深度为 24 位</strong>。</li>
+<li>24 位可以表示 <strong>256×256×256 &#x3D; 16 777 216</strong> 种颜色（约 1677 万色）。</li>
+<li>典型取值：<code>(0,0,0)</code> 黑色、<code>(255,255,255)</code> 白色、<code>(255,0,0)</code> 红色。</li>
+</ul>
+<h4 id="（4）RGBA-图像"><a href="#（4）RGBA-图像" class="headerlink" title="（4）RGBA 图像"></a>（4）RGBA 图像</h4><ul>
+<li><strong>32 位彩色</strong>：<strong>RGB 图像 + 8 位透明度信息 Alpha</strong>。</li>
+<li>1 个像素点使用 <strong>4 个字节</strong>，位深度为 <strong>32 位</strong>。</li>
+<li>例：Alpha &#x3D; 255 &#x2F; 180 &#x2F; 128 &#x2F; 0（0 表示全透明）。</li>
+</ul>
+<h4 id="（5）256-色彩色图像（调色板图像）"><a href="#（5）256-色彩色图像（调色板图像）" class="headerlink" title="（5）256 色彩色图像（调色板图像）"></a>（5）256 色彩色图像（调色板图像）</h4><ul>
+<li>每个像素用 <strong>8 位二进制</strong>表示，取值是<strong>调色板中的索引值</strong>。</li>
+<li>对于不同的图像，所对应的这 256 种颜色的集合是<strong>不一样</strong>的。</li>
+<li>在保存和加载这种类型的位图时，需要<strong>将调色板和图像一同保存和加载</strong>。</li>
+</ul>
+<p><img src="/images/dl/dl07-image/p12-01_349x276.jpg" alt="第 12 页：256 色调色板"></p>
+<h3 id="7-1-4-图像格式与图像压缩"><a href="#7-1-4-图像格式与图像压缩" class="headerlink" title="7.1.4 图像格式与图像压缩"></a>7.1.4 图像格式与图像压缩</h3><p><strong>图像压缩</strong>：适当<strong>降低图像质量</strong>来减小它所占用的空间；不同的<strong>图像压缩算法</strong>对应不同的<strong>图像格式</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>压缩方式</th>
+<th>特点与适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>BMP</strong></td>
+<td>不压缩</td>
+<td>占用存储空间大，不支持文件压缩，<strong>不适用于网页</strong></td>
+</tr>
+<tr>
+<td><strong>JPEG</strong></td>
+<td><strong>有损压缩</strong></td>
+<td>压缩率高、所占空间小；适合<strong>色彩丰富、细节清晰细腻</strong>的大图像；<strong>不适合</strong>颜色较少、有大块相近颜色区域、或亮度差异明显的简单图片；<strong>每次编辑都会降低质量</strong>，不适合多次编辑</td>
+</tr>
+<tr>
+<td><strong>PNG</strong></td>
+<td><strong>无损压缩</strong></td>
+<td>Portable Network Graphics；适合<strong>有规律渐变色彩</strong>的图像</td>
+</tr>
+<tr>
+<td><strong>GIF</strong></td>
+<td>—</td>
+<td>Graphics Interchange Format；支持<strong>静态和动态</strong>格式，动态图由多幅图片组成、循环显示形成动画；<strong>只支持 256 色</strong>，适合色彩简单、颜色较少的小图像</td>
+</tr>
+<tr>
+<td><strong>TIFF</strong></td>
+<td>支持多种编码</td>
+<td>Tag Image File Format；定义了 4 类格式：二值（TIFF-B）、黑白灰度（TIFF-G）、带调色板彩色（TIFF-P）、RGB 彩色（TIFF-R）；支持 RGB、JPEG 等多种编码；<strong>印刷行业最常用</strong>；<strong>Web 浏览器不支持</strong></td>
+</tr>
+</tbody></table>
+<h3 id="7-1-5-色彩模式"><a href="#7-1-5-色彩模式" class="headerlink" title="7.1.5 色彩模式"></a>7.1.5 色彩模式</h3><ul>
+<li><strong>二值图像、灰度图像、RGB 图像、RGBA 图像</strong>（前面已介绍）。</li>
+<li><strong>CMYK</strong>（印刷四分色）：<ul>
+<li>C：Cyan &#x3D; 青色</li>
+<li>M：Magenta &#x3D; 洋红色</li>
+<li>Y：Yellow &#x3D; 黄色</li>
+<li>K：blacK &#x3D; 黑色</li>
+</ul>
+</li>
+<li><strong>YCbCr</strong>：<ul>
+<li>Y：亮度</li>
+<li>Cb：蓝色色度</li>
+<li>Cr：红色色度</li>
+</ul>
+</li>
+<li><strong>HSI</strong>：<ul>
+<li>H：色调</li>
+<li>S：饱和度</li>
+<li>I：亮度</li>
+</ul>
+</li>
+</ul>
+<p><img src="/images/dl/dl07-image/p20-01_1200x508.jpg" alt="第 20 页：色彩模式"></p>
+<h3 id="7-1-6-图像类型"><a href="#7-1-6-图像类型" class="headerlink" title="7.1.6 图像类型"></a>7.1.6 图像类型</h3><ul>
+<li><strong>序列图像</strong>：时间上有一定<strong>顺序和间隔</strong>、内容上相关的一组图像；其中每幅图像称为<strong>帧图像</strong>，帧图像之间的<strong>时间间隔是固定的</strong>（本质就是视频）。</li>
+<li><strong>深度图像（Depth Map）</strong>：一种<strong>三维场景信息</strong>的表达方式，每个像素点的取值代表这个点<strong>离摄像机的距离</strong>；采用<strong>灰度图</strong>表示，每个像素点由<strong>一个字节</strong>表示；注意像素取值<strong>并不代表实际距离</strong>，颜色的深浅只代表<strong>相对距离的远近</strong>。</li>
+</ul>
+<hr>
+<h2 id="7-2-Pillow-图像处理库"><a href="#7-2-Pillow-图像处理库" class="headerlink" title="7.2 Pillow 图像处理库"></a>7.2 Pillow 图像处理库</h2><h3 id="7-2-1-为什么用-Pillow"><a href="#7-2-1-为什么用-Pillow" class="headerlink" title="7.2.1 为什么用 Pillow"></a>7.2.1 为什么用 Pillow</h3><table>
+<thead>
+<tr>
+<th>库</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>matplotlib.image</code></td>
+<td>仅支持导入 <strong>PNG 格式</strong>的图像，且<strong>功能有限</strong></td>
+</tr>
+<tr>
+<td><strong>PIL</strong>（Python Imaging Library）</td>
+<td>功能丰富、简单易用，但<strong>仅支持 Python 2.x</strong>，且<strong>已经停止更新</strong></td>
+</tr>
+<tr>
+<td><strong>Pillow</strong></td>
+<td>在 PIL 的基础上发展而成，<strong>支持 Python 3</strong></td>
+</tr>
+</tbody></table>
+<h3 id="7-2-2-安装与导入"><a href="#7-2-2-安装与导入" class="headerlink" title="7.2.2 安装与导入"></a>7.2.2 安装与导入</h3><ul>
+<li>安装：<ul>
+<li>使用 <strong>Anaconda</strong>：无需单独安装 Pillow；</li>
+<li>或使用 <strong>pip 命令</strong>安装。</li>
+</ul>
+</li>
+<li>导入：<strong>PIL.image 模块</strong> + <strong>matplotlib.pyplot 模块</strong>。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-3-打开图像：Image-open"><a href="#7-2-3-打开图像：Image-open" class="headerlink" title="7.2.3 打开图像：Image.open()"></a>7.2.3 打开图像：<code>Image.open()</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">image对象 = Image.<span class="built_in">open</span>(路径)</span><br></pre></td></tr></table></figure>
+
+<p>返回一个 <strong>image 对象</strong>；路径可以是<strong>当前工作目录</strong>下的文件名（如 <code>lena.tiff</code>），也可以是完整路径。</p>
+<h3 id="7-2-4-保存图像与格式转换"><a href="#7-2-4-保存图像与格式转换" class="headerlink" title="7.2.4 保存图像与格式转换"></a>7.2.4 保存图像与格式转换</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">图像对象.save(新路径)</span><br></pre></td></tr></table></figure>
+
+<p><strong>改变文件名的后缀，就可以转换图像格式</strong>：把 <code>lena.jpg</code> 存成 <code>lena.bmp</code>，得到的就是 BMP 文件。</p>
+<h3 id="7-2-5-图像对象的主要属性"><a href="#7-2-5-图像对象的主要属性" class="headerlink" title="7.2.5 图像对象的主要属性"></a>7.2.5 图像对象的主要属性</h3><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>图像对象.format</code></td>
+<td>图像格式</td>
+</tr>
+<tr>
+<td><code>图像对象.size</code></td>
+<td>图像尺寸</td>
+</tr>
+<tr>
+<td><code>图像对象.mode</code></td>
+<td>色彩模式</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">img = Image.<span class="built_in">open</span>(<span class="string">&quot;lena.jpg&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;image:&quot;</span>, img.<span class="built_in">format</span>, img.size, img.mode)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/dl/dl07-image/p06-03_492x175.jpg" alt="第 6 页：打开图像并查看 format"></p>
+<h3 id="7-2-6-显示图像：imshow"><a href="#7-2-6-显示图像：imshow" class="headerlink" title="7.2.6 显示图像：imshow()"></a>7.2.6 显示图像：<code>imshow()</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">plt.imshow(对象或数组)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>课件中的显示效果：<strong>不显示坐标轴</strong>（用 <code>plt.axis(&quot;off&quot;)</code>），并在”子图标题”的位置显示<strong>图片格式</strong>（用 <code>plt.title()</code>）。</p>
+<p><img src="/images/dl/dl07-image/p08-02_842x292.jpg" alt="第 8 页：三种格式对比显示"></p>
+<h3 id="7-2-7-转换图像的色彩模式"><a href="#7-2-7-转换图像的色彩模式" class="headerlink" title="7.2.7 转换图像的色彩模式"></a>7.2.7 转换图像的色彩模式</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">图像对象.convert(色彩模式)</span><br></pre></td></tr></table></figure>
+
+<p>转换后的图像需要保存才会<strong>出现在当前工作目录中</strong>。常用取值：</p>
+<table>
+<thead>
+<tr>
+<th>取值</th>
+<th>色彩模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1</code></td>
+<td>二值图像</td>
+</tr>
+<tr>
+<td><code>L</code></td>
+<td>灰度图像</td>
+</tr>
+<tr>
+<td><code>RGB</code></td>
+<td>24 位彩色图像</td>
+</tr>
+<tr>
+<td><code>RGBA</code></td>
+<td>32 位彩色图像</td>
+</tr>
+<tr>
+<td><code>CMYK</code></td>
+<td>CMYK 彩色图像</td>
+</tr>
+<tr>
+<td><code>YCbCr</code></td>
+<td>YCbCr 彩色图像</td>
+</tr>
+<tr>
+<td><code>I</code></td>
+<td>32 位整型灰度图像</td>
+</tr>
+<tr>
+<td><code>F</code></td>
+<td>32 位浮点灰度图像</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">img_gray = img.convert(<span class="string">&quot;L&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;mode=&quot;</span>, img_gray.mode)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">5</span>, <span class="number">5</span>))</span><br><span class="line">plt.imshow(img_gray, cmap=<span class="string">&quot;gray&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/dl/dl07-image/p09-02_458x146.jpg" alt="第 9 页：convert(&quot;L&quot;) 转灰度"></p>
+<h3 id="7-2-8-颜色通道的分离与合并"><a href="#7-2-8-颜色通道的分离与合并" class="headerlink" title="7.2.8 颜色通道的分离与合并"></a>7.2.8 颜色通道的分离与合并</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">图像对象.split(色彩模式)              <span class="comment"># 分离</span></span><br><span class="line">Image.merge(色彩模式, 图像列表)        <span class="comment"># 合并</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>split()</code>：将彩色图像<strong>分离为 R、G、B 三个颜色通道</strong>，各通道采用<strong>灰度图表示颜色的亮度</strong>。</li>
+<li><code>merge()</code>：将所有通道<strong>合并</strong>，得到 <strong>RGB 彩色图像</strong>。</li>
+</ul>
+<p><img src="/images/dl/dl07-image/p10-01_686x613.jpg" alt="第 10 页：R&#x2F;G&#x2F;B 通道与合并结果"></p>
+<h3 id="7-2-9-图像转-NumPy-数组"><a href="#7-2-9-图像转-NumPy-数组" class="headerlink" title="7.2.9 图像转 NumPy 数组"></a>7.2.9 图像转 NumPy 数组</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">数组 = np.array(图像对象)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>灰度图像</strong>对应一个<strong>二维数组</strong>，其中每个元素对应一个像素：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">img_gray = Image.<span class="built_in">open</span>(<span class="string">&quot;lena_gray.bmp&quot;</span>)</span><br><span class="line">arr_img_gray = np.array(img_gray)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;\nshape:&quot;</span>, arr_img_gray.shape)</span><br><span class="line"><span class="built_in">print</span>(arr_img_gray)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>512×512 的 RGB 彩色图像</strong>是一个<strong>三维数组</strong>：前两维对应图像的尺寸，<strong>第三维分别对应图像的 3 个通道</strong>（shape 形如 <code>(512, 512, 3)</code>）。</li>
+</ul>
+<p><img src="/images/dl/dl07-image/p12-01_1103x156.jpg" alt="第 12 页：彩色图像转数组（三维）"></p>
+<h3 id="7-2-10-综合例：图像颜色反向"><a href="#7-2-10-综合例：图像颜色反向" class="headerlink" title="7.2.10 综合例：图像颜色反向"></a>7.2.10 综合例：图像颜色反向</h3><p>对图像中<strong>每一个像素</strong>做颜色反向运算（<code>255 - 原值</code>）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">arr_img_new = <span class="number">255</span> - arr_img_gray</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">5</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">121</span>)</span><br><span class="line">plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line">plt.imshow(arr_img_gray, cmap=<span class="string">&quot;gray&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">122</span>)</span><br><span class="line">plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line">plt.imshow(arr_img_new, cmap=<span class="string">&quot;gray&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-11-缩放图像：resize-与-thumbnail"><a href="#7-2-11-缩放图像：resize-与-thumbnail" class="headerlink" title="7.2.11 缩放图像：resize() 与 thumbnail()"></a>7.2.11 缩放图像：<code>resize()</code> 与 <code>thumbnail()</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">plt.figure(figsize=(<span class="number">5</span>, <span class="number">5</span>))</span><br><span class="line">img_small = img.resize((<span class="number">64</span>, <span class="number">64</span>))</span><br><span class="line">plt.imshow(img_small)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><strong>两者最关键的差别</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>是否修改原图</th>
+<th>返回值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>resize()</code></td>
+<td><strong>不</strong>对原图进行修改</td>
+<td>返回缩放后的<strong>新图像对象</strong></td>
+</tr>
+<tr>
+<td><code>thumbnail()</code></td>
+<td><strong>原地操作</strong>，直接对 image 对象本身缩放</td>
+<td>返回值是 <strong>None</strong></td>
+</tr>
+</tbody></table>
+<h3 id="7-2-12-旋转与镜像：transpose"><a href="#7-2-12-旋转与镜像：transpose" class="headerlink" title="7.2.12 旋转与镜像：transpose()"></a>7.2.12 旋转与镜像：<code>transpose()</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">图像对象.transpose(转置方式)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>转置方式</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Image.FLIP_LEFT_RIGHT</code></td>
+<td>水平翻转</td>
+</tr>
+<tr>
+<td><code>Image.FLIP_TOP_BOTTOM</code></td>
+<td>上下翻转</td>
+</tr>
+<tr>
+<td><code>Image.ROTATE_90</code></td>
+<td>逆时针旋转 90°</td>
+</tr>
+<tr>
+<td><code>Image.ROTATE_180</code></td>
+<td>逆时针旋转 180°</td>
+</tr>
+<tr>
+<td><code>Image.ROTATE_270</code></td>
+<td>逆时针旋转 270°</td>
+</tr>
+<tr>
+<td><code>Image.TRANSPOSE</code></td>
+<td>将图像进行转置</td>
+</tr>
+<tr>
+<td><code>Image.TRANSVERSE</code></td>
+<td>将图像进行转置，再水平翻转</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">img_flr = img.transpose(Image.FLIP_LEFT_RIGHT)</span><br><span class="line">img_r90 = img.transpose(Image.ROTATE_90)</span><br><span class="line">img_tp  = img.transpose(Image.TRANSPOSE)</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-13-裁剪图像：crop"><a href="#7-2-13-裁剪图像：crop" class="headerlink" title="7.2.13 裁剪图像：crop()"></a>7.2.13 裁剪图像：<code>crop()</code></h3><p>在图像上指定的位置<strong>裁剪出一个矩形区域</strong>，返回值为<strong>图像对象</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">图像对象.crop((左, 上, 右, 下))</span><br></pre></td></tr></table></figure>
+
+<p>四个参数分别是<strong>左上角坐标</strong>和<strong>右下角坐标</strong>。完整示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"></span><br><span class="line">img = Image.<span class="built_in">open</span>(<span class="string">&quot;Lena.tiff&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">5</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">121</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">122</span>)</span><br><span class="line">img_region = img.crop((<span class="number">100</span>, <span class="number">100</span>, <span class="number">400</span>, <span class="number">400</span>))</span><br><span class="line">plt.imshow(img_region)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-2-小节速查表（课件总结）"><a href="#7-2-小节速查表（课件总结）" class="headerlink" title="7.2 小节速查表（课件总结）"></a>7.2 小节速查表（课件总结）</h3><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>方法 &#x2F; 函数 &#x2F; 属性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>打开图像</td>
+<td><code>Image.open(路径)</code></td>
+</tr>
+<tr>
+<td>保存图像</td>
+<td><code>图像对象.save(路径)</code></td>
+</tr>
+<tr>
+<td>查看图像属性</td>
+<td><code>图像对象.format</code>、<code>.size</code>、<code>.mode</code></td>
+</tr>
+<tr>
+<td>显示图像</td>
+<td><code>plt.imshow(对象/N维数组)</code></td>
+</tr>
+<tr>
+<td>转换色彩模式</td>
+<td><code>图像对象.convert(色彩模式)</code></td>
+</tr>
+<tr>
+<td>颜色通道分离与合并</td>
+<td><code>图像对象.split()</code> &#x2F; <code>Image.merge(色彩模式, 图像列表)</code></td>
+</tr>
+<tr>
+<td>将图像转换为数组</td>
+<td><code>np.array(图像对象)</code></td>
+</tr>
+<tr>
+<td>缩放</td>
+<td><code>图像对象.resize(图像尺寸)</code>、<code>thumbnail()</code></td>
+</tr>
+<tr>
+<td>旋转和镜像</td>
+<td><code>图像对象.transpose(转置方式)</code></td>
+</tr>
+<tr>
+<td>裁剪图像</td>
+<td><code>图像对象.crop((左, 上, 右, 下))</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="7-3-手写数字数据集（MNIST）"><a href="#7-3-手写数字数据集（MNIST）" class="headerlink" title="7.3 手写数字数据集（MNIST）"></a>7.3 手写数字数据集（MNIST）</h2><h3 id="7-3-1-数据集介绍"><a href="#7-3-1-数据集介绍" class="headerlink" title="7.3.1 数据集介绍"></a>7.3.1 数据集介绍</h3><ul>
+<li><strong>MNIST</strong> &#x3D; <strong>M</strong>ixed <strong>N</strong>ational <strong>I</strong>nstitute of <strong>S</strong>tandards and <strong>T</strong>echnology database。</li>
+<li>由 <strong>New York University</strong> 的 <strong>Yann LeCun</strong> 构建。</li>
+<li>规模：<strong>60000 条训练数据</strong> + <strong>10000 条测试数据</strong>。</li>
+<li>由 <strong>250 个不同的人</strong>手写而成。</li>
+<li>每张是 <strong>28×28 像素的灰度图像</strong>，存储在 <strong>28×28 的二维数组</strong>中。</li>
+</ul>
+<h3 id="7-3-2-下载-MNIST-数据集"><a href="#7-3-2-下载-MNIST-数据集" class="headerlink" title="7.3.2 下载 MNIST 数据集"></a>7.3.2 下载 MNIST 数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line">mnist = tf.keras.datasets.mnist</span><br><span class="line">(train_x, train_y), (test_x, test_y) = mnist.load_data()</span><br></pre></td></tr></table></figure>
+
+<p>下载过程中的提示（下载到当前 Windows 用户目录 <code>C:\Users\&lt;用户名&gt;\.keras\datasets\</code>）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Downloading data from https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz</span><br><span class="line">11493376/11490434 [==============================] - 18s 2us/step</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-3-3-训练集与测试集的长度、形状"><a href="#7-3-3-训练集与测试集的长度、形状" class="headerlink" title="7.3.3 训练集与测试集的长度、形状"></a>7.3.3 训练集与测试集的长度、形状</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Training set:&quot;</span>, <span class="built_in">len</span>(train_x))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Testing set:&quot;</span>, <span class="built_in">len</span>(test_x))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Training set: 60000</span><br><span class="line">Testing set: 10000</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(train_x.shape, train_x.dtype)</span><br><span class="line"><span class="built_in">print</span>(train_y.shape, train_y.dtype)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Train_x: (60000, 28, 28) : uint8</span><br><span class="line">Train_y: (60000,) uint8</span><br></pre></td></tr></table></figure>
+
+<p><strong>要会读这个形状</strong>：60000 张图片，每张 28×28；标签是 60000 个整数（0~9），数据类型为 <code>uint8</code>。</p>
+<h3 id="7-3-4-显示手写数字图片"><a href="#7-3-4-显示手写数字图片" class="headerlink" title="7.3.4 显示手写数字图片"></a>7.3.4 显示手写数字图片</h3><p><strong>输出数据集中的第 1 个样本</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line">plt.imshow(train_x[<span class="number">0</span>], cmap=<span class="string">&quot;gray&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>注意灰度取值规则：<strong>0-黑色；255-白色</strong>，数值越大，亮度越高。</p>
+<h3 id="7-3-5-例：随机显示-4-幅数字图片"><a href="#7-3-5-例：随机显示-4-幅数字图片" class="headerlink" title="7.3.5 例：随机显示 4 幅数字图片"></a>7.3.5 例：随机显示 4 幅数字图片</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">mnist = tf.keras.datasets.mnist</span><br><span class="line">(train_x, train_y), (test_x, test_y) = mnist.load_data()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">4</span>):</span><br><span class="line">    num = np.random.randint(<span class="number">1</span>, <span class="number">50000</span>)</span><br><span class="line"></span><br><span class="line">    plt.subplot(<span class="number">1</span>, <span class="number">4</span>, i + <span class="number">1</span>)</span><br><span class="line">    plt.axis(<span class="string">&quot;off&quot;</span>)</span><br><span class="line">    plt.imshow(train_x[num], cmap=<span class="string">&quot;gray&quot;</span>)</span><br><span class="line">    plt.title(train_y[num])</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>索引值是<strong>随机</strong>产生的，所以每次运行结果都会不同（<code>plt.title(train_y[num])</code> 显示的是这张图的标记）。</p>
+<hr>
+<h2 id="本讲易错点清单"><a href="#本讲易错点清单" class="headerlink" title="本讲易错点清单"></a>本讲易错点清单</h2><ol>
+<li><strong>位深度与字节换算</strong>：二值 1 位&#x2F;像素、灰度 8 位、RGB 24 位、RGBA 32 位；1 字节 &#x3D; 8 位。512×512 灰度图 &#x3D; 256 KB，RGB 则为 768 KB。</li>
+<li><strong>灰度约定</strong>：0 是黑、255 是白；做颜色反向就是 <code>255 - 像素值</code>。</li>
+<li><strong>数组维度</strong>：灰度图 → 二维数组；彩色 RGB 图 → 三维数组（第三维是 3 个通道）。</li>
+<li><strong><code>resize()</code> vs <code>thumbnail()</code></strong>：前者返回新对象、不改原图；后者<strong>原地修改</strong>且<strong>返回 None</strong>，不能写成 <code>img = img.thumbnail(...)</code>。</li>
+<li><strong><code>crop()</code> 参数顺序</strong>是 <code>(左, 上, 右, 下)</code>（左上角、右下角），别和 <code>(x, y, w, h)</code> 混淆。</li>
+<li><strong><code>matplotlib.image</code> 只支持 PNG</strong>；要处理 JPEG&#x2F;BMP&#x2F;GIF&#x2F;TIFF 等格式请用 <strong>Pillow</strong>。</li>
+<li><strong>PIL 已停止更新且只支持 Python 2</strong>，新代码请统一用 <strong>Pillow</strong>。</li>
+<li><strong>MNIST 形状</strong>：<code>train_x</code> 是 <code>(60000, 28, 28)</code>，<code>train_y</code> 是 <code>(60000,)</code>，<code>dtype=uint8</code>（取值 0~255）。</li>
+<li><strong>显示灰度图要加 <code>cmap=&quot;gray&quot;</code></strong>，否则 matplotlib 会用默认伪彩色映射，看起来颜色很怪。</li>
+<li><strong>JPEG 是有损压缩</strong>，反复编辑保存会持续掉画质；需要多次编辑的素材请用 PNG&#x2F;TIFF。</li>
+</ol>
+<hr>
+<h2 id="与后续深度学习内容的衔接"><a href="#与后续深度学习内容的衔接" class="headerlink" title="与后续深度学习内容的衔接"></a>与后续深度学习内容的衔接</h2><ul>
+<li>图像在计算机里的本质是<strong>数组</strong>：这个认知是后面所有卷积神经网络（CNN）处理图像的基础——CNN 的输入就是一个形状为 <code>(样本数, 高, 宽, 通道数)</code> 的四维张量。</li>
+<li>本次学的 <strong><code>np.array(image)</code></strong> 正是把图像”喂”给神经网络的必经一步；MNIST 则是后面手写数字识别的标准练手数据集。</li>
+</ul>
+<blockquote>
+<p>原始课件位置：<code>课件/第7讲/</code>（7.1 数字图像基本概念、7.2 Pillow图像处理库、7.3 手写数字数据集）。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/" title="第7讲 数字图像基础">http://example.com/2026/10/04/第7讲-数字图像基础/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F/" rel="tag"># 数字图像</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/" rel="prev" title="第3讲 Python语言基础（1）">
+      <i class="fa fa-chevron-left"></i> 第3讲 Python语言基础（1）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/05/%E7%AC%AC8%E8%AE%B2-TensorFlow2.0%E5%9F%BA%E7%A1%80/" rel="next" title="第8讲 TensorFlow2.0基础">
+      第8讲 TensorFlow2.0基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-7-%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80%EF%BC%88%E5%9B%BE%E5%83%8F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5-Pillow-%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.1.</span> <span class="nav-text">7.1 数字图像基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-1-%E5%9B%BE%E5%83%8F%E7%9A%84%E7%A6%BB%E6%95%A3%E5%8C%96"><span class="nav-number">1.1.1.</span> <span class="nav-text">7.1.1 图像的离散化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-2-%E5%83%8F%E7%B4%A0%E3%80%81%E4%BD%8D%E5%9B%BE%E4%B8%8E%E4%BD%8D%E6%B7%B1%E5%BA%A6"><span class="nav-number">1.1.2.</span> <span class="nav-text">7.1.2 像素、位图与位深度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-3-%E4%BA%94%E7%B1%BB%E5%B8%B8%E8%A7%81%E5%9B%BE%E5%83%8F"><span class="nav-number">1.1.3.</span> <span class="nav-text">7.1.3 五类常见图像</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%881%EF%BC%89%E4%BA%8C%E5%80%BC%E5%9B%BE%E5%83%8F%EF%BC%88Binary-Image%EF%BC%89"><span class="nav-number">1.1.3.1.</span> <span class="nav-text">（1）二值图像（Binary Image）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%882%EF%BC%89%E7%81%B0%E5%BA%A6%E5%9B%BE%E5%83%8F%EF%BC%88Gray-Image%EF%BC%89"><span class="nav-number">1.1.3.2.</span> <span class="nav-text">（2）灰度图像（Gray Image）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%883%EF%BC%89%E5%BD%A9%E8%89%B2%E5%9B%BE%E5%83%8F%EF%BC%88RGB%EF%BC%89"><span class="nav-number">1.1.3.3.</span> <span class="nav-text">（3）彩色图像（RGB）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%884%EF%BC%89RGBA-%E5%9B%BE%E5%83%8F"><span class="nav-number">1.1.3.4.</span> <span class="nav-text">（4）RGBA 图像</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%885%EF%BC%89256-%E8%89%B2%E5%BD%A9%E8%89%B2%E5%9B%BE%E5%83%8F%EF%BC%88%E8%B0%83%E8%89%B2%E6%9D%BF%E5%9B%BE%E5%83%8F%EF%BC%89"><span class="nav-number">1.1.3.5.</span> <span class="nav-text">（5）256 色彩色图像（调色板图像）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-4-%E5%9B%BE%E5%83%8F%E6%A0%BC%E5%BC%8F%E4%B8%8E%E5%9B%BE%E5%83%8F%E5%8E%8B%E7%BC%A9"><span class="nav-number">1.1.4.</span> <span class="nav-text">7.1.4 图像格式与图像压缩</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-5-%E8%89%B2%E5%BD%A9%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.1.5.</span> <span class="nav-text">7.1.5 色彩模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-1-6-%E5%9B%BE%E5%83%8F%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.6.</span> <span class="nav-text">7.1.6 图像类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-Pillow-%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86%E5%BA%93"><span class="nav-number">1.2.</span> <span class="nav-text">7.2 Pillow 图像处理库</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-Pillow"><span class="nav-number">1.2.1.</span> <span class="nav-text">7.2.1 为什么用 Pillow</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-2-%E5%AE%89%E8%A3%85%E4%B8%8E%E5%AF%BC%E5%85%A5"><span class="nav-number">1.2.2.</span> <span class="nav-text">7.2.2 安装与导入</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-3-%E6%89%93%E5%BC%80%E5%9B%BE%E5%83%8F%EF%BC%9AImage-open"><span class="nav-number">1.2.3.</span> <span class="nav-text">7.2.3 打开图像：Image.open()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-4-%E4%BF%9D%E5%AD%98%E5%9B%BE%E5%83%8F%E4%B8%8E%E6%A0%BC%E5%BC%8F%E8%BD%AC%E6%8D%A2"><span class="nav-number">1.2.4.</span> <span class="nav-text">7.2.4 保存图像与格式转换</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-5-%E5%9B%BE%E5%83%8F%E5%AF%B9%E8%B1%A1%E7%9A%84%E4%B8%BB%E8%A6%81%E5%B1%9E%E6%80%A7"><span class="nav-number">1.2.5.</span> <span class="nav-text">7.2.5 图像对象的主要属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-6-%E6%98%BE%E7%A4%BA%E5%9B%BE%E5%83%8F%EF%BC%9Aimshow"><span class="nav-number">1.2.6.</span> <span class="nav-text">7.2.6 显示图像：imshow()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-7-%E8%BD%AC%E6%8D%A2%E5%9B%BE%E5%83%8F%E7%9A%84%E8%89%B2%E5%BD%A9%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.7.</span> <span class="nav-text">7.2.7 转换图像的色彩模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-8-%E9%A2%9C%E8%89%B2%E9%80%9A%E9%81%93%E7%9A%84%E5%88%86%E7%A6%BB%E4%B8%8E%E5%90%88%E5%B9%B6"><span class="nav-number">1.2.8.</span> <span class="nav-text">7.2.8 颜色通道的分离与合并</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-9-%E5%9B%BE%E5%83%8F%E8%BD%AC-NumPy-%E6%95%B0%E7%BB%84"><span class="nav-number">1.2.9.</span> <span class="nav-text">7.2.9 图像转 NumPy 数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-10-%E7%BB%BC%E5%90%88%E4%BE%8B%EF%BC%9A%E5%9B%BE%E5%83%8F%E9%A2%9C%E8%89%B2%E5%8F%8D%E5%90%91"><span class="nav-number">1.2.10.</span> <span class="nav-text">7.2.10 综合例：图像颜色反向</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-11-%E7%BC%A9%E6%94%BE%E5%9B%BE%E5%83%8F%EF%BC%9Aresize-%E4%B8%8E-thumbnail"><span class="nav-number">1.2.11.</span> <span class="nav-text">7.2.11 缩放图像：resize() 与 thumbnail()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-12-%E6%97%8B%E8%BD%AC%E4%B8%8E%E9%95%9C%E5%83%8F%EF%BC%9Atranspose"><span class="nav-number">1.2.12.</span> <span class="nav-text">7.2.12 旋转与镜像：transpose()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-13-%E8%A3%81%E5%89%AA%E5%9B%BE%E5%83%8F%EF%BC%9Acrop"><span class="nav-number">1.2.13.</span> <span class="nav-text">7.2.13 裁剪图像：crop()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-2-%E5%B0%8F%E8%8A%82%E9%80%9F%E6%9F%A5%E8%A1%A8%EF%BC%88%E8%AF%BE%E4%BB%B6%E6%80%BB%E7%BB%93%EF%BC%89"><span class="nav-number">1.2.14.</span> <span class="nav-text">7.2 小节速查表（课件总结）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88MNIST%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">7.3 手写数字数据集（MNIST）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-1-%E6%95%B0%E6%8D%AE%E9%9B%86%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.3.1.</span> <span class="nav-text">7.3.1 数据集介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-2-%E4%B8%8B%E8%BD%BD-MNIST-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-number">1.3.2.</span> <span class="nav-text">7.3.2 下载 MNIST 数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-3-%E8%AE%AD%E7%BB%83%E9%9B%86%E4%B8%8E%E6%B5%8B%E8%AF%95%E9%9B%86%E7%9A%84%E9%95%BF%E5%BA%A6%E3%80%81%E5%BD%A2%E7%8A%B6"><span class="nav-number">1.3.3.</span> <span class="nav-text">7.3.3 训练集与测试集的长度、形状</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-4-%E6%98%BE%E7%A4%BA%E6%89%8B%E5%86%99%E6%95%B0%E5%AD%97%E5%9B%BE%E7%89%87"><span class="nav-number">1.3.4.</span> <span class="nav-text">7.3.4 显示手写数字图片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-3-5-%E4%BE%8B%EF%BC%9A%E9%9A%8F%E6%9C%BA%E6%98%BE%E7%A4%BA-4-%E5%B9%85%E6%95%B0%E5%AD%97%E5%9B%BE%E7%89%87"><span class="nav-number">1.3.5.</span> <span class="nav-text">7.3.5 例：随机显示 4 幅数字图片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E6%98%93%E9%94%99%E7%82%B9%E6%B8%85%E5%8D%95"><span class="nav-number">1.4.</span> <span class="nav-text">本讲易错点清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E%E5%90%8E%E7%BB%AD%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%86%85%E5%AE%B9%E7%9A%84%E8%A1%94%E6%8E%A5"><span class="nav-number">1.5.</span> <span class="nav-text">与后续深度学习内容的衔接</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

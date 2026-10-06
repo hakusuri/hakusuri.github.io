@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 9 讲 回归问题（机器学习基础 &#x2F; 一元与多元线性回归 &#x2F; 可视化 &#x2F; PyTorch 实现） 本讲对应课件：9.1 机器学习基础 → 9.2 一元线性回归 → 9.3 实例：解析法实现一元线性回归 → 9.4 多元线性回归 → 9.5 实例：解析法实现多元线性回归 → 9.6.1 三维数据可视化 → 9.6.2 实例：线性回归模型可视化 → 9.7.1 &amp;#x2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第9讲 回归问题（线性回归）">
+<meta property="og:url" content="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 9 讲 回归问题（机器学习基础 &#x2F; 一元与多元线性回归 &#x2F; 可视化 &#x2F; PyTorch 实现） 本讲对应课件：9.1 机器学习基础 → 9.2 一元线性回归 → 9.3 实例：解析法实现一元线性回归 → 9.4 多元线性回归 → 9.5 实例：解析法实现多元线性回归 → 9.6.1 三维数据可视化 → 9.6.2 实例：线性回归模型可视化 → 9.7.1 &amp;#x2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p05-01_992x494.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p06-01_941x467.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p04-01_675x594.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p06-01_917x597.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p07-01_518x436.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl09-regression/p08-01_615x537.jpg">
+<meta property="article:published_time" content="2026-10-06T12:46:41.000Z">
+<meta property="article:modified_time" content="2026-10-06T15:43:50.901Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="线性回归">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl09-regression/p05-01_992x494.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第9讲 回归问题（线性回归） | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第9讲 回归问题（线性回归）
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-06 20:46:41 / 修改时间：23:43:50" itemprop="dateCreated datePublished" datetime="2026-10-06T20:46:41+08:00">2026-10-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-9-讲-回归问题（机器学习基础-一元与多元线性回归-可视化-PyTorch-实现）"><a href="#第-9-讲-回归问题（机器学习基础-一元与多元线性回归-可视化-PyTorch-实现）" class="headerlink" title="第 9 讲 回归问题（机器学习基础 &#x2F; 一元与多元线性回归 &#x2F; 可视化 &#x2F; PyTorch 实现）"></a>第 9 讲 回归问题（机器学习基础 &#x2F; 一元与多元线性回归 &#x2F; 可视化 &#x2F; PyTorch 实现）</h1><blockquote>
+<p>本讲对应课件：<strong>9.1 机器学习基础 → 9.2 一元线性回归 → 9.3 实例：解析法实现一元线性回归 → 9.4 多元线性回归 → 9.5 实例：解析法实现多元线性回归 → 9.6.1 三维数据可视化 → 9.6.2 实例：线性回归模型可视化 → 9.7.1 &#x2F; 9.7.2 PyTorch 实现（解析法）</strong>。<br>这是<strong>第一个完整的机器学习项目</strong>：用最经典的”商品房房价预测”把”提出模型 → 定义损失 → 求解析解 → 预测 → 可视化”整条链路走一遍。全讲围绕两条主线——<strong>一元线性回归</strong>与<strong>多元线性回归</strong>，每种都给出 <strong>TensorFlow 版</strong>与 <strong>PyTorch 版</strong>两套实现。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>9.1 机器学习基础</td>
+<td>从数据中学习、监督&#x2F;无监督&#x2F;半监督学习、样本集&#x2F;属性&#x2F;标记、回归 vs 分类</td>
+</tr>
+<tr>
+<td>9.2 一元线性回归</td>
+<td>模型 y&#x3D;wx+b、损失函数、均方误差、最小二乘法、w 与 b 的解析解</td>
+</tr>
+<tr>
+<td>9.3 实例（TensorFlow）</td>
+<td>加载样本 → 计算 w、b → 预测房价 → 可视化</td>
+</tr>
+<tr>
+<td>9.4 多元线性回归</td>
+<td>超平面、向量&#x2F;矩阵形式、损失函数的矩阵表达、正规方程 W&#x3D;(XᵀX)⁻¹XᵀY</td>
+</tr>
+<tr>
+<td>9.5 实例（NumPy）</td>
+<td>构造增广矩阵 X、np.stack&#x2F;matmul&#x2F;transpose&#x2F;linalg.inv 求解 W、预测房价</td>
+</tr>
+<tr>
+<td>9.6.1 三维数据可视化</td>
+<td>mplot3d 工具集、Axes3D、scatter&#x2F;plot_surface&#x2F;plot_wireframe、np.meshgrid</td>
+</tr>
+<tr>
+<td>9.6.2 线性回归模型可视化</td>
+<td>用 W 画回归平面、改变视角观察、散点 + 线框图</td>
+</tr>
+<tr>
+<td>9.7.1 &#x2F; 9.7.2</td>
+<td>PyTorch 解析法实现一元&#x2F;多元线性回归（与 TensorFlow 版对照）</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="9-1-机器学习基础"><a href="#9-1-机器学习基础" class="headerlink" title="9.1 机器学习基础"></a>9.1 机器学习基础</h2><h3 id="9-1-1-从数据中学习"><a href="#9-1-1-从数据中学习" class="headerlink" title="9.1.1 从数据中学习"></a>9.1.1 从数据中学习</h3><p>课件用一句农谚开场——“日晕三更雨，月晕午时风”——引出<strong>从经验（数据）中总结规律</strong>这件事。</p>
+<p><strong>机器学习</strong>：<strong>从数据中学习</strong>的算法。以<strong>房屋销售记录</strong>为例：</p>
+<ol>
+<li><strong>建立模型</strong>：假设房价与面积之间存在某种关系；</li>
+<li><strong>学习模型</strong>：用已有的销售记录（数据）确定模型中的参数；</li>
+<li><strong>预测房价</strong>：给定新的面积，用模型算出价格。</li>
+</ol>
+<p>其中”<strong>学习算法</strong>“的定义是：<strong>从数据中产生模型的算法</strong>。</p>
+<h3 id="9-1-2-监督学习与核心术语"><a href="#9-1-2-监督学习与核心术语" class="headerlink" title="9.1.2 监督学习与核心术语"></a>9.1.2 监督学习与核心术语</h3><p><strong>监督学习（Supervised Learning）</strong>：通过对<strong>有标记</strong>数据的学习，寻找<strong>属性和标记之间的映射关系</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据集（data set）&#x2F; 样本集（sample set）</td>
+<td>全部样本的集合</td>
+</tr>
+<tr>
+<td>示例（instance）&#x2F; 样本（sample）</td>
+<td>一条记录</td>
+</tr>
+<tr>
+<td>属性（attribute）&#x2F; 特征（feature）</td>
+<td>描述样本的输入量（如房屋面积）</td>
+</tr>
+<tr>
+<td>标记 &#x2F; 标签（label）</td>
+<td>要预测的输出量（如房价）</td>
+</tr>
+<tr>
+<td>模型 &#x2F; 假设 &#x2F; 估计函数 &#x2F; 学习器（learner）</td>
+<td>学到的映射关系</td>
+</tr>
+<tr>
+<td>真相 &#x2F; 真实（ground truth）</td>
+<td>样本本来的真实输出</td>
+</tr>
+</tbody></table>
+<p>按输出类型分为两大类：</p>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>回归（regression）</strong></td>
+<td>预测<strong>连续值</strong>（本讲主题：预测房价）</td>
+</tr>
+<tr>
+<td><strong>分类（classification）</strong></td>
+<td>预测<strong>离散值</strong>（如判断是否为垃圾邮件）</td>
+</tr>
+</tbody></table>
+<h3 id="9-1-3-无监督学习与半监督学习"><a href="#9-1-3-无监督学习与半监督学习" class="headerlink" title="9.1.3 无监督学习与半监督学习"></a>9.1.3 无监督学习与半监督学习</h3><ul>
+<li><strong>无监督学习（Unsupervised Learning）</strong>：在样本数据<strong>没有标记</strong>的情况下，挖掘出<strong>内部蕴含的关系</strong>。典型任务是<strong>聚类</strong>——把<strong>相似度高</strong>的样本聚合在一起。</li>
+<li><strong>半监督学习（Semi-Supervised Learning）</strong>：将有监督学习和无监督学习相结合，综合使用<strong>大量没有标记的数据</strong>和<strong>少量有标记的数据</strong>共同进行学习。</li>
+</ul>
+<h3 id="9-1-4-机器学习的发展和应用"><a href="#9-1-4-机器学习的发展和应用" class="headerlink" title="9.1.4 机器学习的发展和应用"></a>9.1.4 机器学习的发展和应用</h3><p>课件给出”<strong>人工智能 → 机器学习 → 深度学习</strong>“的层次关系，并用多张图展示了机器学习在各行业的应用。</p>
+<hr>
+<h2 id="9-2-一元线性回归"><a href="#9-2-一元线性回归" class="headerlink" title="9.2 一元线性回归"></a>9.2 一元线性回归</h2><h3 id="9-2-1-模型"><a href="#9-2-1-模型" class="headerlink" title="9.2.1 模型"></a>9.2.1 模型</h3><p><strong>一元线性回归（Simple Linear Regression）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">y = w·x + b</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>x</code></td>
+<td>变量</td>
+<td>输入特征（如房屋面积）</td>
+</tr>
+<tr>
+<td><code>w</code></td>
+<td><strong>权重（weights）</strong></td>
+<td>直线的斜率</td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td><strong>偏置值（bias）</strong></td>
+<td>直线的截距</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td>输出</td>
+<td>预测值（如房价）</td>
+</tr>
+</tbody></table>
+<h3 id="9-2-2-最佳拟合直线：为什么要用平方"><a href="#9-2-2-最佳拟合直线：为什么要用平方" class="headerlink" title="9.2.2 最佳拟合直线：为什么要用平方"></a>9.2.2 最佳拟合直线：为什么要用平方</h3><p>最佳拟合直线应该使得所有点的<strong>残差累计值最小</strong>。课件比较了三种度量：</p>
+<table>
+<thead>
+<tr>
+<th>度量</th>
+<th>表达式</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>残差和最小</td>
+<td><code>Σ(yᵢ - yᵢ&#39;)</code></td>
+<td>正负残差会相互抵消</td>
+</tr>
+<tr>
+<td>残差绝对值和最小</td>
+<td><code>Σ&amp;#124;yᵢ - yᵢ&#39;&amp;#124;</code></td>
+<td>绝对值不便求导</td>
+</tr>
+<tr>
+<td><strong>残差平方和最小</strong></td>
+<td><code>Σ(yᵢ - yᵢ&#39;)²</code></td>
+<td>✅ 可导、无抵消</td>
+</tr>
+</tbody></table>
+<p>因此采用<strong>平方损失函数（Square Loss）</strong>。</p>
+<h3 id="9-2-3-损失函数与最小二乘法"><a href="#9-2-3-损失函数与最小二乘法" class="headerlink" title="9.2.3 损失函数与最小二乘法"></a>9.2.3 损失函数与最小二乘法</h3><ul>
+<li><strong>损失函数 &#x2F; 代价函数（cost function）</strong>：估量模型的<strong>预测值</strong>与<strong>真实值</strong>的<strong>不一致程度</strong>。</li>
+<li><strong>均方误差（Mean Square Error, MSE）</strong>：<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = Σᵢ (yᵢ - w·xᵢ - b)²</span><br></pre></td></tr></table></figure>
+（<code>yᵢ</code> 是真实值，<code>w·xᵢ + b</code> 是预测值）</li>
+<li><strong>最小二乘法</strong>：基于<strong>均方误差最小化</strong>来进行模型求解的方法。</li>
+</ul>
+<h3 id="9-2-4-解析解（核心公式）"><a href="#9-2-4-解析解（核心公式）" class="headerlink" title="9.2.4 解析解（核心公式）"></a>9.2.4 解析解（核心公式）</h3><p>问题化为<strong>求极值</strong>：<code>w, b</code> 取何值时损失函数最小？</p>
+<p>已知：样本点 <code>(xᵢ, yᵢ)</code>；未知：变量 <code>w, b</code>。</p>
+<p>对损失函数分别求 <code>w</code> 和 <code>b</code> 的偏导，并令<strong>极值点的偏导数为零</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">∂Loss/∂w = Σ 2(xᵢw + b - yᵢ)·xᵢ = 0</span><br><span class="line">∂Loss/∂b = Σ 2(xᵢw + b - yᵢ)·1   = 0</span><br></pre></td></tr></table></figure>
+
+<p>由此得到 <strong>解析解（Analytical solution）&#x2F; 封闭解（Closed-form solution）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">w = Σ(xᵢ - x̄)(yᵢ - ȳ) / Σ(xᵢ - x̄)²</span><br><span class="line"></span><br><span class="line">b = ȳ - w·x̄</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>x̄</code>、<code>ȳ</code> 分别是 <code>x</code>、<code>y</code> 的均值。这个公式本讲后面会<strong>直接用代码实现</strong>。</p>
+<hr>
+<h2 id="9-3-实例：解析法实现一元线性回归（TensorFlow-版）"><a href="#9-3-实例：解析法实现一元线性回归（TensorFlow-版）" class="headerlink" title="9.3 实例：解析法实现一元线性回归（TensorFlow 版）"></a>9.3 实例：解析法实现一元线性回归（TensorFlow 版）</h2><p>任务：用<strong>商品房销售记录</strong>（16 条）建立房价预测模型，并预测 8 组待评估房屋的价格。</p>
+<p><strong>待评估的房屋面积</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x_test = [<span class="number">128.15</span>, <span class="number">45.00</span>, <span class="number">141.43</span>, <span class="number">106.27</span>, <span class="number">99.00</span>, <span class="number">53.84</span>, <span class="number">85.36</span>, <span class="number">70.00</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-1-导入库、设置字体、加载样本数据"><a href="#9-3-1-导入库、设置字体、加载样本数据" class="headerlink" title="9.3.1 导入库、设置字体、加载样本数据"></a>9.3.1 导入库、设置字体、加载样本数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>]   <span class="comment"># 正常显示中文</span></span><br><span class="line"></span><br><span class="line">x = tf.constant([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">                 <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = tf.constant([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">                 <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-2-学习模型：计算-w-和-b"><a href="#9-3-2-学习模型：计算-w-和-b" class="headerlink" title="9.3.2 学习模型：计算 w 和 b"></a>9.3.2 学习模型：计算 w 和 b</h3><p>把 9.2 的解析解公式翻译成代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">meanX = tf.reduce_mean(x)</span><br><span class="line">meanY = tf.reduce_mean(y)</span><br><span class="line"></span><br><span class="line">sumXY = tf.reduce_sum((x - meanX) * (y - meanY))</span><br><span class="line">sumX  = tf.reduce_sum((x - meanX) * (x - meanX))</span><br><span class="line"></span><br><span class="line">w = sumXY / sumX</span><br><span class="line">b = meanY - w * meanX</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;权值w=&quot;</span>, w.numpy(), <span class="string">&quot;\n偏置值b=&quot;</span>, b.numpy())</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;线性模型:y=&quot;</span>, w.numpy(), <span class="string">&quot;*x+&quot;</span>, b.numpy())</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">权值w= 0.8945604</span><br><span class="line">偏置值b= 5.4108505</span><br><span class="line">线性模型:y= 0.8945604 *x+ 5.4108505</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>对照 9.2 的公式：<code>sumXY</code> 就是分子 <code>Σ(xᵢ-x̄)(yᵢ-ȳ)</code>，<code>sumX</code> 是分母 <code>Σ(xᵢ-x̄)²</code>，<code>b = ȳ - w·x̄</code>。<strong>没有用任何梯度下降，一步就算出了最优参数</strong>——这就是”解析法”。</p>
+</blockquote>
+<h3 id="9-3-3-预测房价"><a href="#9-3-3-预测房价" class="headerlink" title="9.3.3 预测房价"></a>9.3.3 预测房价</h3><p><img src="/images/dl/dl09-regression/p05-01_992x494.jpg" alt="第5页 预测房价运行结果"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">x_test = np.array([<span class="number">128.15</span>, <span class="number">45.00</span>, <span class="number">141.43</span>, <span class="number">106.27</span>, <span class="number">99.00</span>, <span class="number">53.84</span>, <span class="number">85.36</span>, <span class="number">70.00</span>])</span><br><span class="line">y_pred = (w * x_test + b).numpy()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;面积\t估计房价&quot;</span>)</span><br><span class="line">n = <span class="built_in">len</span>(x_test)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(n):</span><br><span class="line">    <span class="built_in">print</span>(x_test[i], <span class="string">&quot;\t&quot;</span>, <span class="built_in">round</span>(y_pred[i], <span class="number">2</span>))</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">面积    估计房价</span><br><span class="line">128.15  120.05</span><br><span class="line">45.0    45.67</span><br><span class="line">141.43  131.93</span><br><span class="line">106.27  100.48</span><br><span class="line">99.0    93.97</span><br><span class="line">53.84   53.57</span><br><span class="line">85.36   81.77</span><br><span class="line">70.0    68.03</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-3-4-数据和模型可视化"><a href="#9-3-4-数据和模型可视化" class="headerlink" title="9.3.4 数据和模型可视化"></a>9.3.4 数据和模型可视化</h3><p><img src="/images/dl/dl09-regression/p06-01_941x467.jpg" alt="第6页 数据与模型可视化"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">plt.figure()</span><br><span class="line"></span><br><span class="line">plt.scatter(x, y, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;销售记录&quot;</span>)</span><br><span class="line">plt.scatter(x_test, y_pred, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;预测房价&quot;</span>)</span><br><span class="line">plt.plot(x_test, y_pred, color=<span class="string">&quot;green&quot;</span>, label=<span class="string">&quot;拟合直线&quot;</span>, linewidth=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">plt.xlabel(<span class="string">&quot;面积（平方米）&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;价格（万元）&quot;</span>, fontsize=<span class="number">14</span>)</span><br><span class="line"></span><br><span class="line">plt.xlim((<span class="number">40</span>, <span class="number">150</span>))</span><br><span class="line">plt.ylim((<span class="number">40</span>, <span class="number">150</span>))</span><br><span class="line"></span><br><span class="line">plt.suptitle(<span class="string">&quot;商品房销售价格评估系统v1.0&quot;</span>, fontsize=<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line">plt.legend(loc=<span class="string">&quot;upper left&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>要点：<strong>红色散点</strong>是训练数据、<strong>蓝色散点</strong>是预测值、<strong>绿色直线</strong>是拟合出的回归直线；用 <code>xlim/ylim</code> 统一坐标范围便于比较。</p>
+<hr>
+<h2 id="9-4-多元线性回归"><a href="#9-4-多元线性回归" class="headerlink" title="9.4 多元线性回归"></a>9.4 多元线性回归</h2><h3 id="9-4-1-从直线到超平面"><a href="#9-4-1-从直线到超平面" class="headerlink" title="9.4.1 从直线到超平面"></a>9.4.1 从直线到超平面</h3><ul>
+<li><strong>多元回归（Multivariate Regression）</strong>：回归分析中包括<strong>两个或两个以上</strong>的自变量。</li>
+<li><strong>多元线性回归（Multivariate Linear Regression）</strong>：因变量和自变量之间是<strong>线性关系</strong>。</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">y = w₁x₁ + w₂x₂ + ... + wₘxₘ + b</span><br></pre></td></tr></table></figure>
+
+<p>它在几何上是一个<strong>超平面（Hyperplane）</strong>——<strong>直线在高维空间中的推广</strong>。</p>
+<p><strong>举例</strong>（课件用的例子）：<code>x₁</code> 面积、<code>x₂</code> 房间数、<code>x₃</code> 楼层数；取 <code>w₁=0.6</code>、<code>w₂=0.3</code>、<code>w₃=0.1</code>。</p>
+<h3 id="9-4-2-向量与矩阵形式（关键技巧）"><a href="#9-4-2-向量与矩阵形式（关键技巧）" class="headerlink" title="9.4.2 向量与矩阵形式（关键技巧）"></a>9.4.2 向量与矩阵形式（关键技巧）</h3><p><strong>令 <code>b = w₀</code>、<code>x₀ = 1</code></strong>（这个”凑 1”的技巧是后面构造增广矩阵的关键）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">y = w₀x₀ + w₁x₁ + ... + wₘxₘ = X·W</span><br><span class="line"></span><br><span class="line">W = (w₀, w₁, ..., wₘ)ᵀ        # 参数向量，(m+1) 维</span><br><span class="line">X = (x₀, x₁, ..., xₘ)ᵀ        # 一个样本，         (m+1) 维</span><br></pre></td></tr></table></figure>
+
+<p>对第 <code>i</code> 个样本：<code>yᵢ = Xᵢ·W</code>，损失函数为：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = Σᵢ (yᵢ - Xᵢ·W)²</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-4-3-损失函数的矩阵表达"><a href="#9-4-3-损失函数的矩阵表达" class="headerlink" title="9.4.3 损失函数的矩阵表达"></a>9.4.3 损失函数的矩阵表达</h3><p>把所有样本堆起来：<code>X</code> 为 <code>n×(m+1)</code> 的矩阵（<code>X = (X₁, X₂, ..., Xₙ)ᵀ</code>），<code>Y</code> 为 <code>n</code> 维向量：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = (Y - XW)ᵀ(Y - XW)</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-4-4-求最小：正规方程"><a href="#9-4-4-求最小：正规方程" class="headerlink" title="9.4.4 求最小：正规方程"></a>9.4.4 求最小：正规方程</h3><p>求 <code>argmin Loss</code>（<code>argmin</code> 表示”函数取最小值时自变量的取值”）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">∂Loss/∂W = -2Xᵀ(Y - XW) = 0</span><br><span class="line">⟹ XᵀXW = XᵀY</span><br><span class="line">⟹ W = (XᵀX)⁻¹XᵀY        （当 XᵀX 为满秩矩阵时）</span><br></pre></td></tr></table></figure>
+
+<p><strong>这个公式就是多元线性回归的解析解</strong>，代码里只需三步：算 <code>XᵀX</code> → 求逆 → 乘 <code>Xᵀ</code> 和 <code>Y</code>。</p>
+<h3 id="9-4-5-换个角度看：线性方程组"><a href="#9-4-5-换个角度看：线性方程组" class="headerlink" title="9.4.5 换个角度看：线性方程组"></a>9.4.5 换个角度看：线性方程组</h3><p><code>n</code> 个样本、<code>m</code> 个属性时，展开就是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">w₀ + w₁x₁₁ + w₂x₂₁ + ... = y₁</span><br><span class="line">w₀ + w₁x₁₂ + w₂x₂₂ + ... = y₂</span><br><span class="line">...</span><br><span class="line">w₀ + w₁x₁ₙ + w₂x₂ₙ + ... = yₙ</span><br></pre></td></tr></table></figure>
+
+<p>即 <code>XW = Y</code> 的矩阵形式，与上面的损失函数、正规方程一一对应。</p>
+<h3 id="9-4-6-补充：向量、矩阵与多维数组"><a href="#9-4-6-补充：向量、矩阵与多维数组" class="headerlink" title="9.4.6 补充：向量、矩阵与多维数组"></a>9.4.6 补充：向量、矩阵与多维数组</h3><ul>
+<li><strong>n 维向量</strong>：向量中元素个数为 <code>n</code>。<code>(1,2,3)</code> 是 3 维向量；<code>(1,2,3,4,5)</code> 是 5 维向量；<code>(1,2,...,n)</code> 是 <code>n</code> 维向量；</li>
+<li><code>X = (x₀, x₁, ..., xₘ)ᵀ</code> 是 <strong><code>m+1</code> 维向量</strong>；</li>
+<li><strong>矩阵</strong>：由 <code>m×n</code> 个数排成的 <strong><code>m</code> 行 <code>n</code> 列</strong>的数表；</li>
+<li>多维数组（TensorFlow &#x2F; NumPy 中）：轴（axis）从 0 开始编号。</li>
+</ul>
+<hr>
+<h2 id="9-5-实例：解析法实现多元线性回归（NumPy-版）"><a href="#9-5-实例：解析法实现多元线性回归（NumPy-版）" class="headerlink" title="9.5 实例：解析法实现多元线性回归（NumPy 版）"></a>9.5 实例：解析法实现多元线性回归（NumPy 版）</h2><p>任务：用<strong>房屋面积</strong>和<strong>房间数</strong>两个属性预测房价。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">待评估数据：面积 x₁_test、房间数 x₂_test</span><br><span class="line">学习模型：计算 W</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-5-1-加载样本数据"><a href="#9-5-1-加载样本数据" class="headerlink" title="9.5.1 加载样本数据"></a>9.5.1 加载样本数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">x1 = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">               <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">x2 = np.array([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">y  = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">               <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line">x1.shape, x2.shape, y.shape</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">((16,), (16,), (16,))</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-5-2-数据处理：构造增广矩阵-X"><a href="#9-5-2-数据处理：构造增广矩阵-X" class="headerlink" title="9.5.2 数据处理：构造增广矩阵 X"></a>9.5.2 数据处理：构造增广矩阵 X</h3><p><img src="/images/dl/dl09-regression/p04-01_675x594.jpg" alt="第4页 构造增广矩阵 X"></p>
+<p>按 9.4.2 的”<code>x₀ = 1</code>、<code>b = w₀</code> “技巧，把一列 1、<code>x1</code>、<code>x2</code> 堆叠起来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x0 = np.ones(<span class="built_in">len</span>(x1))</span><br><span class="line">X = np.stack((x0, x1, x2), axis=<span class="number">1</span>)   <span class="comment"># 按列堆叠成 16×3 的矩阵</span></span><br><span class="line">X</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">array([[  1.  , 137.97,   3.  ],</span><br><span class="line">       [  1.  , 104.5 ,   2.  ],</span><br><span class="line">       [  1.  , 100.  ,   2.  ],</span><br><span class="line">       ...</span><br><span class="line">       [  1.  ,  86.21,   2.  ]])</span><br></pre></td></tr></table></figure>
+
+<p>形状关系（要会读）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">X: n×(m+1) = 16×3      W: (m+1)×1 = 3×1      Y: n×1 = 16×1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>np.ones(len(x1))</code>：生成 16 个 1；</li>
+<li><code>np.stack(..., axis=1)</code>：<strong>按列</strong>堆叠（<code>axis=0</code> 是按行堆叠）。</li>
+</ul>
+<h3 id="9-5-3-求解模型参数-W"><a href="#9-5-3-求解模型参数-W" class="headerlink" title="9.5.3 求解模型参数 W"></a>9.5.3 求解模型参数 W</h3><p><img src="/images/dl/dl09-regression/p06-01_917x597.jpg" alt="第6页 求解 W 与回归方程"></p>
+<p>把 <code>W = (XᵀX)⁻¹XᵀY</code> 逐项翻译成 NumPy：</p>
+<table>
+<thead>
+<tr>
+<th>数学符号</th>
+<th>NumPy 函数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Xᵀ</code></td>
+<td><code>np.transpose()</code></td>
+</tr>
+<tr>
+<td><code>XᵀX</code></td>
+<td><code>np.matmul()</code></td>
+</tr>
+<tr>
+<td><code>(·)⁻¹</code></td>
+<td><code>np.linalg.inv()</code></td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Xt = np.transpose(X)                    <span class="comment"># 计算 X&#x27;</span></span><br><span class="line">XtX_1 = np.linalg.inv(np.matmul(Xt, X)) <span class="comment"># 计算 (X&#x27;X)^-1</span></span><br><span class="line">XtX_1_Xt = np.matmul(XtX_1, Xt)         <span class="comment"># 计算 (X&#x27;X)^-1 X&#x27;</span></span><br><span class="line">W = np.matmul(XtX_1_Xt, Y)              <span class="comment"># W = ((X&#x27;X)^-1) X&#x27;Y</span></span><br><span class="line">W</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">array([[11.96729093],</span><br><span class="line">       [ 0.53488599],</span><br><span class="line">       [14.33150378]])</span><br></pre></td></tr></table></figure>
+
+<p>把 <code>W</code> 压成一维（便于按索引取参数）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W = W.reshape(-<span class="number">1</span>)</span><br><span class="line">W</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">array([11.96729093,  0.53488599, 14.33150378])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;多元线性回归方程：&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Y=&quot;</span>, W[<span class="number">1</span>], <span class="string">&quot;*x1+&quot;</span>, W[<span class="number">2</span>], <span class="string">&quot;*x2+&quot;</span>, W[<span class="number">0</span>])</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">多元线性回归方程：</span><br><span class="line">Y= 0.5348859949724747 *x1+ 14.33150377673149 *x2+ 11.967290930535732</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>即：<code>Y = 0.5349·面积 + 14.3315·房间数 + 11.9673</code>。注意 <code>W[0]</code> 就是偏置 <code>b</code>（对应 <code>x₀=1</code>）。</p>
+</blockquote>
+<h3 id="9-5-4-预测房价"><a href="#9-5-4-预测房价" class="headerlink" title="9.5.4 预测房价"></a>9.5.4 预测房价</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;请输入房屋面积和房间数，预测房屋销售价格：&quot;</span>)</span><br><span class="line">x1_test = <span class="built_in">float</span>(<span class="built_in">input</span>(<span class="string">&quot;商品房面积:&quot;</span>))</span><br><span class="line">x2_test = <span class="built_in">int</span>(<span class="built_in">input</span>(<span class="string">&quot;房间数: &quot;</span>))</span><br><span class="line"></span><br><span class="line">y_pred = W[<span class="number">1</span>]*x1_test + W[<span class="number">2</span>]*x2_test + W[<span class="number">0</span>]</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;预测价格：&quot;</span>, <span class="built_in">round</span>(y_pred, <span class="number">2</span>), <span class="string">&quot;万元&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">请输入房屋面积和房间数，预测房屋销售价格：</span><br><span class="line">商品房面积:140</span><br><span class="line">房间数: 3</span><br><span class="line">预测价格： 129.85 万元</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-5-5-NumPy-数组运算函数小结（课件表）"><a href="#9-5-5-NumPy-数组运算函数小结（课件表）" class="headerlink" title="9.5.5 NumPy 数组运算函数小结（课件表）"></a>9.5.5 NumPy 数组运算函数小结（课件表）</h3><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>函数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数组&#x2F;矩阵堆叠</td>
+<td><code>np.stack()</code></td>
+</tr>
+<tr>
+<td>改变数组形状</td>
+<td><code>np.reshape()</code></td>
+</tr>
+<tr>
+<td>矩阵相乘</td>
+<td><code>np.matmul()</code></td>
+</tr>
+<tr>
+<td>矩阵转置</td>
+<td><code>np.transpose()</code></td>
+</tr>
+<tr>
+<td>矩阵求逆</td>
+<td><code>np.linalg.inv()</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="9-6-1-三维数据可视化"><a href="#9-6-1-三维数据可视化" class="headerlink" title="9.6.1 三维数据可视化"></a>9.6.1 三维数据可视化</h2><h3 id="9-6-1-1-mplot3d-工具集"><a href="#9-6-1-1-mplot3d-工具集" class="headerlink" title="9.6.1.1 mplot3d 工具集"></a>9.6.1.1 mplot3d 工具集</h3><ul>
+<li><strong>mplot3d</strong> 用于<strong>绘制三维图形</strong>，<strong>内置于 Matplotlib</strong>；</li>
+<li>涉及两个对象：<strong>Figure 对象</strong>（画布）与 <strong>Axes3d 对象</strong>（三维坐标系）。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-6-1-2-绘制三维散点图"><a href="#9-6-1-2-绘制三维散点图" class="headerlink" title="9.6.1.2 绘制三维散点图"></a>9.6.1.2 绘制三维散点图</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x = np.random.uniform(<span class="number">10</span>, <span class="number">40</span>, <span class="number">30</span>)</span><br><span class="line">y = np.random.uniform(<span class="number">100</span>, <span class="number">200</span>, <span class="number">30</span>)</span><br><span class="line">z = np.random.uniform(<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>)</span><br><span class="line"></span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = Axes3D(fig)</span><br><span class="line">ax3d.scatter(x, y, z, c=<span class="string">&#x27;b&#x27;</span>, marker=<span class="string">&quot;*&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>要点：<strong>先 <code>fig = plt.figure()</code> 建画布，再 <code>Axes3D(fig)</code> 建三维坐标系</strong>，之后所有绘图都调 <code>ax3d</code> 的方法（而不是 <code>plt</code> 的）。</p>
+<h3 id="9-6-1-3-网格点坐标矩阵：np-meshgrid"><a href="#9-6-1-3-网格点坐标矩阵：np-meshgrid" class="headerlink" title="9.6.1.3 网格点坐标矩阵：np.meshgrid()"></a>9.6.1.3 网格点坐标矩阵：np.meshgrid()</h3><p><img src="/images/dl/dl09-regression/p07-01_518x436.jpg" alt="第7页 np.meshgrid() 生成网格点坐标矩阵"></p>
+<p>画曲面必须先把 <code>x</code>、<code>y</code> 的所有组合铺成”网格”：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>]</span><br><span class="line">y = [<span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]</span><br><span class="line">X, Y = np.meshgrid(x, y)</span><br><span class="line">X</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">array([[1, 2, 3, 4],</span><br><span class="line">       [1, 2, 3, 4],</span><br><span class="line">       [1, 2, 3, 4]])</span><br><span class="line"></span><br><span class="line">Y</span><br><span class="line">array([[4, 4, 4, 4],</span><br><span class="line">       [5, 5, 5, 5],</span><br><span class="line">       [6, 6, 6, 6]])</span><br></pre></td></tr></table></figure>
+
+<p>即得到 3×4 个网格点：<code>(1,4) (2,4) (3,4) (4,4) / (1,5) ... / (1,6) ...</code>。</p>
+<h3 id="9-6-1-4-绘制平面图：plot-surface"><a href="#9-6-1-4-绘制平面图：plot-surface" class="headerlink" title="9.6.1.4 绘制平面图：plot_surface()"></a>9.6.1.4 绘制平面图：plot_surface()</h3><p><img src="/images/dl/dl09-regression/p08-01_615x537.jpg" alt="第8页 plot_surface 绘制平面 z&#x3D;2x+y"></p>
+<p>以 <code>z = 2x + y</code> 为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">1</span>, <span class="number">5</span>)          <span class="comment"># [1 2 3 4]</span></span><br><span class="line">y = np.arange(<span class="number">1</span>, <span class="number">5</span>)</span><br><span class="line">X, Y = np.meshgrid(x, y)     <span class="comment"># X.shape, Y.shape -&gt; (4, 4)</span></span><br><span class="line">Z = <span class="number">2</span> * X + Y                <span class="comment"># Z.shape -&gt; (4, 4)</span></span><br><span class="line"></span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = Axes3D(fig)</span><br><span class="line">ax3d.plot_surface(X, Y, Z, cmap=<span class="string">&quot;rainbow&quot;</span>)</span><br><span class="line">ax3d.set_xlabel(<span class="string">&#x27;X&#x27;</span>)</span><br><span class="line">ax3d.set_ylabel(<span class="string">&#x27;Y&#x27;</span>)</span><br><span class="line">ax3d.set_zlabel(<span class="string">&#x27;Z=2X+Y&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>用更密的网格 + 颜色条：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">x = np.arange(<span class="number">0</span>, <span class="number">10</span>, <span class="number">0.1</span>)</span><br><span class="line">y = np.arange(<span class="number">0</span>, <span class="number">10</span>, <span class="number">0.1</span>)</span><br><span class="line">X, Y = np.meshgrid(x, y)</span><br><span class="line">Z = <span class="number">2</span>*X + Y                  <span class="comment"># Z.shape -&gt; (100, 100)</span></span><br><span class="line"></span><br><span class="line">fig = plt.figure()</span><br><span class="line">ax3d = Axes3D(fig)</span><br><span class="line">surf = ax3d.plot_surface(X, Y, Z, cmap=<span class="string">&quot;rainbow&quot;</span>)</span><br><span class="line">fig.colorbar(surf, shrink=<span class="number">0.5</span>, aspect=<span class="number">5</span>)</span><br><span class="line">ax3d.set_xlabel(<span class="string">&#x27;X&#x27;</span>)</span><br><span class="line">ax3d.set_ylabel(<span class="string">&#x27;Y&#x27;</span>)</span><br><span class="line">ax3d.set_zlabel(<span class="string">&#x27;Z=2X+Y&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>plot_surface()</code> 绘制<strong>平面&#x2F;曲面图</strong>；<code>fig.colorbar()</code> 给高度加颜色条。</p>
+</blockquote>
+<h3 id="9-6-1-5-绘制线框图：plot-wireframe"><a href="#9-6-1-5-绘制线框图：plot-wireframe" class="headerlink" title="9.6.1.5 绘制线框图：plot_wireframe()"></a>9.6.1.5 绘制线框图：plot_wireframe()</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ax3d.plot_wireframe(X, Y, Z)</span><br></pre></td></tr></table></figure>
+
+<p><code>plot_wireframe()</code> 只画网格线（不填充面），适合看曲面的骨架结构。课件最后还演示了曲面 <code>z = x + sin(y)</code> 的<strong>曲面图</strong>与<strong>曲面线框图</strong>。</p>
+<hr>
+<h2 id="9-6-2-实例：线性回归模型可视化"><a href="#9-6-2-实例：线性回归模型可视化" class="headerlink" title="9.6.2 实例：线性回归模型可视化"></a>9.6.2 实例：线性回归模型可视化</h2><p>把 9.5 求出的 <code>W</code> 代进回归方程，在三维空间里把<strong>回归平面</strong>画出来。</p>
+<h3 id="9-6-2-1-加载数据与模型参数"><a href="#9-6-2-1-加载数据与模型参数" class="headerlink" title="9.6.2.1 加载数据与模型参数"></a>9.6.2.1 加载数据与模型参数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> mpl_toolkits.mplot3d <span class="keyword">import</span> Axes3D</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">x1 = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">               <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">x2 = np.array([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">y  = np.array([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">               <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line">W = np.array([<span class="number">11.96729093</span>, <span class="number">0.53488599</span>, <span class="number">14.33150378</span>])</span><br><span class="line">y_pred = W[<span class="number">1</span>]*x1 + W[<span class="number">2</span>]*x2 + W[<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-6-2-2-绘制散点图与回归平面"><a href="#9-6-2-2-绘制散点图与回归平面" class="headerlink" title="9.6.2.2 绘制散点图与回归平面"></a>9.6.2.2 绘制散点图与回归平面</h3><ul>
+<li>先画<strong>三维散点图</strong>：横轴面积 <code>x1</code>、纵轴房间数 <code>x2</code>、竖轴价格 <code>y</code>；</li>
+<li>再用 <code>np.meshgrid()</code> 生成 <code>x1</code>、<code>x2</code> 的网格，按回归方程算出对应的 <code>Z</code>，用 <code>plot_surface()</code> 画出<strong>回归平面</strong>；</li>
+<li>用 <code>ax3d.view_init(elev, azim)</code> <strong>改变视角</strong>（仰角与方位角），从不同角度观察数据点与平面的贴合程度；</li>
+<li>最后可以把<strong>散点图</strong>和<strong>线框图</strong>（<code>plot_wireframe()</code>）叠在一起看。</li>
+</ul>
+<hr>
+<h2 id="9-7-1-PyTorch-实现一元线性回归（解析法）"><a href="#9-7-1-PyTorch-实现一元线性回归（解析法）" class="headerlink" title="9.7.1 PyTorch 实现一元线性回归（解析法）"></a>9.7.1 PyTorch 实现一元线性回归（解析法）</h2><blockquote>
+<p>本节是 9.3 的 <strong>PyTorch 版</strong>，题目、样本数据、解析解公式完全一样，区别只在 API。</p>
+</blockquote>
+<h3 id="9-7-1-1-PyTorch-与-TensorFlow-类似函数对照（课件表）"><a href="#9-7-1-1-PyTorch-与-TensorFlow-类似函数对照（课件表）" class="headerlink" title="9.7.1.1 PyTorch 与 TensorFlow 类似函数对照（课件表）"></a>9.7.1.1 PyTorch 与 TensorFlow 类似函数对照（课件表）</h3><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>PyTorch</th>
+<th>TensorFlow</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>创建张量</td>
+<td><code>torch.tensor()</code></td>
+<td><code>tf.constant()</code></td>
+</tr>
+<tr>
+<td>求平均值</td>
+<td><code>torch.mean()</code></td>
+<td><code>tf.mean()</code></td>
+</tr>
+<tr>
+<td>求和</td>
+<td><code>torch.sum()</code></td>
+<td><code>tf.sum()</code></td>
+</tr>
+</tbody></table>
+<h3 id="9-7-1-2-实现步骤"><a href="#9-7-1-2-实现步骤" class="headerlink" title="9.7.1.2 实现步骤"></a>9.7.1.2 实现步骤</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">plt.rcParams[<span class="string">&#x27;font.sans-serif&#x27;</span>] = [<span class="string">&#x27;SimHei&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">x = torch.tensor([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">                  <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = torch.tensor([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">                  <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br><span class="line"></span><br><span class="line">meanX = torch.mean(x)</span><br><span class="line">meanY = torch.mean(y)</span><br><span class="line">sumXY = torch.<span class="built_in">sum</span>((x - meanX) * (y - meanY))</span><br><span class="line">sumX  = torch.<span class="built_in">sum</span>((x - meanX) * (x - meanX))</span><br><span class="line"></span><br><span class="line">w = sumXY / sumX</span><br><span class="line">b = meanY - w * meanX</span><br></pre></td></tr></table></figure>
+
+<p>运行结果（与 TensorFlow 版完全一致）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">权值w= 0.8945604</span><br><span class="line">偏置值b= 5.4108505</span><br><span class="line">线性模型y= 0.8945604 *x+ 5.4108505</span><br></pre></td></tr></table></figure>
+
+<p>预测房价时输出的是 <strong>tensor 形式</strong>（TensorFlow 版由于用了 <code>.numpy()</code>，显示为普通数组）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">面积        预测房价</span><br><span class="line">tensor(128.1500)   120.05</span><br><span class="line">tensor(45.)        45.67</span><br><span class="line">tensor(141.4300)   131.93</span><br><span class="line">tensor(106.2700)   100.48</span><br><span class="line">tensor(99.)        93.97</span><br><span class="line">tensor(53.8400)    53.57</span><br><span class="line">tensor(85.3600)    81.77</span><br><span class="line">tensor(70.)        68.03</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-7-1-3-代码还原的字符级核对（已核对）"><a href="#9-7-1-3-代码还原的字符级核对（已核对）" class="headerlink" title="9.7.1.3 代码还原的字符级核对（已核对）"></a>9.7.1.3 代码还原的字符级核对（已核对）</h3><blockquote>
+<p>⚠️ 重要：这种”小写字母丢失”是<strong>逐 PDF 各自不同</strong>的字体问题——第 8 讲的 8.7.1<del>8.7.5 <strong>完整保留</strong>了大小写代码，而 9.7.1、9.7.2 与第 10 讲的 10.7.2</del>10.7.5 则<strong>丢失</strong>（判定表见 <code>.tools/README.md</code>）。因此本节代码只能靠结构核对 + 语义还原。</p>
+</blockquote>
+<p>课件 9.7.1 是”文字型 PDF”，其代码字体<strong>没有小写字母的字形映射</strong>（抽取时小写字母整体丢失，只留下大写字母、数字和 <code>_</code> <code>.</code> <code>=</code> <code>(</code> <code>)</code> <code>[</code> <code>,</code> <code>*</code> <code>/</code> <code>&#39;</code>）。因此<strong>小写字母只能靠语义推断</strong>；而<strong>结构、变量大小写、下标、数字、符号是可以逐字符核对的</strong>。核对结果：</p>
+<table>
+<thead>
+<tr>
+<th>课件抽取到的”骨架”</th>
+<th>还原后的代码</th>
+<th>核对结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>=     .      ([137.97,</code></td>
+<td><code>x = torch.tensor([137.97, ...])</code></td>
+<td>✅ 小写部分为 <code>torch.tensor</code>（T→torch 由本页表格 “创建张量 torch.tensor()” 印证）</td>
+</tr>
+<tr>
+<td><code>=     .      ([145.00,</code></td>
+<td><code>y = torch.tensor([145.00, ...])</code></td>
+<td>✅ 同上</td>
+</tr>
+<tr>
+<td><code>(    X)</code></td>
+<td><code>(x - meanX)</code></td>
+<td>⚠️ 只留下括号与 <code>X</code>，无法确认是 <code>meanX</code> 还是 <code>x.mean()</code></td>
+</tr>
+<tr>
+<td><code>=     .   (( -    X)*( -    Y))</code></td>
+<td><code>sumXY = torch.sum((x - meanX)*(y - meanY))</code></td>
+<td>✅ 变量大小写（X&#x2F;Y）与符号完全对应</td>
+</tr>
+<tr>
+<td><code>=     .   (( -    X)*( -    X))</code></td>
+<td><code>sumX = torch.sum((x - meanX)*(x - meanX))</code></td>
+<td>✅ 同上</td>
+</tr>
+<tr>
+<td><code>=   XY/   X</code></td>
+<td><code>w = sumXY / sumX</code></td>
+<td>✅ 左右两侧的 <code>XY</code>&#x2F;<code>X</code> 与上一行变量名对应（中间的空洞即小写字母）</td>
+</tr>
+<tr>
+<td><code>=    Y- *    X</code></td>
+<td><code>b = meanY - w * meanX</code></td>
+<td>✅ <code>Y</code>、<code>*</code>、<code>X</code> 的位置完全一致</td>
+</tr>
+</tbody></table>
+<p><strong>遗留的 3 处不确定</strong>（不影响运行结果）：</p>
+<ol>
+<li><strong>均值变量名</strong>：9.3 的 TensorFlow 版用的是 <code>meanX/meanY</code>，但 9.7.1 的抽取结果里 “3 计算w和b” 上方只剩 <code>XY</code>、<code>(    X)</code> 等碎片，无法确认是 <code>meanX</code> 还是 <code>x.mean()</code> 这类写法；</li>
+<li><strong>导入段</strong>：抽取到 <code>.  P     [&#39;    .    -     &#39;]</code> 与 <code>=[&#39;S  H  &#39;]</code>，对应 <code>plt.rcParams[&#39;font.sans-serif&#39;] = [&#39;SimHei&#39;]</code>（<code>SimHei</code> 与 <code>font.sans-serif</code> 的字母数吻合）；但同段若还有 <code>np.random.seed(...)</code> 之类的行，则属于丢失后无法察觉的内容；</li>
+<li><strong>预测段的打印格式</strong>：运行结果是 <code>tensor(128.1500)</code> 这种<strong>张量直接打印</strong>的样式，说明代码里保留了张量、没有调用 <code>.numpy()</code>；具体是在 <code>print</code> 里直接传张量还是先 <code>y_pred = w*x_test + b</code>——<strong>代码结构一致</strong>。</li>
+</ol>
+<blockquote>
+<p>结论：<strong>本节的代码可放心使用</strong>——所有 API 名称、参数、数值、索引（<code>W[1]/W[2]/W[0]</code>）都来自课件的完好字符，只有少数变量名有命名风格上的差异。</p>
+</blockquote>
+<hr>
+<h2 id="9-7-2-PyTorch-实现多元线性回归（解析法）"><a href="#9-7-2-PyTorch-实现多元线性回归（解析法）" class="headerlink" title="9.7.2 PyTorch 实现多元线性回归（解析法）"></a>9.7.2 PyTorch 实现多元线性回归（解析法）</h2><blockquote>
+<p>本节是 9.5 的 <strong>PyTorch 版</strong>，用面积与房间数两个属性预测房价。</p>
+</blockquote>
+<h3 id="9-7-2-1-导入与数据"><a href="#9-7-2-1-导入与数据" class="headerlink" title="9.7.2.1 导入与数据"></a>9.7.2.1 导入与数据</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line">os.environ[<span class="string">&#x27;KMP_DUPLICATE_LIB_OK&#x27;</span>] = <span class="string">&#x27;TRUE&#x27;</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"></span><br><span class="line">x1 = torch.tensor([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">124.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">                   <span class="number">106.69</span>, <span class="number">138.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">x2 = torch.tensor([<span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>])</span><br><span class="line">y  = torch.tensor([<span class="number">145.00</span>, <span class="number">110.00</span>, <span class="number">93.00</span>, <span class="number">116.00</span>, <span class="number">65.32</span>, <span class="number">104.00</span>, <span class="number">118.00</span>, <span class="number">91.00</span>,</span><br><span class="line">                   <span class="number">62.00</span>, <span class="number">133.00</span>, <span class="number">51.00</span>, <span class="number">45.00</span>, <span class="number">78.50</span>, <span class="number">69.65</span>, <span class="number">75.69</span>, <span class="number">95.30</span>])</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-7-2-2-数据处理与求解-W"><a href="#9-7-2-2-数据处理与求解-W" class="headerlink" title="9.7.2.2 数据处理与求解 W"></a>9.7.2.2 数据处理与求解 W</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">x0 = torch.ones(<span class="built_in">len</span>(x1))</span><br><span class="line">X = torch.stack((x0, x1, x2), dim=<span class="number">1</span>)      <span class="comment"># 16×3</span></span><br><span class="line">Y = y.reshape(-<span class="number">1</span>, <span class="number">1</span>)                      <span class="comment"># 16×1</span></span><br><span class="line"></span><br><span class="line">Xt = torch.transpose(X, <span class="number">0</span>, <span class="number">1</span>)             <span class="comment"># X&#x27;</span></span><br><span class="line">XtX_1 = torch.inverse(torch.matmul(Xt, X))<span class="comment"># (X&#x27;X)^-1</span></span><br><span class="line">XtX_1_Xt = torch.matmul(XtX_1, Xt)        <span class="comment"># (X&#x27;X)^-1 X&#x27;</span></span><br><span class="line">W = torch.matmul(XtX_1_Xt, Y)             <span class="comment"># W = ((X&#x27;X)^-1) X&#x27;Y</span></span><br><span class="line">W = W.reshape(-<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;多元线性回归方程：&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Y=&quot;</span>, W[<span class="number">1</span>].item(), <span class="string">&quot;*x1+&quot;</span>, W[<span class="number">2</span>].item(), <span class="string">&quot;*x2+&quot;</span>, W[<span class="number">0</span>].item())</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">多元线性回归方程：</span><br><span class="line">Y= 0.5348885 *x1+ 14.331184 *x2+ 11.967243</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>与 9.5 的 NumPy 版结果一致（末位差异来自浮点精度）。<strong>PyTorch 中取标量值要用 <code>.item()</code></strong>，对应 TensorFlow 的 <code>.numpy()</code>。</p>
+</blockquote>
+<h3 id="9-7-2-3-预测房价"><a href="#9-7-2-3-预测房价" class="headerlink" title="9.7.2.3 预测房价"></a>9.7.2.3 预测房价</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;请输入房屋面积和房间数，预测房屋销售价格：&quot;</span>)</span><br><span class="line">x1_test = <span class="built_in">float</span>(<span class="built_in">input</span>(<span class="string">&quot;商品房面积：&quot;</span>))</span><br><span class="line">x2_test = <span class="built_in">int</span>(<span class="built_in">input</span>(<span class="string">&quot;房间数：&quot;</span>))</span><br><span class="line"></span><br><span class="line">y_pred = W[<span class="number">1</span>].item()*x1_test + W[<span class="number">2</span>].item()*x2_test + W[<span class="number">0</span>].item()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;预测价格：&quot;</span>, <span class="built_in">round</span>(y_pred, <span class="number">2</span>), <span class="string">&quot;万元&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">请输入房屋面积和房间数，预测房屋销售价格：</span><br><span class="line">商品房房面积：90</span><br><span class="line">房间数：2</span><br><span class="line">预测价格： 88.77 万元</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="9-7-2-4-代码还原的字符级核对（已核对）"><a href="#9-7-2-4-代码还原的字符级核对（已核对）" class="headerlink" title="9.7.2.4 代码还原的字符级核对（已核对）"></a>9.7.2.4 代码还原的字符级核对（已核对）</h3><p>与 9.7.1 同样的问题（小写字母丢失），但 9.7.2 的抽取结果里<strong>保留了更多完好字符</strong>，可以逐行核对：</p>
+<table>
+<thead>
+<tr>
+<th>课件抽取到的”骨架”</th>
+<th>还原后的代码</th>
+<th>核对结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.       [&#39;KMP_DUPLICATE_LIB_OK&#39;]=&#39;T   &#39;</code></td>
+<td><code>os.environ[&#39;KMP_DUPLICATE_LIB_OK&#39;] = &#39;TRUE&#39;</code></td>
+<td>✅ 键名与 <code>&#39;T...&#39;</code>（TRUE）完全对应</td>
+</tr>
+<tr>
+<td><code>=     .      ([137.97, ...])</code></td>
+<td><code>x1 = torch.tensor([...])</code></td>
+<td>✅ T→torch（与 9.7.1 同）</td>
+</tr>
+<tr>
+<td><code>=     .      ([3,2,2,3,...])</code></td>
+<td><code>x2 = torch.tensor([...])</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>0=     .    (   ( 1))</code></td>
+<td><code>x0 = torch.ones(len(x1))</code></td>
+<td>✅ <code>0</code>、<code>(</code>、<code>1</code> 的位置说明是 <code>len(x1)</code>（若为 <code>x1.size()</code> 则括号结构不同）</td>
+</tr>
+<tr>
+<td><code>X=     .     (( 0, 1, 2),</code> + <code>=1)</code></td>
+<td><code>X = torch.stack((x0, x1, x2), dim=1)</code></td>
+<td>✅ 变量序号 <code>0/1/2</code>、参数关键字以 <code>=1</code> 结尾（对应 <code>dim=1</code>）完全对应</td>
+</tr>
+<tr>
+<td><code>Y=     .      ( ).       (-1,1)</code></td>
+<td><code>Y = y.reshape(-1, 1)</code></td>
+<td>✅ <code>(-1,1)</code> 参数完全可见</td>
+</tr>
+<tr>
+<td><code>X =     .         (X,</code> + <code>0,</code> + <code>1)</code></td>
+<td><code>Xt = torch.transpose(X, 0, 1)</code></td>
+<td>✅ 三个参数 <code>X, 0, 1</code> 逐字可见</td>
+</tr>
+<tr>
+<td><code>=     .      .   (  .      (X ,X))</code></td>
+<td><code>XtX_1 = torch.inverse(torch.matmul(Xt, X))</code></td>
+<td>✅ <strong>两个连续点号</strong>说明是”两次方法调用”，与 <code>torch.inverse(torch.matmul(...))</code> 结构吻合；<code>(X ,X)</code> 即 <code>(Xt, X)</code></td>
+</tr>
+<tr>
+<td><code>=     .      (X X_1,X )</code></td>
+<td><code>XtX_1_Xt = torch.matmul(XtX_1, Xt)</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>W=     .      (X X_1_X ,Y)</code></td>
+<td><code>W = torch.matmul(XtX_1_Xt, Y)</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>#W=((X&#39;X)-1)X&#39;Y</code></td>
+<td>课件自带的行内注释</td>
+<td>✅ <strong>原样可见</strong>（这句注释本身不含小写字母，所以完整保留下来，正好印证了算法）</td>
+</tr>
+<tr>
+<td><code>W=W.       (-1)</code></td>
+<td><code>W = W.reshape(-1)</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>(&quot;Y=&quot;,W[1].     (),&quot;* 1+&quot;,W[2].     (),&quot;* 2+&quot;,W[0].     ())</code></td>
+<td><code>print(&quot;Y=&quot;, W[1].item(), &quot;*x1+&quot;, W[2].item(), &quot;*x2+&quot;, W[0].item())</code></td>
+<td>✅ <code>W[1]/W[2]/W[0]</code> 索引顺序与课件一致；<code>.     ()</code> 是 <code>.item()</code>（5 字符，与 <code>item</code> 长度吻合）</td>
+</tr>
+<tr>
+<td><code>1_    =     (     (&quot;</code> … <code>2_    =   (     (&quot;</code></td>
+<td><code>x1_test = float(input(&quot;商品房面积：&quot;))</code></td>
+<td>✅ <code>1_</code>&#x2F;<code>2_</code> 下划线位置对应 <code>x1_test</code>&#x2F;<code>x2_test</code>（<strong>推测</strong>），<code>float(...)</code>&#x2F;<code>int(...)</code> 由后文 <code>( _    ,2)</code> 的 <code>round(y_pred, 2)</code> 反推</td>
+</tr>
+<tr>
+<td><code>=W[1].     ()* 1_    +W[2].     ()* 2_    +W[0].     ()</code></td>
+<td><code>y_pred = W[1].item()*x1_test + W[2].item()*x2_test + W[0].item()</code></td>
+<td>✅ 乘加结构与下划线变量名完全对应</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：9.7.2 的代码<strong>还原度很高</strong>——参数、索引、关键字、括号结构都有完好字符佐证；不确定的只有 <code>x1_test/x2_test</code>（由下划线位置推测）与个别方法名的字母拼写。</p>
+<h2 id="本讲易错点清单"><a href="#本讲易错点清单" class="headerlink" title="本讲易错点清单"></a>本讲易错点清单</h2><ol>
+<li><strong>解析解公式的分子分母别写反</strong>：<code>w = Σ(xᵢ-x̄)(yᵢ-ȳ) / Σ(xᵢ-x̄)²</code>，分子是”x 的偏差 × y 的偏差”，分母是”x 的偏差平方和”。</li>
+<li><strong><code>b = ȳ - w·x̄</code></strong>：算出 <code>w</code> 之后代回去算 <code>b</code>，别忘减号。</li>
+<li><strong>多元回归必须补一列 1</strong>：<code>x₀ = 1</code> 对应偏置 <code>b = w₀</code>；漏了这一列，<code>W[0]</code> 就没有意义，回归平面也画不对。</li>
+<li><strong><code>np.stack((x0, x1, x2), axis=1)</code></strong>：要按<strong>列</strong>堆叠成 <code>n×3</code>；写成 <code>axis=0</code> 会变成 <code>3×n</code>，矩阵乘法直接错。</li>
+<li><strong><code>(XᵀX)⁻¹</code> 存在的条件</strong>：<code>XᵀX</code> 必须是<strong>满秩矩阵</strong>（样本数要足够、属性之间不能完全线性相关），否则求逆会报错或得到不可靠结果。</li>
+<li><strong>形状对齐</strong>：<code>X</code> 是 <code>n×(m+1)</code>、<code>W</code> 是 <code>(m+1)×1</code>、<code>Y</code> 是 <code>n×1</code>；<code>Y</code> 别忘了 <code>reshape(-1, 1)</code>。</li>
+<li><strong>求出的 <code>W</code> 是二维的</strong>：需要 <code>reshape(-1)</code> 压成一维，才能用 <code>W[0]/W[1]/W[2]</code> 取参数。</li>
+<li><strong>TensorFlow 用 <code>.numpy()</code>、PyTorch 用 <code>.item()</code></strong> 取标量值；PyTorch 的张量在打印时带 <code>tensor(...)</code> 外壳。</li>
+<li><strong>三维绘图要建 Axes3D 对象</strong>：<code>fig = plt.figure(); ax3d = Axes3D(fig)</code>，之后用 <code>ax3d.scatter / plot_surface / plot_wireframe</code>，不要再用 <code>plt.xxx</code>。</li>
+<li><strong>画曲面前必须先 <code>np.meshgrid()</code></strong>：<code>X</code>、<code>Y</code>、<code>Z</code> 三者形状要一致（如都是 <code>(100, 100)</code>）。</li>
+<li><strong>中文显示</strong>：<code>plt.rcParams[&#39;font.sans-serif&#39;] = [&#39;SimHei&#39;]</code>，否则标题和图例会变方框。</li>
+<li><strong><code>os.environ[&#39;KMP_DUPLICATE_LIB_OK&#39;] = &#39;TRUE&#39;</code></strong>：PyTorch 与 NumPy&#x2F;MKL 同用时可能报 OpenMP 重复加载错误，课件用这行规避。</li>
+</ol>
+<hr>
+<h2 id="本讲知识地图"><a href="#本讲知识地图" class="headerlink" title="本讲知识地图"></a>本讲知识地图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">9.1 机器学习基础</span><br><span class="line">      └── 监督学习（回归 / 分类）、无监督学习、半监督学习</span><br><span class="line">            │</span><br><span class="line">9.2 一元线性回归  y = wx + b</span><br><span class="line">      └── 平方损失 → 最小二乘 → 解析解（w、b 各一个公式）</span><br><span class="line">            │</span><br><span class="line">            ├── 9.3 TensorFlow 版实例（商品房单属性）</span><br><span class="line">            │</span><br><span class="line">9.4 多元线性回归  Y = XW（超平面）</span><br><span class="line">      └── 矩阵损失 → 正规方程 W = (XᵀX)⁻¹XᵀY</span><br><span class="line">            │</span><br><span class="line">            ├── 9.5 NumPy 版实例（面积 + 房间数）</span><br><span class="line">            │</span><br><span class="line">9.6 可视化</span><br><span class="line">      ├── 9.6.1 mplot3d / Axes3D / meshgrid / plot_surface / plot_wireframe</span><br><span class="line">      └── 9.6.2 用 W 画回归平面、改变视角</span><br><span class="line">            │</span><br><span class="line">9.7 PyTorch 版实现</span><br><span class="line">      ├── 9.7.1 一元（torch.mean / torch.sum / torch.tensor）</span><br><span class="line">      └── 9.7.2 多元（torch.stack / transpose / inverse / matmul）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>原始课件位置：<code>课件/第9讲/</code>（9.1 机器学习基础、9.2 一元线性回归、9.3 实例：解析法实现一元线性回归、9.4 多元线性回归、9.5 实例：解析法实现多元线性回归、9.6.1 三维数据可视化、9.6.2 实例：线性回归模型可视化、9.7.1 &#x2F; 9.7.2 PyTorch 实现）。<br>说明：9.7.x 两份课件为”文字型 PDF”且字体缺少字形映射，抽取时单字母变量名会丢失，其代码已按 9.3 &#x2F; 9.5 的对应实现与课件公式还原，参数值与运行结果均取自课件。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/" title="第9讲 回归问题（线性回归）">http://example.com/2026/10/06/第9讲-回归问题（线性回归）/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92/" rel="tag"># 线性回归</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/06/%E7%AC%AC8%E8%AE%B2-PyTorch%E5%9F%BA%E7%A1%80%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" rel="prev" title="第8讲 PyTorch基础（子篇）">
+      <i class="fa fa-chevron-left"></i> 第8讲 PyTorch基础（子篇）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-9-%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80-%E4%B8%80%E5%85%83%E4%B8%8E%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92-%E5%8F%AF%E8%A7%86%E5%8C%96-PyTorch-%E5%AE%9E%E7%8E%B0%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 9 讲 回归问题（机器学习基础 &#x2F; 一元与多元线性回归 &#x2F; 可视化 &#x2F; PyTorch 实现）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#9-1-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%9F%BA%E7%A1%80"><span class="nav-number">1.1.</span> <span class="nav-text">9.1 机器学习基础</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-1-1-%E4%BB%8E%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.1.</span> <span class="nav-text">9.1.1 从数据中学习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-1-2-%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%E4%B8%8E%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD"><span class="nav-number">1.1.2.</span> <span class="nav-text">9.1.2 监督学习与核心术语</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-1-3-%E6%97%A0%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0%E4%B8%8E%E5%8D%8A%E7%9B%91%E7%9D%A3%E5%AD%A6%E4%B9%A0"><span class="nav-number">1.1.3.</span> <span class="nav-text">9.1.3 无监督学习与半监督学习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-1-4-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E7%9A%84%E5%8F%91%E5%B1%95%E5%92%8C%E5%BA%94%E7%94%A8"><span class="nav-number">1.1.4.</span> <span class="nav-text">9.1.4 机器学习的发展和应用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-2-%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.2.</span> <span class="nav-text">9.2 一元线性回归</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-1-%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.2.1.</span> <span class="nav-text">9.2.1 模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-2-%E6%9C%80%E4%BD%B3%E6%8B%9F%E5%90%88%E7%9B%B4%E7%BA%BF%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E7%94%A8%E5%B9%B3%E6%96%B9"><span class="nav-number">1.2.2.</span> <span class="nav-text">9.2.2 最佳拟合直线：为什么要用平方</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-3-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E4%B8%8E%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95"><span class="nav-number">1.2.3.</span> <span class="nav-text">9.2.3 损失函数与最小二乘法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-2-4-%E8%A7%A3%E6%9E%90%E8%A7%A3%EF%BC%88%E6%A0%B8%E5%BF%83%E5%85%AC%E5%BC%8F%EF%BC%89"><span class="nav-number">1.2.4.</span> <span class="nav-text">9.2.4 解析解（核心公式）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-3-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E8%A7%A3%E6%9E%90%E6%B3%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88TensorFlow-%E7%89%88%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">9.3 实例：解析法实现一元线性回归（TensorFlow 版）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-1-%E5%AF%BC%E5%85%A5%E5%BA%93%E3%80%81%E8%AE%BE%E7%BD%AE%E5%AD%97%E4%BD%93%E3%80%81%E5%8A%A0%E8%BD%BD%E6%A0%B7%E6%9C%AC%E6%95%B0%E6%8D%AE"><span class="nav-number">1.3.1.</span> <span class="nav-text">9.3.1 导入库、设置字体、加载样本数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-2-%E5%AD%A6%E4%B9%A0%E6%A8%A1%E5%9E%8B%EF%BC%9A%E8%AE%A1%E7%AE%97-w-%E5%92%8C-b"><span class="nav-number">1.3.2.</span> <span class="nav-text">9.3.2 学习模型：计算 w 和 b</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-3-%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7"><span class="nav-number">1.3.3.</span> <span class="nav-text">9.3.3 预测房价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-3-4-%E6%95%B0%E6%8D%AE%E5%92%8C%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.3.4.</span> <span class="nav-text">9.3.4 数据和模型可视化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-4-%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92"><span class="nav-number">1.4.</span> <span class="nav-text">9.4 多元线性回归</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-1-%E4%BB%8E%E7%9B%B4%E7%BA%BF%E5%88%B0%E8%B6%85%E5%B9%B3%E9%9D%A2"><span class="nav-number">1.4.1.</span> <span class="nav-text">9.4.1 从直线到超平面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-2-%E5%90%91%E9%87%8F%E4%B8%8E%E7%9F%A9%E9%98%B5%E5%BD%A2%E5%BC%8F%EF%BC%88%E5%85%B3%E9%94%AE%E6%8A%80%E5%B7%A7%EF%BC%89"><span class="nav-number">1.4.2.</span> <span class="nav-text">9.4.2 向量与矩阵形式（关键技巧）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-3-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E7%9F%A9%E9%98%B5%E8%A1%A8%E8%BE%BE"><span class="nav-number">1.4.3.</span> <span class="nav-text">9.4.3 损失函数的矩阵表达</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-4-%E6%B1%82%E6%9C%80%E5%B0%8F%EF%BC%9A%E6%AD%A3%E8%A7%84%E6%96%B9%E7%A8%8B"><span class="nav-number">1.4.4.</span> <span class="nav-text">9.4.4 求最小：正规方程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-5-%E6%8D%A2%E4%B8%AA%E8%A7%92%E5%BA%A6%E7%9C%8B%EF%BC%9A%E7%BA%BF%E6%80%A7%E6%96%B9%E7%A8%8B%E7%BB%84"><span class="nav-number">1.4.5.</span> <span class="nav-text">9.4.5 换个角度看：线性方程组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-4-6-%E8%A1%A5%E5%85%85%EF%BC%9A%E5%90%91%E9%87%8F%E3%80%81%E7%9F%A9%E9%98%B5%E4%B8%8E%E5%A4%9A%E7%BB%B4%E6%95%B0%E7%BB%84"><span class="nav-number">1.4.6.</span> <span class="nav-text">9.4.6 补充：向量、矩阵与多维数组</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-5-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E8%A7%A3%E6%9E%90%E6%B3%95%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88NumPy-%E7%89%88%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">9.5 实例：解析法实现多元线性回归（NumPy 版）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-1-%E5%8A%A0%E8%BD%BD%E6%A0%B7%E6%9C%AC%E6%95%B0%E6%8D%AE"><span class="nav-number">1.5.1.</span> <span class="nav-text">9.5.1 加载样本数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-2-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%EF%BC%9A%E6%9E%84%E9%80%A0%E5%A2%9E%E5%B9%BF%E7%9F%A9%E9%98%B5-X"><span class="nav-number">1.5.2.</span> <span class="nav-text">9.5.2 数据处理：构造增广矩阵 X</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-3-%E6%B1%82%E8%A7%A3%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0-W"><span class="nav-number">1.5.3.</span> <span class="nav-text">9.5.3 求解模型参数 W</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-4-%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7"><span class="nav-number">1.5.4.</span> <span class="nav-text">9.5.4 预测房价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-5-5-NumPy-%E6%95%B0%E7%BB%84%E8%BF%90%E7%AE%97%E5%87%BD%E6%95%B0%E5%B0%8F%E7%BB%93%EF%BC%88%E8%AF%BE%E4%BB%B6%E8%A1%A8%EF%BC%89"><span class="nav-number">1.5.5.</span> <span class="nav-text">9.5.5 NumPy 数组运算函数小结（课件表）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-6-1-%E4%B8%89%E7%BB%B4%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.6.</span> <span class="nav-text">9.6.1 三维数据可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-1-1-mplot3d-%E5%B7%A5%E5%85%B7%E9%9B%86"><span class="nav-number">1.6.1.</span> <span class="nav-text">9.6.1.1 mplot3d 工具集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-1-2-%E7%BB%98%E5%88%B6%E4%B8%89%E7%BB%B4%E6%95%A3%E7%82%B9%E5%9B%BE"><span class="nav-number">1.6.2.</span> <span class="nav-text">9.6.1.2 绘制三维散点图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-1-3-%E7%BD%91%E6%A0%BC%E7%82%B9%E5%9D%90%E6%A0%87%E7%9F%A9%E9%98%B5%EF%BC%9Anp-meshgrid"><span class="nav-number">1.6.3.</span> <span class="nav-text">9.6.1.3 网格点坐标矩阵：np.meshgrid()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-1-4-%E7%BB%98%E5%88%B6%E5%B9%B3%E9%9D%A2%E5%9B%BE%EF%BC%9Aplot-surface"><span class="nav-number">1.6.4.</span> <span class="nav-text">9.6.1.4 绘制平面图：plot_surface()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-1-5-%E7%BB%98%E5%88%B6%E7%BA%BF%E6%A1%86%E5%9B%BE%EF%BC%9Aplot-wireframe"><span class="nav-number">1.6.5.</span> <span class="nav-text">9.6.1.5 绘制线框图：plot_wireframe()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-6-2-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-number">1.7.</span> <span class="nav-text">9.6.2 实例：线性回归模型可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-2-1-%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E4%B8%8E%E6%A8%A1%E5%9E%8B%E5%8F%82%E6%95%B0"><span class="nav-number">1.7.1.</span> <span class="nav-text">9.6.2.1 加载数据与模型参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-6-2-2-%E7%BB%98%E5%88%B6%E6%95%A3%E7%82%B9%E5%9B%BE%E4%B8%8E%E5%9B%9E%E5%BD%92%E5%B9%B3%E9%9D%A2"><span class="nav-number">1.7.2.</span> <span class="nav-text">9.6.2.2 绘制散点图与回归平面</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-7-1-PyTorch-%E5%AE%9E%E7%8E%B0%E4%B8%80%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E8%A7%A3%E6%9E%90%E6%B3%95%EF%BC%89"><span class="nav-number">1.8.</span> <span class="nav-text">9.7.1 PyTorch 实现一元线性回归（解析法）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-1-1-PyTorch-%E4%B8%8E-TensorFlow-%E7%B1%BB%E4%BC%BC%E5%87%BD%E6%95%B0%E5%AF%B9%E7%85%A7%EF%BC%88%E8%AF%BE%E4%BB%B6%E8%A1%A8%EF%BC%89"><span class="nav-number">1.8.1.</span> <span class="nav-text">9.7.1.1 PyTorch 与 TensorFlow 类似函数对照（课件表）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-1-2-%E5%AE%9E%E7%8E%B0%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.8.2.</span> <span class="nav-text">9.7.1.2 实现步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-1-3-%E4%BB%A3%E7%A0%81%E8%BF%98%E5%8E%9F%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BA%A7%E6%A0%B8%E5%AF%B9%EF%BC%88%E5%B7%B2%E6%A0%B8%E5%AF%B9%EF%BC%89"><span class="nav-number">1.8.3.</span> <span class="nav-text">9.7.1.3 代码还原的字符级核对（已核对）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-7-2-PyTorch-%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%85%83%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%88%E8%A7%A3%E6%9E%90%E6%B3%95%EF%BC%89"><span class="nav-number">1.9.</span> <span class="nav-text">9.7.2 PyTorch 实现多元线性回归（解析法）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-2-1-%E5%AF%BC%E5%85%A5%E4%B8%8E%E6%95%B0%E6%8D%AE"><span class="nav-number">1.9.1.</span> <span class="nav-text">9.7.2.1 导入与数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-2-2-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E4%B8%8E%E6%B1%82%E8%A7%A3-W"><span class="nav-number">1.9.2.</span> <span class="nav-text">9.7.2.2 数据处理与求解 W</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-2-3-%E9%A2%84%E6%B5%8B%E6%88%BF%E4%BB%B7"><span class="nav-number">1.9.3.</span> <span class="nav-text">9.7.2.3 预测房价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-7-2-4-%E4%BB%A3%E7%A0%81%E8%BF%98%E5%8E%9F%E7%9A%84%E5%AD%97%E7%AC%A6%E7%BA%A7%E6%A0%B8%E5%AF%B9%EF%BC%88%E5%B7%B2%E6%A0%B8%E5%AF%B9%EF%BC%89"><span class="nav-number">1.9.4.</span> <span class="nav-text">9.7.2.4 代码还原的字符级核对（已核对）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E6%98%93%E9%94%99%E7%82%B9%E6%B8%85%E5%8D%95"><span class="nav-number">1.10.</span> <span class="nav-text">本讲易错点清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE"><span class="nav-number">1.11.</span> <span class="nav-text">本讲知识地图</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">333k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:03</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>
