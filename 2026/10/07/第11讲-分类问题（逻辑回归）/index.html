@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现） 本讲对应课件：11.1 逻辑回归 → 11.2 实例：实现一元逻辑回归 → 11.3 线性分类器 → 11.4 实例：实现多元逻辑回归 → 11.5 多分类问题 → 11.6 实例：实现多分类，以及 11.7.x 的 PyTorch 实现。第 9、10 讲">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第11讲 分类问题（逻辑回归）">
+<meta property="og:url" content="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现） 本讲对应课件：11.1 逻辑回归 → 11.2 实例：实现一元逻辑回归 → 11.3 线性分类器 → 11.4 实例：实现多元逻辑回归 → 11.5 多分类问题 → 11.6 实例：实现多分类，以及 11.7.x 的 PyTorch 实现。第 9、10 讲">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p07-01_318x174.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p05-01_896x623.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p13-01_1118x556.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p14-01_1022x459.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p06-01_739x617.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p15-01_1221x622.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p03-01_1111x650.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p08-01_1054x442.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl11-logistic/p13-01_756x227.jpg">
+<meta property="article:published_time" content="2026-10-07T13:44:32.000Z">
+<meta property="article:modified_time" content="2026-10-07T14:28:46.879Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="逻辑回归">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl11-logistic/p07-01_318x174.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第11讲 分类问题（逻辑回归） | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第11讲 分类问题（逻辑回归）
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-07 21:44:32 / 修改时间：22:28:46" itemprop="dateCreated datePublished" datetime="2026-10-07T21:44:32+08:00">2026-10-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）"><a href="#第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）" class="headerlink" title="第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现）"></a>第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现）</h1><blockquote>
+<p>本讲对应课件：<strong>11.1 逻辑回归 → 11.2 实例：实现一元逻辑回归 → 11.3 线性分类器 → 11.4 实例：实现多元逻辑回归 → 11.5 多分类问题 → 11.6 实例：实现多分类</strong>，以及 <strong>11.7.x 的 PyTorch 实现</strong>。<br>第 9、10 讲解决”预测连续值”（回归），本讲转向<strong>预测离散类别</strong>（分类）。核心三步：<strong>用 sigmoid&#x2F;softmax 把线性输出变成概率 → 用交叉熵衡量误差 → 用梯度下降更新参数</strong>。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>11.1 逻辑回归</td>
+<td>广义线性模型、分类器与阶跃函数、logistic 函数、平方损失 vs 交叉熵、准确率</td>
+</tr>
+<tr>
+<td>11.2 一元逻辑回归实例</td>
+<td>sigmoid、交叉熵、准确率、<code>tf.where</code>、中心化、训练与可视化、预测</td>
+</tr>
+<tr>
+<td>11.3 线性分类器</td>
+<td>决策边界、超平面、线性可分与不可分、逻辑运算（与&#x2F;或&#x2F;非&#x2F;异或）</td>
+</tr>
+<tr>
+<td>11.4 多元逻辑回归实例</td>
+<td>Iris 数据集、属性中心化、增广矩阵、训练、决策边界绘制、网格与等高线</td>
+</tr>
+<tr>
+<td>11.5 多分类问题</td>
+<td>独热编码、softmax、多分类交叉熵、互斥&#x2F;非互斥</td>
+</tr>
+<tr>
+<td>11.6 多分类实例</td>
+<td><code>tf.one_hot</code>、<code>argmax</code> 算准确率、softmax 训练、分区着色</td>
+</tr>
+<tr>
+<td>11.7 PyTorch 实现</td>
+<td>一元&#x2F;多元逻辑回归、鸢尾花多分类</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="11-1-逻辑回归"><a href="#11-1-逻辑回归" class="headerlink" title="11.1 逻辑回归"></a>11.1 逻辑回归</h2><h3 id="11-1-1-从线性回归到广义线性模型"><a href="#11-1-1-从线性回归到广义线性模型" class="headerlink" title="11.1.1 从线性回归到广义线性模型"></a>11.1.1 从线性回归到广义线性模型</h3><p>课程回顾：<strong>线性回归</strong>把自变量和因变量之间的关系用<strong>线性模型</strong>表示，对未来或未知的数据进行估计；多元时是<strong>超平面（Hyperplane）</strong>。</p>
+<p><strong>对数线性回归</strong>：<code>ln y = wx + b</code>，即 <code>y = e^(wx+b)</code>。</p>
+<p><strong>广义线性模型（generalized linear model）</strong>：<code>y = g⁻¹(wx + b)</code> —— 只要 <strong>g 是任何单调可微函数</strong>，就能把线性输出映射到需要的范围。</p>
+<p>高维形式：<code>Y = g⁻¹(XW)</code>，其中 <code>W = (w₀, w₁, ..., wₘ)ᵀ</code>、<code>X = (x₀, x₁, ..., xₘ)ᵀ</code>、<code>x₀ = 1</code>。</p>
+<h3 id="11-1-2-分类问题与分类器"><a href="#11-1-2-分类问题与分类器" class="headerlink" title="11.1.2 分类问题与分类器"></a>11.1.2 分类问题与分类器</h3><ul>
+<li><strong>分类器</strong>：能够<strong>自动对输入的数据进行分类</strong>；</li>
+<li><strong>输入</strong>：特征；<strong>输出</strong>：<strong>离散值</strong>；</li>
+<li>典型例子：鸢尾花分类（山鸢尾 0 &#x2F; 杂色鸢尾 1 &#x2F; 维吉尼亚鸢尾 2）、手写数字识别（28×28&#x3D;784 个像素 → 0~9）、垃圾邮件识别、图片分类、疾病判断。</li>
+</ul>
+<p><strong>二分类问题</strong>：0 &#x2F; 1 —— <strong>正例和反例</strong>。理想情况是<strong>单位阶跃函数</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">step(z) = 1, z ≥ 0</span><br><span class="line">          0, z &lt; 0        (其中 z = wx + b)</span><br></pre></td></tr></table></figure>
+
+<p>但阶跃函数有三个致命问题：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>后果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>不光滑</strong></td>
+<td>无法求导</td>
+</tr>
+<tr>
+<td><strong>不连续</strong></td>
+<td>梯度不存在</td>
+</tr>
+<tr>
+<td>直接当损失函数</td>
+<td>梯度下降法无法使用</td>
+</tr>
+</tbody></table>
+<p><strong>分类任务的完整流程</strong>：准备训练样本 → 训练分类器 → 对新样本分类。即：<strong>线性回归得到 z&#x3D;wx+b → 经过 step(z) → 输出 0&#x2F;1 分类器</strong>。</p>
+<h3 id="11-1-3-对数几率函数（sigmoid）"><a href="#11-1-3-对数几率函数（sigmoid）" class="headerlink" title="11.1.3 对数几率函数（sigmoid）"></a>11.1.3 对数几率函数（sigmoid）</h3><p><img src="/images/dl/dl11-logistic/p07-01_318x174.jpg" alt="第7页 sigmoid 函数（对数几率函数）"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">y = g(z) = 1 / (1 + e^(-z)) = 1 / (1 + e^(-(wx+b)))</span><br></pre></td></tr></table></figure>
+
+<p>它来自<strong>对数几率</strong> <code>ln(z/(1-z))</code>，所以又叫<strong>对数几率回归 &#x2F; 逻辑回归（logistic regression）</strong>。性质：</p>
+<ul>
+<li><strong>单调上升、连续、光滑</strong>；</li>
+<li><strong>任意阶可导</strong>；</li>
+<li>输出落在 (0, 1) 之间，可以解释为<strong>概率</strong>。</li>
+</ul>
+<p>多元模型：<code>y = 1 / (1 + e^(-XW))</code>。</p>
+<h3 id="11-1-4-损失函数的两次尝试"><a href="#11-1-4-损失函数的两次尝试" class="headerlink" title="11.1.4 损失函数的两次尝试"></a>11.1.4 损失函数的两次尝试</h3><p><strong>尝试 1：平方损失函数</strong>——把 sigmoid 输出代入平方损失：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = Σᵢ (yᵢ - 1/(1+e^(-(w xᵢ + b))))²</span><br></pre></td></tr></table></figure>
+
+<p>问题：<strong>非凸函数</strong>（课件明确标注）——梯度下降容易陷入局部极小。</p>
+<p><strong>尝试 2：交叉熵损失函数</strong>（本讲采用）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = -Σᵢ [ yᵢ·ln(ŷᵢ) + (1-yᵢ)·ln(1-ŷᵢ) ]</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>yᵢ</code> 是<strong>第 i 个样本的标记</strong>（0 或 1），<code>ŷᵢ = 1/(1+e^(-(wxᵢ+b)))</code>。</p>
+<p><strong>平均交叉熵损失函数</strong>（除以样本数 n）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = -(1/n)Σᵢ [ yᵢ·ln(ŷᵢ) + (1-yᵢ)·ln(1-ŷᵢ) ]</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么用交叉熵</strong>：</p>
+<ul>
+<li>它是<strong>凸函数</strong>；</li>
+<li><strong>无需对 sigmoid 函数本身求导</strong>（对数把 sigmoid 的分母消掉了，梯度形式非常简洁：<code>∂Loss/∂w = (1/n)Σ(ŷᵢ-yᵢ)xᵢ</code>）；</li>
+<li>它衡量的是<strong>概率分布之间的误差</strong>。</li>
+</ul>
+<h3 id="11-1-5-准确率（accuracy）"><a href="#11-1-5-准确率（accuracy）" class="headerlink" title="11.1.5 准确率（accuracy）"></a>11.1.5 准确率（accuracy）</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">准确率 = 正确分类的样本数 / 总样本数</span><br></pre></td></tr></table></figure>
+
+<p><strong>课件用两组数据说明”准确率相同、损失可以差很多”</strong>（这是本讲很重要的一个直觉）：</p>
+<table>
+<thead>
+<tr>
+<th>样本</th>
+<th>标记</th>
+<th>模型 A 预测</th>
+<th>模型 B 预测</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>0</td>
+<td>0.1</td>
+<td>0.49</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0</td>
+<td>0.2</td>
+<td>0.45</td>
+</tr>
+<tr>
+<td>3</td>
+<td>1</td>
+<td>0.8</td>
+<td>0.51</td>
+</tr>
+<tr>
+<td>4</td>
+<td>1</td>
+<td>0.49（错）</td>
+<td>0.1（错）</td>
+</tr>
+</tbody></table>
+<ul>
+<li>两个模型的<strong>准确率都是 75%</strong>（4 个里错 1 个）；</li>
+<li>但交叉熵平均损失：<strong>模型 A ≈ 0.3162，模型 B ≈ 1.0617</strong> —— 模型 A 的预测更”有把握且正确”。</li>
+</ul>
+<blockquote>
+<p>结论：<strong>准确率只看对错，交叉熵还看”错得有多离谱”</strong>，所以训练时用交叉熵做损失、用准确率做评价指标。</p>
+</blockquote>
+<hr>
+<h2 id="11-2-实例：实现一元逻辑回归（TensorFlow）"><a href="#11-2-实例：实现一元逻辑回归（TensorFlow）" class="headerlink" title="11.2 实例：实现一元逻辑回归（TensorFlow）"></a>11.2 实例：实现一元逻辑回归（TensorFlow）</h2><p><strong>任务</strong>：根据<strong>房屋面积</strong>把商品房分成<strong>普通住宅（0）&#x2F; 高档住宅（1）</strong>。</p>
+<h3 id="11-2-1-验证-sigmoid-与交叉熵的写法"><a href="#11-2-1-验证-sigmoid-与交叉熵的写法" class="headerlink" title="11.2.1 验证 sigmoid 与交叉熵的写法"></a>11.2.1 验证 sigmoid 与交叉熵的写法</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;TensorFlow version:&quot;</span>, tf.__version__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line">x = np.array([<span class="number">1.</span>, <span class="number">2.</span>, <span class="number">3.</span>, <span class="number">4.</span>])</span><br><span class="line">w = tf.Variable(<span class="number">1.</span>)</span><br><span class="line">b = tf.Variable(<span class="number">1.</span>)</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>/(<span class="number">1</span>+tf.exp(-(w*x+b)))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;tf.Tensor: id=25, shape=(4,), dtype=float32, numpy=array([0.880797 , 0.95257413, 0.98201376, 0.9933072 ], dtype=float32)&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>交叉熵损失（两种写法）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">y = np.array([<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>])</span><br><span class="line">pred = np.array([<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.8</span>, <span class="number">0.49</span>])</span><br><span class="line"></span><br><span class="line"><span class="number">1</span> - y          <span class="comment"># array([1, 1, 0, 0])</span></span><br><span class="line"><span class="number">1</span> - pred       <span class="comment"># array([0.9 , 0.8 , 0.2 , 0.51])</span></span><br><span class="line"></span><br><span class="line">-tf.reduce_sum(y*tf.math.log(pred) + (<span class="number">1</span>-y)*tf.math.log(<span class="number">1</span>-pred))</span><br><span class="line"><span class="comment"># 1.2649975061637104</span></span><br><span class="line">-tf.reduce_mean(y*tf.math.log(pred) + (<span class="number">1</span>-y)*tf.math.log(<span class="number">1</span>-pred))</span><br><span class="line"><span class="comment"># 0.3162493765409276</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>reduce_sum</code> 是交叉熵总和，<code>reduce_mean</code> 是<strong>平均交叉熵</strong>；训练时用后者（与样本数无关，便于统一学习率）。</p>
+</blockquote>
+<h3 id="11-2-2-准确率的三种实现方式"><a href="#11-2-2-准确率的三种实现方式" class="headerlink" title="11.2.2 准确率的三种实现方式"></a>11.2.2 准确率的三种实现方式</h3><p><img src="/images/dl/dl11-logistic/p05-01_896x623.jpg" alt="第5页 准确率实现：round&#x2F;equal&#x2F;where"></p>
+<p><strong>方式 1：round + equal</strong>（利用 <code>tf.round</code> 四舍五入到 0&#x2F;1）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">tf.<span class="built_in">round</span>(pred)                                   <span class="comment"># array([0., 0., 1., 0.])</span></span><br><span class="line">tf.equal(tf.<span class="built_in">round</span>(pred), y)                      <span class="comment"># array([ True,  True,  True, False])</span></span><br><span class="line">tf.cast(tf.equal(tf.<span class="built_in">round</span>(pred), y), tf.int8)    <span class="comment"># array([1, 1, 1, 0], dtype=int8)</span></span><br><span class="line">tf.reduce_mean(tf.cast(tf.equal(tf.<span class="built_in">round</span>(pred), y), tf.float32))   <span class="comment"># 0.75</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>⚠️ 坑：<code>tf.round</code> 是”四舍六入五成双”</strong>（banker’s rounding）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tf.round(0.5)      -&gt; 0.0      # 不是 1.0！</span><br><span class="line">tf.round(0.500001) -&gt; 1.0</span><br></pre></td></tr></table></figure>
+
+<p>所以 <code>tf.round(pred)</code> 在恰好 0.5 时会把样本判成 <strong>0 类</strong>，这不符合”≥0.5 判为正类”的直觉。</p>
+<p><strong>方式 2：tf.where（推荐）</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a = np.array([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])</span><br><span class="line">b = np.array([<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>])</span><br><span class="line">tf.where(pred&lt;<span class="number">0.5</span>, a, b)          <span class="comment"># array([ 1,  2, 30,  4])</span></span><br><span class="line">tf.where(pred&gt;=<span class="number">0.5</span>)               <span class="comment"># 只写条件时返回满足条件的索引：array([[2]])</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>方式 3：用 <code>tf.where</code> 实现准确率</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tf.reduce_mean(tf.cast(tf.equal(tf.where(pred&lt;<span class="number">0.5</span>, <span class="number">0</span>, <span class="number">1</span>), y), tf.float32))   <span class="comment"># 0.75</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong><code>tf.where(pred&lt;0.5, 0, 1)</code></strong> 的语义是”概率小于 0.5 判 0 类，否则判 1 类”——等价于”≥0.5 即正例”，比 <code>tf.round</code> 更符合定义。<strong>注意第一个参数是”小于 0.5 时取第二个参数”</strong>，别写反。</p>
+</blockquote>
+<h3 id="11-2-3-加载数据与中心化"><a href="#11-2-3-加载数据与中心化" class="headerlink" title="11.2.3 加载数据与中心化"></a>11.2.3 加载数据与中心化</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">x = np.array([<span class="number">137.97</span>, <span class="number">104.50</span>, <span class="number">100.00</span>, <span class="number">126.32</span>, <span class="number">79.20</span>, <span class="number">99.00</span>, <span class="number">124.00</span>, <span class="number">114.00</span>,</span><br><span class="line">              <span class="number">106.69</span>, <span class="number">140.05</span>, <span class="number">53.75</span>, <span class="number">46.91</span>, <span class="number">68.00</span>, <span class="number">63.02</span>, <span class="number">81.26</span>, <span class="number">86.21</span>])</span><br><span class="line">y = np.array([<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">plt.scatter(x, y)</span><br></pre></td></tr></table></figure>
+
+<p><strong>中心化</strong>（减去均值，把数据平移到原点附近）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x_train = x - x.mean()</span><br></pre></td></tr></table></figure>
+
+<p>中心化的好处：让 sigmoid 的输入分布更合理、<strong>加快收敛</strong>；同时使绘制 sigmoid 曲线时更容易看清变化区间。</p>
+<h3 id="11-2-4-训练循环"><a href="#11-2-4-训练循环" class="headerlink" title="11.2.4 训练循环"></a>11.2.4 训练循环</h3><p><img src="/images/dl/dl11-logistic/p13-01_1118x556.jpg" alt="第13页 一元逻辑回归训练循环"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_train, y_train)</span><br><span class="line">plt.plot(x_, y_, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">3</span>)     <span class="comment"># 初始权值下的 sigmoid 曲线</span></span><br><span class="line"></span><br><span class="line">cross_train = []</span><br><span class="line">acc_train = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line"></span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        pred_train = <span class="number">1</span>/(<span class="number">1</span>+tf.exp(-(w*x_train+b)))</span><br><span class="line">        Loss_train = -tf.reduce_mean(y_train*tf.math.log(pred_train) + (<span class="number">1</span>-y_train)*tf.math.log(<span class="number">1</span>-pred_train))</span><br><span class="line">        Accuracy_train = tf.reduce_mean(tf.cast(tf.equal(tf.where(pred_train&lt;<span class="number">0.5</span>, <span class="number">0</span>, <span class="number">1</span>), y_train), tf.float32))</span><br><span class="line"></span><br><span class="line">    cross_train.append(Loss_train)</span><br><span class="line">    acc_train.append(Accuracy_train)</span><br><span class="line"></span><br><span class="line">    dL_dw, dL_db = tape.gradient(Loss_train, [w, b])</span><br><span class="line"></span><br><span class="line">    w.assign_sub(learn_rate*dL_dw)</span><br><span class="line">    b.assign_sub(learn_rate*dL_db)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Train Loss: %f, Accuracy: %f&quot;</span> % (i, Loss_train, Accuracy_train))</span><br><span class="line">        y_ = <span class="number">1</span>/(<span class="number">1</span>+tf.exp(-(w*x_+b)))</span><br><span class="line">        plt.plot(x_, y_)</span><br></pre></td></tr></table></figure>
+
+<p><strong>结构上与第 10 讲的回归训练完全一致</strong>，只有两处不同：<strong>预测函数换成 sigmoid</strong>、<strong>损失换成交叉熵</strong>；另外把<strong>准确率</strong>也一起记录并打印出来。</p>
+<h3 id="11-2-5-预测与结果"><a href="#11-2-5-预测与结果" class="headerlink" title="11.2.5 预测与结果"></a>11.2.5 预测与结果</h3><p><img src="/images/dl/dl11-logistic/p14-01_1022x459.jpg" alt="第14页 预测与分类结果"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x_test = [<span class="number">128.15</span>, <span class="number">45.00</span>, <span class="number">141.43</span>, <span class="number">106.27</span>, <span class="number">99.00</span>, <span class="number">53.84</span>, <span class="number">85.36</span>, <span class="number">70.00</span>, <span class="number">162.00</span>, <span class="number">114.60</span>]</span><br><span class="line">pred_test = <span class="number">1</span>/(<span class="number">1</span>+tf.exp(-(w*(x_test-np.mean(x))+b)))</span><br><span class="line">y_test = tf.where(pred_test&lt;<span class="number">0.5</span>, <span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(x_test)):</span><br><span class="line">    <span class="built_in">print</span>(x_test[i], <span class="string">&quot;\t&quot;</span>, pred_test[i].numpy(), <span class="string">&quot;\t&quot;</span>, y_test[i].numpy(), <span class="string">&quot;\t&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">128.15   0.8610252     1</span><br><span class="line">45.0     0.0029561974  0</span><br><span class="line">141.43   0.9545566     1</span><br><span class="line">106.27   0.45318928    0</span><br><span class="line">99.0     0.2981362     0</span><br><span class="line">53.84    0.00663888    0</span><br><span class="line">85.36    0.108105935   0</span><br><span class="line">70.0     0.028681064   0</span><br><span class="line">162.0    0.9928677     1</span><br><span class="line">114.6    0.6406205     1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意预测时也要减同一个均值</strong>：<code>x_test - np.mean(x)</code>。训练时中心化过，预测时不中心化会导致输入尺度不一致、结果全错。</p>
+</blockquote>
+<hr>
+<h2 id="11-3-线性分类器"><a href="#11-3-线性分类器" class="headerlink" title="11.3 线性分类器"></a>11.3 线性分类器</h2><h3 id="11-3-1-决策边界与超平面"><a href="#11-3-1-决策边界与超平面" class="headerlink" title="11.3.1 决策边界与超平面"></a>11.3.1 决策边界与超平面</h3><p><strong>线性分类器（Linear Classifier）</strong>：用一个线性函数划分空间：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">f(x₁, x₂) = w₁x₁ + w₂x₂ + b = 0</span><br><span class="line">f(x) &gt; 0 判为一类；f(x) &lt; 0 判为另一类</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>方程 <code>w₁x₁ + w₂x₂ + b = 0</code> 就是<strong>决策边界</strong>；</li>
+<li>在 <strong>m 维空间</strong>中，决策边界是一个<strong>超平面</strong>：<code>WX + b = 0</code>；</li>
+<li>一维空间是<strong>一个点</strong>、二维空间是<strong>一条直线</strong>、三维空间是<strong>一个平面</strong>。</li>
+</ul>
+<h3 id="11-3-2-线性分类器实例"><a href="#11-3-2-线性分类器实例" class="headerlink" title="11.3.2 线性分类器实例"></a>11.3.2 线性分类器实例</h3><p>用 <code>z = 2x₁ - x₂ - 2</code>（即 <code>2x₁ - x₂ = 2</code> 这条直线）做分类器：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">y = step(z) = step(2x₁ - x₂ - 2)</span><br><span class="line">y = g(z) = g(w₁x₁ + w₂x₂ + b)</span><br></pre></td></tr></table></figure>
+
+<p>代入各点看符号：<code>(1,3) → 2-3-2 = -3 &lt; 0 → y=0</code>；<code>(3,1) → 6-1-2 = 3 ≥ 0 → y=1</code>；<code>(-1,1) → -2-1-2 = -5 &lt; 0 → y=0</code>；<code>(2,-2) → 4+2-2 = 4 ≥ 0 → y=1</code>。</p>
+<h3 id="11-3-3-线性不可分与逻辑运算"><a href="#11-3-3-线性不可分与逻辑运算" class="headerlink" title="11.3.3 线性不可分与逻辑运算"></a>11.3.3 线性不可分与逻辑运算</h3><p>有些数据<strong>无法用一条直线分开</strong>（如异或），这就是<strong>线性不可分</strong>。</p>
+<p>课件用逻辑运算举例（XOR 是最经典的线性不可分问题）：</p>
+<table>
+<thead>
+<tr>
+<th>运算</th>
+<th>真值表</th>
+<th>是否线性可分</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>与（AND）</strong></td>
+<td>(0,0)→0、(0,1)→0、(1,0)→0、(1,1)→1</td>
+<td>✅ 可用直线分开</td>
+</tr>
+<tr>
+<td><strong>或（OR）</strong></td>
+<td>(0,0)→0、(0,1)→1、(1,0)→1、(1,1)→1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>非（NOT）</strong></td>
+<td>0→1、1→0</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>异或（XOR）</strong></td>
+<td>(0,0)→0、(0,1)→1、(1,0)→1、(1,1)→0</td>
+<td>❌ <strong>线性不可分</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>异或线性不可分，正是当年感知机被指出局限性的例子，也引出了后面”多层网络&#x2F;深度学习”的必要性。</p>
+</blockquote>
+<hr>
+<h2 id="11-4-实例：实现多元逻辑回归（TensorFlow）"><a href="#11-4-实例：实现多元逻辑回归（TensorFlow）" class="headerlink" title="11.4 实例：实现多元逻辑回归（TensorFlow）"></a>11.4 实例：实现多元逻辑回归（TensorFlow）</h2><p><strong>任务</strong>：用<strong>鸢尾花数据集的 4 个属性</strong>做<strong>二分类</strong>（山鸢尾 vs 变色鸢尾）。</p>
+<h3 id="11-4-1-数据集与加载"><a href="#11-4-1-数据集与加载" class="headerlink" title="11.4.1 数据集与加载"></a>11.4.1 数据集与加载</h3><p><strong>Iris 数据集</strong>：150 个样本、4 个属性、1 个标签：</p>
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>英文</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>花萼长度</td>
+<td>Sepal Length</td>
+</tr>
+<tr>
+<td>花萼宽度</td>
+<td>Sepal Width</td>
+</tr>
+<tr>
+<td>花瓣长度</td>
+<td>Petal Length</td>
+</tr>
+<tr>
+<td>花瓣宽度</td>
+<td>Petal Width</td>
+</tr>
+</tbody></table>
+<p>标签三类：山鸢尾（Setosa）、变色鸢尾（Versicolour）、维吉尼亚鸢尾（Virginica）——<strong>本实例只取前两类做二分类</strong>。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;TensorFlow version:&quot;</span>, tf.__version__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib <span class="keyword">as</span> mpl</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br><span class="line"></span><br><span class="line">df_iris = pd.read_csv(train_path, header=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-4-2-数据处理"><a href="#11-4-2-数据处理" class="headerlink" title="11.4.2 数据处理"></a>11.4.2 数据处理</h3><p><img src="/images/dl/dl11-logistic/p06-01_739x617.jpg" alt="第6页 提取属性与两类标签"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">iris = np.array(df_iris)</span><br><span class="line">iris.shape                      <span class="comment"># (120, 5)    ← 120 个样本、4 属性 + 1 标签</span></span><br><span class="line"></span><br><span class="line">train_x = iris[:, <span class="number">0</span>:<span class="number">2</span>]          <span class="comment"># 取前两个属性（花萼长度、花萼宽度）</span></span><br><span class="line">train_y = iris[:, <span class="number">4</span>]</span><br><span class="line">train_x.shape, train_y.shape    <span class="comment"># ((120, 2), (120,))</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 只保留标签 &lt; 2 的两类（山鸢尾 0、变色鸢尾 1）</span></span><br><span class="line">x_train = train_x[train_y &lt; <span class="number">2</span>]</span><br><span class="line">y_train = train_y[train_y &lt; <span class="number">2</span>]</span><br><span class="line">x_train.shape, y_train.shape    <span class="comment"># ((78, 2), (78,))</span></span><br><span class="line">num = <span class="built_in">len</span>(x_train)</span><br></pre></td></tr></table></figure>
+
+<p><strong>属性中心化</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">x_train = x_train - np.mean(x_train, axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">plt.scatter(x_train[:, <span class="number">0</span>], x_train[:, <span class="number">1</span>], c=y_train, cmap=cm_pt)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>axis=0</code> 表示对<strong>每一列</strong>求均值（每个属性各自中心化）；<code>c=y_train</code> 用标签决定点的颜色。</p>
+</blockquote>
+<p><strong>构造增广矩阵</strong>（补一列 1 对应偏置）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">x0_train = np.ones(num).reshape(-<span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">X = tf.cast(tf.concat((x0_train, x_train), axis=<span class="number">1</span>), tf.float32)   <span class="comment"># (78, 3)</span></span><br><span class="line">Y = tf.cast(y_train.reshape(-<span class="number">1</span>, <span class="number">1</span>), tf.float32)                   <span class="comment"># (78, 1)</span></span><br><span class="line"></span><br><span class="line">X.shape, Y.shape      <span class="comment"># (TensorShape([78, 3]), TensorShape([78, 1]))</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="11-4-3-训练模型"><a href="#11-4-3-训练模型" class="headerlink" title="11.4.3 训练模型"></a>11.4.3 训练模型</h3><p><img src="/images/dl/dl11-logistic/p15-01_1221x622.jpg" alt="第15页 多元逻辑回归训练循环与决策边界"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ce = []</span><br><span class="line">acc = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED = <span class="number">1</span>/(<span class="number">1</span>+tf.exp(-tf.matmul(X, W)))</span><br><span class="line">        Loss = -tf.reduce_mean(Y*tf.math.log(PRED) + (<span class="number">1</span>-Y)*tf.math.log(<span class="number">1</span>-PRED))</span><br><span class="line"></span><br><span class="line">    accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.where(PRED.numpy()&lt;<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">1.</span>), Y), tf.float32))</span><br><span class="line">    ce.append(Loss)</span><br><span class="line">    acc.append(accuracy)</span><br><span class="line"></span><br><span class="line">    dL_dW = tape.gradient(Loss, W)</span><br><span class="line">    W.assign_sub(learn_rate*dL_dW)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Acc:%f, Loss: %f&quot;</span> % (i, accuracy, Loss))</span><br></pre></td></tr></table></figure>
+
+<p><strong>与一元版的差别</strong>：<code>w</code>、<code>b</code> 合并成一个参数向量 <code>W</code>（shape <code>(3,1)</code>），线性部分用 <code>tf.matmul(X, W)</code>。</p>
+<h3 id="11-4-4-决策边界的绘制"><a href="#11-4-4-决策边界的绘制" class="headerlink" title="11.4.4 决策边界的绘制"></a>11.4.4 决策边界的绘制</h3><p>决策边界就是 <code>W[0] + W[1]·x₁ + W[2]·x₂ = 0</code>，即：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">x₂ = -(W[0] + W[1]·x₁) / W[2]</span><br></pre></td></tr></table></figure>
+
+<p>在训练过程中同步画出这条线：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">plt.scatter(x_train[:, <span class="number">0</span>], x_train[:, <span class="number">1</span>], c=y_train, cmap=cm_pt)</span><br><span class="line">plt.plot(x_, y_, color=<span class="string">&quot;red&quot;</span>, linewidth=<span class="number">3</span>)</span><br><span class="line">plt.xlim([-<span class="number">1.5</span>, <span class="number">1.5</span>])</span><br><span class="line">plt.ylim([-<span class="number">1.5</span>, <span class="number">1.5</span>])</span><br><span class="line"></span><br><span class="line">ce = []</span><br><span class="line">acc = []</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED = <span class="number">1</span>/(<span class="number">1</span>+tf.exp(-tf.matmul(X, W)))</span><br><span class="line">        Loss = -tf.reduce_mean(Y*tf.math.log(PRED) + (<span class="number">1</span>-Y)*tf.math.log(<span class="number">1</span>-PRED))</span><br><span class="line"></span><br><span class="line">    accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.where(PRED.numpy()&lt;<span class="number">0.5</span>, <span class="number">0.</span>, <span class="number">1.</span>), Y), tf.float32))</span><br><span class="line">    ce.append(Loss)</span><br><span class="line">    acc.append(accuracy)</span><br><span class="line"></span><br><span class="line">    dL_dW = tape.gradient(Loss, W)</span><br><span class="line">    W.assign_sub(learn_rate*dL_dW)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Acc:%f, Loss: %f&quot;</span> % (i, accuracy, Loss))</span><br><span class="line">        y_ = -(W[<span class="number">0</span>] + W[<span class="number">1</span>]*x_) / W[<span class="number">2</span>]     <span class="comment"># 决策边界</span></span><br><span class="line">        plt.plot(x_, y_)</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-4-5-绘制分类图（11-4-2-节）"><a href="#11-4-5-绘制分类图（11-4-2-节）" class="headerlink" title="11.4.5 绘制分类图（11.4.2 节）"></a>11.4.5 绘制分类图（11.4.2 节）</h3><p>要画出”整个平面被分成两半”的效果，需要三个工具：</p>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>np.meshgrid()</code></td>
+<td>生成<strong>网格点坐标矩阵</strong>（详见 9.6 小节）</td>
+</tr>
+<tr>
+<td><code>plt.pcolormesh()</code></td>
+<td>按网格值<strong>填充分区颜色</strong></td>
+</tr>
+<tr>
+<td><code>plt.contour()</code> &#x2F; <code>plt.contourf()</code></td>
+<td>绘制<strong>轮廓线</strong> &#x2F; <strong>填充分区</strong></td>
+</tr>
+</tbody></table>
+<p><strong>基础示例（网格 + 伪彩色）</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">n = <span class="number">10</span></span><br><span class="line">x = np.linspace(-<span class="number">10</span>, <span class="number">10</span>, n)</span><br><span class="line">y = np.linspace(-<span class="number">10</span>, <span class="number">10</span>, n)</span><br><span class="line">X, Y = np.meshgrid(x, y)</span><br><span class="line">Z = X + Y</span><br><span class="line"></span><br><span class="line">plt.pcolormesh(X, Y, Z, cmap=<span class="string">&quot;rainbow&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p><strong>提高网格分辨率</strong>（<code>n = 200</code>）后改用轮廓线，边界更平滑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">n = <span class="number">200</span></span><br><span class="line">x = np.linspace(-<span class="number">10</span>, <span class="number">10</span>, n)</span><br><span class="line">y = np.linspace(-<span class="number">10</span>, <span class="number">10</span>, n)</span><br><span class="line">X, Y = np.meshgrid(x, y)</span><br><span class="line">Z = X + Y</span><br><span class="line"></span><br><span class="line">plt.contour(X, Y, Z, cmap=<span class="string">&quot;rainbow&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>用法要点</strong>：网格点矩阵 <code>X</code>、<code>Y</code> 的形状必须与 <code>Z</code> 一致（都是 <code>(n, n)</code>）；<code>pcolormesh</code> 适合”离散网格填充”，<code>contour/contourf</code> 适合”平滑分区”。在分类问题里，把 <code>Z</code> 换成”每个网格点被预测为哪一类”即可画出决策区域。</p>
+</blockquote>
+<hr>
+<h2 id="11-5-多分类问题"><a href="#11-5-多分类问题" class="headerlink" title="11.5 多分类问题"></a>11.5 多分类问题</h2><h3 id="11-5-1-从二分类到多分类"><a href="#11-5-1-从二分类到多分类" class="headerlink" title="11.5.1 从二分类到多分类"></a>11.5.1 从二分类到多分类</h3><ul>
+<li><strong>逻辑回归</strong>解决的是<strong>二分类问题</strong>；</li>
+<li><strong>多分类问题</strong>：把输入样本划分为<strong>多个类别</strong>。</li>
+</ul>
+<p><strong>两种编码方式</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>编码</th>
+<th>说明</th>
+<th>例（三类）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>自然顺序码</strong></td>
+<td>直接给类别编号</td>
+<td>山鸢尾 0、变色鸢尾 1、维吉尼亚鸢尾 2</td>
+</tr>
+<tr>
+<td><strong>独热编码（one-hot）</strong></td>
+<td>使<strong>非偏序关系</strong>的取值<strong>不具有偏序性</strong>，各类别<strong>到原点等距</strong></td>
+<td>山鸢尾 (1,0,0)、变色鸢尾 (0,1,0)、维吉尼亚鸢尾 (0,0,1)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>为什么要独热</strong>：顺序码里 2 &gt; 1 &gt; 0 会人为引入”大小关系”，模型可能误以为”维吉尼亚鸢尾 &#x3D; 2×山鸢尾”。独热编码让三个类别在向量空间里<strong>等距且对称</strong>。应用场景：<strong>离散的特征、多分类问题的类别标签</strong>。</p>
+</blockquote>
+<h3 id="11-5-2-softmax-函数"><a href="#11-5-2-softmax-函数" class="headerlink" title="11.5.2 softmax 函数"></a>11.5.2 softmax 函数</h3><p><strong>二分类</strong>：<code>y = 1/(1+e^(-(WX)))</code> → 输出一个概率（正类的概率）。</p>
+<p><strong>多分类</strong>：需要输出<strong>每个类别的概率</strong>，用 <strong>softmax 函数</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zₖ = w₀ₖ + w₁ₖx₁ + w₂ₖx₂ + ... + wₘₖxm</span><br><span class="line"></span><br><span class="line">softmax(zₖ) = e^(zₖ) / Σⱼ e^(zⱼ)          （k 是输出的索引，C 是类别总数）</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>zₖ</code>：<strong>第 k 个输出接收到的所有输入的线性组合</strong>；</li>
+<li>输出是<strong>每个类别的概率</strong>，且<strong>概率之和为 1</strong>；</li>
+<li>课件明确指出：<strong>Softmax 函数是 Logistic 函数在多分类问题上的推广</strong>。</li>
+</ul>
+<p><strong>例</strong>：用<strong>花瓣长度</strong>和<strong>花瓣宽度</strong>识别 3 种鸢尾花：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">z₁ = w₀₁ + w₁₁x₁ + w₂₁x₂</span><br><span class="line">z₂ = w₀₂ + w₁₂x₁ + w₂₂x₂</span><br><span class="line">z₃ = w₀₃ + w₁₃x₁ + w₂₃x₂</span><br><span class="line"></span><br><span class="line">y = softmax(WX) = ( e^(z₁)/Σe^(z), e^(z₂)/Σe^(z), e^(z₃)/Σe^(z) )</span><br></pre></td></tr></table></figure>
+
+<p>权重矩阵按”输出个数 × 输入维数”排列：<strong>W 是 C 行 × (m+1) 列</strong>（C 个类别、m 个属性 + 1 个偏置），课件在四类时给出的是 <code>4×5</code> 的矩阵，正好印证这个规律。</p>
+<h3 id="11-5-3-多分类的损失函数"><a href="#11-5-3-多分类的损失函数" class="headerlink" title="11.5.3 多分类的损失函数"></a>11.5.3 多分类的损失函数</h3><table>
+<thead>
+<tr>
+<th>损失函数</th>
+<th>公式</th>
+<th>适用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>二元交叉熵（BCE）</strong></td>
+<td><code>Loss = -Σᵢ[yᵢln(ŷᵢ) + (1-yᵢ)ln(1-ŷᵢ)]</code></td>
+<td>二分类</td>
+</tr>
+<tr>
+<td><strong>多分类交叉熵（CCE）</strong></td>
+<td><code>Loss = -Σᵢ Σₚ yᵢ,ₚ ln(ŷᵢ,ₚ)</code></td>
+<td>多分类</td>
+</tr>
+</tbody></table>
+<p>其中：</p>
+<ul>
+<li><code>i</code>：样本的索引，<code>n</code>：样本总数；</li>
+<li><code>yᵢ,ₚ</code>：<strong>第 i 个样本属于第 p 类的标记值（0&#x2F;1，独热）</strong>；</li>
+<li><code>ŷᵢ,ₚ</code>：<strong>第 i 个样本属于第 p 类的预测概率</strong>；</li>
+<li><code>C</code>：类别总数。</li>
+</ul>
+<p><strong>课件对比实例</strong>（3 个样本、3 类）：</p>
+<table>
+<thead>
+<tr>
+<th>样本</th>
+<th>模型 A 预测</th>
+<th>模型 B 预测</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1（类1）</td>
+<td>(0.3, 0.3, 0.4) ✓</td>
+<td>(0.1, 0.2, 0.7) ✓</td>
+</tr>
+<tr>
+<td>2（类2）</td>
+<td>(0.3, 0.4, 0.3) ✓</td>
+<td>(0.1, 0.7, 0.2) ✓</td>
+</tr>
+<tr>
+<td>3（类3）</td>
+<td>(0.1, 0.2, 0.7) ✗</td>
+<td>(0.3, 0.4, 0.3) ✗</td>
+</tr>
+</tbody></table>
+<ul>
+<li>两个模型<strong>准确率都是 2&#x2F;3 &#x3D; 66.7%</strong>；</li>
+<li>交叉熵损失和：<strong>模型 A &#x3D; 5.9677，模型 B &#x3D; 1.9173</strong>。</li>
+</ul>
+<blockquote>
+<p>又一次印证 11.1 的结论：<strong>准确率相同不等于模型一样好</strong>。模型 B 对正确类别的预测概率更高（更有把握），交叉熵小得多。</p>
+</blockquote>
+<h3 id="11-5-4-互斥与非互斥"><a href="#11-5-4-互斥与非互斥" class="headerlink" title="11.5.4 互斥与非互斥"></a>11.5.4 互斥与非互斥</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>含义</th>
+<th>例</th>
+<th>做法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>互斥的多分类</strong></td>
+<td>每个样本<strong>只能属于一个类别</strong></td>
+<td>鸢尾花识别、手写数字识别</td>
+<td>softmax（概率和为 1）</td>
+</tr>
+<tr>
+<td><strong>非互斥的多分类</strong></td>
+<td>一个样本<strong>可以同时属于多个类别</strong></td>
+<td>一张图里同时有”人物””汽车””户外”</td>
+<td>构建<strong>多个一对多的逻辑回归</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="11-6-实例：实现多分类（TensorFlow）"><a href="#11-6-实例：实现多分类（TensorFlow）" class="headerlink" title="11.6 实例：实现多分类（TensorFlow）"></a>11.6 实例：实现多分类（TensorFlow）</h2><h3 id="11-6-1-独热编码：tf-one-hot"><a href="#11-6-1-独热编码：tf-one-hot" class="headerlink" title="11.6.1 独热编码：tf.one_hot"></a>11.6.1 独热编码：<code>tf.one_hot</code></h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a = [<span class="number">0</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">5</span>]</span><br><span class="line">b = tf.one_hot(a, <span class="number">6</span>)</span><br><span class="line">b</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;tf.Tensor: id=4, shape=(4, 6), dtype=float32, numpy=</span><br><span class="line">array([[1., 0., 0., 0., 0., 0.],</span><br><span class="line">       [0., 0., 1., 0., 0., 0.],</span><br><span class="line">       [0., 0., 0., 1., 0., 0.],</span><br><span class="line">       [0., 0., 0., 0., 0., 1.]], dtype=float32)&gt;</span><br></pre></td></tr></table></figure>
+
+<p>第二个参数是<strong>编码深度</strong>（类别数），输出形状为 <code>(样本数, 类别数)</code>。</p>
+<h3 id="11-6-2-多分类的准确率：argmax"><a href="#11-6-2-多分类的准确率：argmax" class="headerlink" title="11.6.2 多分类的准确率：argmax"></a>11.6.2 多分类的准确率：argmax</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pred = np.array([[<span class="number">0.1</span>, <span class="number">0.2</span>, <span class="number">0.7</span>],</span><br><span class="line">                 [<span class="number">0.1</span>, <span class="number">0.7</span>, <span class="number">0.2</span>],</span><br><span class="line">                 [<span class="number">0.3</span>, <span class="number">0.4</span>, <span class="number">0.3</span>]])</span><br><span class="line">y = np.array([<span class="number">2</span>, <span class="number">1</span>, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">tf.argmax(pred, axis=<span class="number">1</span>)      <span class="comment"># array([2, 1, 1])   ← 取每行最大值的索引</span></span><br><span class="line">tf.equal(tf.argmax(pred, axis=<span class="number">1</span>), y)    <span class="comment"># array([ True,  True, False])</span></span><br><span class="line">tf.cast(tf.equal(tf.argmax(pred, axis=<span class="number">1</span>), y), tf.float32)   <span class="comment"># array([1., 1., 0.])</span></span><br><span class="line">tf.reduce_mean(tf.cast(tf.equal(tf.argmax(pred, axis=<span class="number">1</span>), y), tf.float32))   <span class="comment"># 0.6666667</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>逻辑</strong>：预测值中<strong>最大数的索引</strong>即预测类别 → 与样本标记比较 → 转成数值求平均 &#x3D; 准确率。注意 <strong><code>axis=1</code> 是”每一行”</strong>（每个样本的各类概率），别写成 <code>axis=0</code>。</p>
+<h3 id="11-6-3-多分类交叉熵"><a href="#11-6-3-多分类交叉熵" class="headerlink" title="11.6.3 多分类交叉熵"></a>11.6.3 多分类交叉熵</h3><p><img src="/images/dl/dl11-logistic/p03-01_1111x650.jpg" alt="第3页 argmax 计算多分类准确率"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">y_onehot = np.array([[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>],</span><br><span class="line">                     [<span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>],</span><br><span class="line">                     [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>]])</span><br><span class="line"></span><br><span class="line">-y_onehot*tf.math.log(pred)</span><br><span class="line"><span class="comment"># array([[-0., -0., 0.35667494], [-0., 0.35667494, -0.], [1.2039728, -0., -0.]])</span></span><br><span class="line"></span><br><span class="line">-tf.reduce_sum(y_onehot*tf.math.log(pred))          <span class="comment"># 1.917322692203401</span></span><br><span class="line">-tf.reduce_sum(y_onehot*tf.math.log(pred))/<span class="built_in">len</span>(pred) <span class="comment"># 0.6391075640678003</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>巧思</strong>：因为 <code>y_onehot</code> 里只有一个 1，所以”逐元素相乘再求和”自动只留下<strong>正确类别那一项</strong>的 <code>-ln(p)</code>——这与公式 <code>-Σₚ yᵢ,ₚ ln(ŷᵢ,ₚ)</code> 完全等价，但实现上只是一个乘法。</p>
+</blockquote>
+<h3 id="11-6-4-训练循环（softmax-多分类交叉熵）"><a href="#11-6-4-训练循环（softmax-多分类交叉熵）" class="headerlink" title="11.6.4 训练循环（softmax + 多分类交叉熵）"></a>11.6.4 训练循环（softmax + 多分类交叉熵）</h3><p><img src="/images/dl/dl11-logistic/p08-01_1054x442.jpg" alt="第8页 softmax 多分类训练循环"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">acc = []</span><br><span class="line">cce = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED_train = tf.nn.softmax(tf.matmul(X_train, W))</span><br><span class="line">        Loss_train = -tf.reduce_sum(Y_train*tf.math.log(PRED_train))/num_train</span><br><span class="line"></span><br><span class="line">    accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(PRED_train.numpy(), axis=<span class="number">1</span>), y_train), tf.float32))</span><br><span class="line"></span><br><span class="line">    acc.append(accuracy)</span><br><span class="line">    cce.append(Loss_train)</span><br><span class="line"></span><br><span class="line">    dL_dW = tape.gradient(Loss_train, W)</span><br><span class="line">    W.assign_sub(learn_rate*dL_dW)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, Acc: %f, Loss: %f&quot;</span> % (i, accuracy, Loss_train))</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-6-5-绘制分类图"><a href="#11-6-5-绘制分类图" class="headerlink" title="11.6.5 绘制分类图"></a>11.6.5 绘制分类图</h3><p><img src="/images/dl/dl11-logistic/p13-01_756x227.jpg" alt="第13页 分区着色绘制分类图"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">n = tf.reshape(Y_, ml.shape)      <span class="comment"># 把网格点预测结果 reshape 成与网格相同的形状</span></span><br><span class="line"></span><br><span class="line">plt.figure(figsize=(<span class="number">8</span>, <span class="number">6</span>))</span><br><span class="line">cm_bg = mpl.colors.ListedColormap([<span class="string">&#x27;#A0FFA0&#x27;</span>, <span class="string">&#x27;#FFA0A0&#x27;</span>, <span class="string">&#x27;#A0A0FF&#x27;</span>])</span><br><span class="line">plt.pcolormesh(ml, m2, n, cmap=cm_bg)</span><br><span class="line">plt.scatter(x_train[:, <span class="number">0</span>], x_train[:, <span class="number">1</span>], c=y_train, cmap=<span class="string">&quot;brg&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>要点：</p>
+<ul>
+<li>先用训练好的 <code>W</code> 对<strong>网格点</strong>逐个预测，得到 <code>Y_</code>；</li>
+<li>把预测值<strong>转成自然顺序码</strong>（<code>argmax</code>）决定网格颜色；</li>
+<li><strong><code>Y_</code> 要 reshape 成与 <code>ml</code>（网格横坐标矩阵）相同的形状</strong>，<code>pcolormesh</code> 才能正确填色；</li>
+<li><code>ListedColormap</code> 自定义背景三色，散点用 <code>cmap=&quot;brg&quot;</code> 区分三类。</li>
+</ul>
+<hr>
+<h2 id="11-7-PyTorch-实现（子篇）"><a href="#11-7-PyTorch-实现（子篇）" class="headerlink" title="11.7 PyTorch 实现（子篇）"></a>11.7 PyTorch 实现（子篇）</h2><p>第 11 讲的 11.7.x 是<strong>用 PyTorch 完成同样的分类任务</strong>（一元逻辑回归、多元逻辑回归、鸢尾花多分类），体量较大，单独整理为：</p>
+<p><strong>→ 《第11讲-PyTorch分类实现（子篇）.md》</strong></p>
+<hr>
+<h2 id="本讲易错点清单"><a href="#本讲易错点清单" class="headerlink" title="本讲易错点清单"></a>本讲易错点清单</h2><ol>
+<li><strong>阶跃函数不能当损失</strong>：不光滑、不连续、无法求导——所以要用 <strong>sigmoid + 交叉熵</strong>。</li>
+<li><strong>平方损失 + sigmoid 是非凸的</strong>（课件明确标注），这就是必须换交叉熵的原因之一。</li>
+<li><strong>两个 <code>tf.reduce</code> 要分清</strong>：<code>reduce_sum</code> 是交叉熵总和、<code>reduce_mean</code> 是平均交叉熵；训练用 <code>reduce_mean</code>（多分类里课件用 <code>reduce_sum/n</code>，等价）。</li>
+<li><strong><code>tf.round</code> 是”五成双”</strong>：<code>tf.round(0.5) = 0.0</code>，会把恰好 0.5 的样本判成 0 类。<strong>判分类请用 <code>tf.where(pred&lt;0.5, 0, 1)</code></strong>。</li>
+<li><strong><code>tf.where</code> 的参数顺序</strong>：<code>tf.where(条件, 条件成立时的值, 条件不成立时的值)</code>；<code>pred&lt;0.5</code> 成立（即概率小）判 0，所以是 <code>tf.where(pred&lt;0.5, 0, 1)</code>。</li>
+<li><strong>预测时必须用训练时的中心化&#x2F;归一化</strong>：<code>x_test - np.mean(x_train)</code>；漏了这一步预测全错。</li>
+<li><strong><code>tf.argmax(pred, axis=1)</code></strong> 的 <code>axis=1</code> 表示”每个样本的各类概率里找最大”，多分类算准确率专用。</li>
+<li><strong>独热编码的作用</strong>：让类别<strong>到原点等距、无偏序</strong>——顺序码会引入虚假的大小关系。</li>
+<li><strong>多分类交叉熵的巧妙实现</strong>：<code>-Σ y_onehot·ln(pred)</code>，因为 one-hot 只有一个 1，逐元素乘法自动挑出正确类别那一项。</li>
+<li><strong>softmax 是 logistic 的推广</strong>：二分类用 sigmoid 输出 1 个概率，多分类用 softmax 输出 C 个和为 1 的概率。</li>
+<li><strong>权重矩阵的形状</strong>：<code>W</code> 为 <strong>C×(m+1)</strong>（C 个类别、m 个属性 + 1 个偏置），所以输入矩阵必须补一列 1。</li>
+<li><strong>决策边界公式</strong>：由 <code>W[0] + W[1]x₁ + W[2]x₂ = 0</code> 解出 <code>x₂ = -(W[0]+W[1]x₁)/W[2]</code>，别忘了外面的负号。</li>
+<li><strong>网格矩阵形状要一致</strong>：<code>np.meshgrid</code> 得到的 <code>X/Y</code> 与算出的 <code>Z</code> 必须同形，<code>pcolormesh/contour</code> 才能画对。</li>
+<li><strong>异或（XOR）线性不可分</strong>：这是线性分类器的根本局限，也是后面多层网络存在的理由。</li>
+</ol>
+<hr>
+<h2 id="本讲知识地图"><a href="#本讲知识地图" class="headerlink" title="本讲知识地图"></a>本讲知识地图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">11.1 逻辑回归</span><br><span class="line">      ├── 广义线性模型 y = g⁻¹(XW)</span><br><span class="line">      ├── 分类器 / 阶跃函数（不光滑、不连续）→ 换 sigmoid</span><br><span class="line">      ├── 平方损失（非凸）→ 换交叉熵（凸、无需对 sigmoid 求导）</span><br><span class="line">      └── 准确率 vs 交叉熵：准确率相同、损失可以差很多</span><br><span class="line">            │</span><br><span class="line">11.2 一元逻辑回归实例</span><br><span class="line">      └── sigmoid → 交叉熵 → 准确率（tf.where 而非 tf.round）→ 中心化 → 预测</span><br><span class="line">            │</span><br><span class="line">11.3 线性分类器</span><br><span class="line">      ├── 决策边界 / 超平面 WX+b=0</span><br><span class="line">      └── 线性可分（与/或/非）vs 线性不可分（异或）</span><br><span class="line">            │</span><br><span class="line">11.4 多元逻辑回归实例（Iris 二分类）</span><br><span class="line">      ├── 数据：120 样本 → 取 2 属性 → 筛出 78 个两类样本 → 中心化</span><br><span class="line">      ├── 增广矩阵 X(78,3) + 参数向量 W(3,1)</span><br><span class="line">      └── 决策边界绘制 + 网格/伪彩色/等高线（11.4.2）</span><br><span class="line">            │</span><br><span class="line">11.5 多分类问题</span><br><span class="line">      ├── 独热编码（等距、无偏序）</span><br><span class="line">      ├── softmax（logistic 的推广，输出 C 个和为 1 的概率）</span><br><span class="line">      └── 多分类交叉熵 CCE；互斥（softmax）vs 非互斥（多个一对多）</span><br><span class="line">            │</span><br><span class="line">11.6 多分类实例</span><br><span class="line">      └── tf.one_hot、argmax 算准确率、softmax 训练、pcolormesh 分区着色</span><br><span class="line">            │</span><br><span class="line">11.7 PyTorch 实现（子篇）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>原始课件位置：<code>课件/第11讲/</code>（11.1 逻辑回归、11.2 实例：实现一元逻辑回归、11.3 线性分类器、11.4 实例：实现多元逻辑回归、11.5 多分类问题、11.6 实例：实现多分类、11.7.1~11.7.3 PyTorch 实现）。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/" title="第11讲 分类问题（逻辑回归）">http://example.com/2026/10/07/第11讲-分类问题（逻辑回归）/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/" rel="tag"># 逻辑回归</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/" rel="prev" title="第9讲 回归问题（线性回归）">
+      <i class="fa fa-chevron-left"></i> 第9讲 回归问题（线性回归）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" rel="next" title="第11讲 PyTorch分类实现（子篇）">
+      第11讲 PyTorch分类实现（子篇） <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-11-%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92-%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E5%99%A8-%E5%A4%9A%E5%88%86%E7%B1%BB-%E4%B8%89%E4%B8%AA%E5%AE%9E%E4%BE%8B-PyTorch-%E5%AE%9E%E7%8E%B0%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92"><span class="nav-number">1.1.</span> <span class="nav-text">11.1 逻辑回归</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-1-%E4%BB%8E%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%E5%88%B0%E5%B9%BF%E4%B9%89%E7%BA%BF%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">11.1.1 从线性回归到广义线性模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%E4%B8%8E%E5%88%86%E7%B1%BB%E5%99%A8"><span class="nav-number">1.1.2.</span> <span class="nav-text">11.1.2 分类问题与分类器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-3-%E5%AF%B9%E6%95%B0%E5%87%A0%E7%8E%87%E5%87%BD%E6%95%B0%EF%BC%88sigmoid%EF%BC%89"><span class="nav-number">1.1.3.</span> <span class="nav-text">11.1.3 对数几率函数（sigmoid）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-4-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E4%B8%A4%E6%AC%A1%E5%B0%9D%E8%AF%95"><span class="nav-number">1.1.4.</span> <span class="nav-text">11.1.4 损失函数的两次尝试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-1-5-%E5%87%86%E7%A1%AE%E7%8E%87%EF%BC%88accuracy%EF%BC%89"><span class="nav-number">1.1.5.</span> <span class="nav-text">11.1.5 准确率（accuracy）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-2-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0%E4%B8%80%E5%85%83%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%88TensorFlow%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">11.2 实例：实现一元逻辑回归（TensorFlow）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-1-%E9%AA%8C%E8%AF%81-sigmoid-%E4%B8%8E%E4%BA%A4%E5%8F%89%E7%86%B5%E7%9A%84%E5%86%99%E6%B3%95"><span class="nav-number">1.2.1.</span> <span class="nav-text">11.2.1 验证 sigmoid 与交叉熵的写法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-2-%E5%87%86%E7%A1%AE%E7%8E%87%E7%9A%84%E4%B8%89%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">11.2.2 准确率的三种实现方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-3-%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E4%B8%8E%E4%B8%AD%E5%BF%83%E5%8C%96"><span class="nav-number">1.2.3.</span> <span class="nav-text">11.2.3 加载数据与中心化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-4-%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.2.4.</span> <span class="nav-text">11.2.4 训练循环</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-2-5-%E9%A2%84%E6%B5%8B%E4%B8%8E%E7%BB%93%E6%9E%9C"><span class="nav-number">1.2.5.</span> <span class="nav-text">11.2.5 预测与结果</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-3-%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E5%99%A8"><span class="nav-number">1.3.</span> <span class="nav-text">11.3 线性分类器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-3-1-%E5%86%B3%E7%AD%96%E8%BE%B9%E7%95%8C%E4%B8%8E%E8%B6%85%E5%B9%B3%E9%9D%A2"><span class="nav-number">1.3.1.</span> <span class="nav-text">11.3.1 决策边界与超平面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-3-2-%E7%BA%BF%E6%80%A7%E5%88%86%E7%B1%BB%E5%99%A8%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.3.2.</span> <span class="nav-text">11.3.2 线性分类器实例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-3-3-%E7%BA%BF%E6%80%A7%E4%B8%8D%E5%8F%AF%E5%88%86%E4%B8%8E%E9%80%BB%E8%BE%91%E8%BF%90%E7%AE%97"><span class="nav-number">1.3.3.</span> <span class="nav-text">11.3.3 线性不可分与逻辑运算</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-4-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%85%83%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%88TensorFlow%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">11.4 实例：实现多元逻辑回归（TensorFlow）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-4-1-%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%8E%E5%8A%A0%E8%BD%BD"><span class="nav-number">1.4.1.</span> <span class="nav-text">11.4.1 数据集与加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-4-2-%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">1.4.2.</span> <span class="nav-text">11.4.2 数据处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-4-3-%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-number">1.4.3.</span> <span class="nav-text">11.4.3 训练模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-4-4-%E5%86%B3%E7%AD%96%E8%BE%B9%E7%95%8C%E7%9A%84%E7%BB%98%E5%88%B6"><span class="nav-number">1.4.4.</span> <span class="nav-text">11.4.4 决策边界的绘制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-4-5-%E7%BB%98%E5%88%B6%E5%88%86%E7%B1%BB%E5%9B%BE%EF%BC%8811-4-2-%E8%8A%82%EF%BC%89"><span class="nav-number">1.4.5.</span> <span class="nav-text">11.4.5 绘制分类图（11.4.2 节）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-5-%E5%A4%9A%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98"><span class="nav-number">1.5.</span> <span class="nav-text">11.5 多分类问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-5-1-%E4%BB%8E%E4%BA%8C%E5%88%86%E7%B1%BB%E5%88%B0%E5%A4%9A%E5%88%86%E7%B1%BB"><span class="nav-number">1.5.1.</span> <span class="nav-text">11.5.1 从二分类到多分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-5-2-softmax-%E5%87%BD%E6%95%B0"><span class="nav-number">1.5.2.</span> <span class="nav-text">11.5.2 softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-5-3-%E5%A4%9A%E5%88%86%E7%B1%BB%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-number">1.5.3.</span> <span class="nav-text">11.5.3 多分类的损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-5-4-%E4%BA%92%E6%96%A5%E4%B8%8E%E9%9D%9E%E4%BA%92%E6%96%A5"><span class="nav-number">1.5.4.</span> <span class="nav-text">11.5.4 互斥与非互斥</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-6-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%88%86%E7%B1%BB%EF%BC%88TensorFlow%EF%BC%89"><span class="nav-number">1.6.</span> <span class="nav-text">11.6 实例：实现多分类（TensorFlow）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#11-6-1-%E7%8B%AC%E7%83%AD%E7%BC%96%E7%A0%81%EF%BC%9Atf-one-hot"><span class="nav-number">1.6.1.</span> <span class="nav-text">11.6.1 独热编码：tf.one_hot</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-6-2-%E5%A4%9A%E5%88%86%E7%B1%BB%E7%9A%84%E5%87%86%E7%A1%AE%E7%8E%87%EF%BC%9Aargmax"><span class="nav-number">1.6.2.</span> <span class="nav-text">11.6.2 多分类的准确率：argmax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-6-3-%E5%A4%9A%E5%88%86%E7%B1%BB%E4%BA%A4%E5%8F%89%E7%86%B5"><span class="nav-number">1.6.3.</span> <span class="nav-text">11.6.3 多分类交叉熵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-6-4-%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF%EF%BC%88softmax-%E5%A4%9A%E5%88%86%E7%B1%BB%E4%BA%A4%E5%8F%89%E7%86%B5%EF%BC%89"><span class="nav-number">1.6.4.</span> <span class="nav-text">11.6.4 训练循环（softmax + 多分类交叉熵）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-6-5-%E7%BB%98%E5%88%B6%E5%88%86%E7%B1%BB%E5%9B%BE"><span class="nav-number">1.6.5.</span> <span class="nav-text">11.6.5 绘制分类图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-7-PyTorch-%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">11.7 PyTorch 实现（子篇）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E6%98%93%E9%94%99%E7%82%B9%E6%B8%85%E5%8D%95"><span class="nav-number">1.8.</span> <span class="nav-text">本讲易错点清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE"><span class="nav-number">1.9.</span> <span class="nav-text">本讲知识地图</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">392k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">5:57</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

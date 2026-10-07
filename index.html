@@ -302,6 +302,258 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" class="post-title-link" itemprop="url">第11讲 PyTorch分类实现（子篇）</a>
+        </h2>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-07 22:01:09 / 修改时间：22:28:46" itemprop="dateCreated datePublished" datetime="2026-10-07T22:01:09+08:00">2026-10-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>45k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>41 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="第-11-讲-PyTorch-分类实现（子篇：11-7-1-11-7-3）"><a href="#第-11-讲-PyTorch-分类实现（子篇：11-7-1-11-7-3）" class="headerlink" title="第 11 讲 PyTorch 分类实现（子篇：11.7.1 ~ 11.7.3）"></a>第 11 讲 PyTorch 分类实现（子篇：11.7.1 ~ 11.7.3）</h1><blockquote>
+<p><strong>代码还原声明（务必先读）</strong></p>
+<p>本子篇的素材来自课件 PDF 的<strong>文字抽取</strong>，抽取结果存在三个严重问题：</p>
+<ol>
+<li><strong>换行碎片化</strong>——一条代码语句常被拆成好几行，有的片段甚至整段丢失。例：11.7.3 的 <code>print(f&quot;Epoch: ...&quot;)</code> 只剩 <code>&quot;Epoch:</code> 和 <code>&#123;Loss_train.item()&#125;</code> 两三个碎片；11.7.2 的 <code>plt.plot(x_,y_,color=&#39;red&#39;,linewidth=3)</code> 只剩 <code>color=&#39;red&#39;,linewidth=3</code> 一截。</li>
+<li><strong>代码字体缺小写字母字形</strong>——<strong>小写字母 a~z 全部变成空格</strong>，只有大写字母、数字和符号（<code>_ . = ( ) [ ] , % * - / &#39; :</code>）被保留。例：<code>np.array([...])</code> 抽取成 <code>.     ([...])</code>；<code>requires_grad=True</code> 抽取成 <code>        _    =T   )</code>；<code>torch.tensor(np.random.randn(), requires_grad=True)</code> 抽取成 <code>=     .      (  .      .     (),        _    =T   )</code>。</li>
+<li><strong>行首变量名&#x2F;整段文本被裁掉</strong>——一行开头的全小写变量名常被整段裁掉，例：<code>train_x=iris_train[:,0:2]</code> 只剩 <code>=    _     [:,0:2]</code>；<code>print(...)</code> 只剩 <code>(...)</code>。</li>
+</ol>
+<p>因此，<strong>本文中的代码是按 PyTorch 语义还原后的可运行代码</strong>：语句结构、超参数、API 调用、运行结果都与课件一致；<strong>凡属推断补全之处，均单独用「&gt; 注：」标注</strong>；<strong>课件没有给出的运行结果，本笔记一律不补写</strong>——文中所有终端输出与图片都直接来自课件截图。</p>
+<p><strong>还原原则（三步走）</strong></p>
+<ol>
+<li>用<strong>完好字符</strong>（大写变量名、数字、切片、关键字参数如 <code>requires_grad=</code>、括号结构、点号、下划线）做<strong>逐字符结构核对</strong>——小写字母变成空格后<strong>长度仍然保留</strong>，所以「这个函数名有几个字母」「这个变量名有几个字母」是可以<strong>数出来</strong>的；</li>
+<li>小写处的 API 名&#x2F;变量名按 <strong>PyTorch 语义 + 同讲 TensorFlow 版（11.2 &#x2F; 11.4 &#x2F; 11.6）的同一段代码</strong>推断补全；第 11 讲的 TensorFlow 版代码在课件里是<strong>截图</strong>（有完整字形），恰好可以做「同一件事的另一套 API」的对照；</li>
+<li>用课件的<strong>终端截图</strong>做最终校验。例如 11.7.1 打印出的是全精度浮点 <code>0.8528074207031997</code> 与 <code>0.625</code>，说明格式串用的是 <code>&#123;&#125;</code> 而不是 <code>%f</code>；11.7.3 打印的是 <code>&#123;Loss_train.item()&#125;</code> 风格的全精度值，说明用的是 f-string + <code>.item()</code>。</li>
+</ol>
+<p>具体哪几处无法逐字还原，集中列在文末《<strong>附录 B：未能从 PDF 还原的内容（不确定处汇总）</strong>》。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p><strong>本子篇对应课件</strong>：<strong>11.7.1 PyTorch 实现一元逻辑回归问题 → 11.7.2 PyTorch 实现多元逻辑回归问题 → 11.7.3 PyTorch 实现鸢尾花多分类</strong>。<br>三节的运行环境<strong>完全相同</strong>（课件照录）：<strong>python 3.8.5 &#x2F; numpy 1.21.5 &#x2F; PyTorch 1.8.0</strong>。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+ 
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/" class="post-title-link" itemprop="url">第11讲 分类问题（逻辑回归）</a>
+        </h2>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-07 21:44:32 / 修改时间：22:28:46" itemprop="dateCreated datePublished" datetime="2026-10-07T21:44:32+08:00">2026-10-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）"><a href="#第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）" class="headerlink" title="第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现）"></a>第 11 讲 分类问题（逻辑回归 &#x2F; 线性分类器 &#x2F; 多分类 &#x2F; 三个实例 &#x2F; PyTorch 实现）</h1><blockquote>
+<p>本讲对应课件：<strong>11.1 逻辑回归 → 11.2 实例：实现一元逻辑回归 → 11.3 线性分类器 → 11.4 实例：实现多元逻辑回归 → 11.5 多分类问题 → 11.6 实例：实现多分类</strong>，以及 <strong>11.7.x 的 PyTorch 实现</strong>。<br>第 9、10 讲解决”预测连续值”（回归），本讲转向<strong>预测离散类别</strong>（分类）。核心三步：<strong>用 sigmoid&#x2F;softmax 把线性输出变成概率 → 用交叉熵衡量误差 → 用梯度下降更新参数</strong>。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>11.1 逻辑回归</td>
+<td>广义线性模型、分类器与阶跃函数、logistic 函数、平方损失 vs 交叉熵、准确率</td>
+</tr>
+<tr>
+<td>11.2 一元逻辑回归实例</td>
+<td>sigmoid、交叉熵、准确率、<code>tf.where</code>、中心化、训练与可视化、预测</td>
+</tr>
+<tr>
+<td>11.3 线性分类器</td>
+<td>决策边界、超平面、线性可分与不可分、逻辑运算（与&#x2F;或&#x2F;非&#x2F;异或）</td>
+</tr>
+<tr>
+<td>11.4 多元逻辑回归实例</td>
+<td>Iris 数据集、属性中心化、增广矩阵、训练、决策边界绘制、网格与等高线</td>
+</tr>
+<tr>
+<td>11.5 多分类问题</td>
+<td>独热编码、softmax、多分类交叉熵、互斥&#x2F;非互斥</td>
+</tr>
+<tr>
+<td>11.6 多分类实例</td>
+<td><code>tf.one_hot</code>、<code>argmax</code> 算准确率、softmax 训练、分区着色</td>
+</tr>
+<tr>
+<td>11.7 PyTorch 实现</td>
+<td>一元&#x2F;多元逻辑回归、鸢尾花多分类</td>
+</tr>
+</tbody></table>
+<hr>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+ 
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/06/%E7%AC%AC9%E8%AE%B2-%E5%9B%9E%E5%BD%92%E9%97%AE%E9%A2%98%EF%BC%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1216,220 +1468,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="hakusuri">
-      <meta itemprop="description" content="Hakusuri的个人生活">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HakusuriのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/" class="post-title-link" itemprop="url">第6讲 Matplotlib数据可视化</a>
-        </h2>
-
-        <div class="post-meta">
-	  
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-10-04 16:04:23" itemprop="dateCreated datePublished" datetime="2026-10-04T16:04:23+08:00">2026-10-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-10-06 23:43:50" itemprop="dateModified" datetime="2026-10-06T23:43:50+08:00">2026-10-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>16k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>15 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="第-6-讲-Matplotlib-数据可视化"><a href="#第-6-讲-Matplotlib-数据可视化" class="headerlink" title="第 6 讲 Matplotlib 数据可视化"></a>第 6 讲 Matplotlib 数据可视化</h1><blockquote>
-<p><strong>导读</strong>：本讲解决”用 Python 把数据画出来”的问题，含 5 个小节：<strong>6.1 Matplotlib 绘图基础</strong>（画布、子图、中文字体、标题、自动布局）、<strong>6.2 散点图</strong>（scatter()、marker、图例）、<strong>6.3 折线图和柱状图</strong>（plot()、bar()）、<strong>6.4 波士顿房价数据集可视化</strong>、<strong>6.5 鸢尾花数据集可视化</strong>（下载数据集、Pandas 读 csv、按类别着色画散点图），文末为 <code>tight_layout()</code> 参数补充说明。</p>
-</blockquote>
-<hr>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/10/04/%E7%AC%AC6%E8%AE%B2-Matplotlib%E6%95%B0%E6%8D%AE%E5%8F%AF%E8%A7%86%E5%8C%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
- 
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="hakusuri">
-      <meta itemprop="description" content="Hakusuri的个人生活">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HakusuriのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/" class="post-title-link" itemprop="url">第4讲 Python语言基础（2）</a>
-        </h2>
-
-        <div class="post-meta">
-	  
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-10-04 16:04:23" itemprop="dateCreated datePublished" datetime="2026-10-04T16:04:23+08:00">2026-10-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-10-06 23:43:49" itemprop="dateModified" datetime="2026-10-06T23:43:49+08:00">2026-10-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>26k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>24 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="第-4-讲-Python-语言基础（2）学习笔记"><a href="#第-4-讲-Python-语言基础（2）学习笔记" class="headerlink" title="第 4 讲 Python 语言基础（2）学习笔记"></a>第 4 讲 Python 语言基础（2）学习笔记</h1><blockquote>
-<p><strong>导读</strong>：本讲是《神经网络与深度学习》（中国大学 MOOC · 西安科技大学 · 牟琦）第 4 讲”04 Python 语言基础（2）”的内容整理，共 6 个部分：<strong>4.1 内置数据结构</strong>（4.1.1 序列数据结构、4.1.2 字典和集合）、<strong>4.2 函数和模块</strong>（4.2.1 函数、4.2.2 模块、包和库）、<strong>4.3 Python 面向对象编程</strong>、<strong>4.4 文件</strong>、<strong>4.5 异常处理</strong>、<strong>4.6 上下文管理器</strong>。这些内容是后续用 Python 编写深度学习程序（数据处理、模型代码组织、文件读写、错误处理）的基础。</p>
-</blockquote>
-<hr>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/10/04/%E7%AC%AC4%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%882%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
- 
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1497,7 +1539,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">22</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1510,7 +1552,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1558,13 +1600,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">333k</span>
+    <span title="站点总字数">392k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:03</span>
+    <span title="站点阅读时长">5:57</span>
 </div>
   <div class="powered-by">
 <!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

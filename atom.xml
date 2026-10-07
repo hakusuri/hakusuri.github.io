@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-10-06T15:43:50.901Z</updated>
+  <updated>2026-10-07T14:28:46.896Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,114 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>第11讲 PyTorch分类实现（子篇）</title>
+    <link href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/"/>
+    <id>http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/</id>
+    <published>2026-10-07T14:01:09.000Z</published>
+    <updated>2026-10-07T14:28:46.896Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-11-讲-PyTorch-分类实现（子篇：11-7-1-11-7-3）&quot;&gt;&lt;a href=&quot;#第-11-讲-PyTorch-分类实现（子篇：11-7-1-11-7-3）&quot; class=&quot;headerlink&quot; title=&quot;第 11 讲 PyTorch 分类实现（子篇：11.7.1 ~ 11.7.3）&quot;&gt;&lt;/a&gt;第 11 讲 PyTorch 分类实现（子篇：11.7.1 ~ 11.7.3）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;代码还原声明（务必先读）&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;本子篇的素材来自课件 PDF 的&lt;strong&gt;文字抽取&lt;/strong&gt;，抽取结果存在三个严重问题：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;换行碎片化&lt;/strong&gt;——一条代码语句常被拆成好几行，有的片段甚至整段丢失。例：11.7.3 的 &lt;code&gt;print(f&amp;quot;Epoch: ...&amp;quot;)&lt;/code&gt; 只剩 &lt;code&gt;&amp;quot;Epoch:&lt;/code&gt; 和 &lt;code&gt;&amp;#123;Loss_train.item()&amp;#125;&lt;/code&gt; 两三个碎片；11.7.2 的 &lt;code&gt;plt.plot(x_,y_,color=&amp;#39;red&amp;#39;,linewidth=3)&lt;/code&gt; 只剩 &lt;code&gt;color=&amp;#39;red&amp;#39;,linewidth=3&lt;/code&gt; 一截。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;代码字体缺小写字母字形&lt;/strong&gt;——&lt;strong&gt;小写字母 a~z 全部变成空格&lt;/strong&gt;，只有大写字母、数字和符号（&lt;code&gt;_ . = ( ) [ ] , % * - / &amp;#39; :&lt;/code&gt;）被保留。例：&lt;code&gt;np.array([...])&lt;/code&gt; 抽取成 &lt;code&gt;.     ([...])&lt;/code&gt;；&lt;code&gt;requires_grad=True&lt;/code&gt; 抽取成 &lt;code&gt;        _    =T   )&lt;/code&gt;；&lt;code&gt;torch.tensor(np.random.randn(), requires_grad=True)&lt;/code&gt; 抽取成 &lt;code&gt;=     .      (  .      .     (),        _    =T   )&lt;/code&gt;。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;行首变量名&amp;#x2F;整段文本被裁掉&lt;/strong&gt;——一行开头的全小写变量名常被整段裁掉，例：&lt;code&gt;train_x=iris_train[:,0:2]&lt;/code&gt; 只剩 &lt;code&gt;=    _     [:,0:2]&lt;/code&gt;；&lt;code&gt;print(...)&lt;/code&gt; 只剩 &lt;code&gt;(...)&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;因此，&lt;strong&gt;本文中的代码是按 PyTorch 语义还原后的可运行代码&lt;/strong&gt;：语句结构、超参数、API 调用、运行结果都与课件一致；&lt;strong&gt;凡属推断补全之处，均单独用「&amp;gt; 注：」标注&lt;/strong&gt;；&lt;strong&gt;课件没有给出的运行结果，本笔记一律不补写&lt;/strong&gt;——文中所有终端输出与图片都直接来自课件截图。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;还原原则（三步走）&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;用&lt;strong&gt;完好字符&lt;/strong&gt;（大写变量名、数字、切片、关键字参数如 &lt;code&gt;requires_grad=&lt;/code&gt;、括号结构、点号、下划线）做&lt;strong&gt;逐字符结构核对&lt;/strong&gt;——小写字母变成空格后&lt;strong&gt;长度仍然保留&lt;/strong&gt;，所以「这个函数名有几个字母」「这个变量名有几个字母」是可以&lt;strong&gt;数出来&lt;/strong&gt;的；&lt;/li&gt;
+&lt;li&gt;小写处的 API 名&amp;#x2F;变量名按 &lt;strong&gt;PyTorch 语义 + 同讲 TensorFlow 版（11.2 &amp;#x2F; 11.4 &amp;#x2F; 11.6）的同一段代码&lt;/strong&gt;推断补全；第 11 讲的 TensorFlow 版代码在课件里是&lt;strong&gt;截图&lt;/strong&gt;（有完整字形），恰好可以做「同一件事的另一套 API」的对照；&lt;/li&gt;
+&lt;li&gt;用课件的&lt;strong&gt;终端截图&lt;/strong&gt;做最终校验。例如 11.7.1 打印出的是全精度浮点 &lt;code&gt;0.8528074207031997&lt;/code&gt; 与 &lt;code&gt;0.625&lt;/code&gt;，说明格式串用的是 &lt;code&gt;&amp;#123;&amp;#125;&lt;/code&gt; 而不是 &lt;code&gt;%f&lt;/code&gt;；11.7.3 打印的是 &lt;code&gt;&amp;#123;Loss_train.item()&amp;#125;&lt;/code&gt; 风格的全精度值，说明用的是 f-string + &lt;code&gt;.item()&lt;/code&gt;。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;具体哪几处无法逐字还原，集中列在文末《&lt;strong&gt;附录 B：未能从 PDF 还原的内容（不确定处汇总）&lt;/strong&gt;》。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本子篇对应课件&lt;/strong&gt;：&lt;strong&gt;11.7.1 PyTorch 实现一元逻辑回归问题 → 11.7.2 PyTorch 实现多元逻辑回归问题 → 11.7.3 PyTorch 实现鸢尾花多分类&lt;/strong&gt;。&lt;br&gt;三节的运行环境&lt;strong&gt;完全相同&lt;/strong&gt;（课件照录）：&lt;strong&gt;python 3.8.5 &amp;#x2F; numpy 1.21.5 &amp;#x2F; PyTorch 1.8.0&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="PyTorch" scheme="http://example.com/tags/PyTorch/"/>
+    
+    <category term="逻辑回归" scheme="http://example.com/tags/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>第11讲 分类问题（逻辑回归）</title>
+    <link href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/"/>
+    <id>http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-%E5%88%86%E7%B1%BB%E9%97%AE%E9%A2%98%EF%BC%88%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92%EF%BC%89/</id>
+    <published>2026-10-07T13:44:32.000Z</published>
+    <updated>2026-10-07T14:28:46.879Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）&quot;&gt;&lt;a href=&quot;#第-11-讲-分类问题（逻辑回归-线性分类器-多分类-三个实例-PyTorch-实现）&quot; class=&quot;headerlink&quot; title=&quot;第 11 讲 分类问题（逻辑回归 &amp;#x2F; 线性分类器 &amp;#x2F; 多分类 &amp;#x2F; 三个实例 &amp;#x2F; PyTorch 实现）&quot;&gt;&lt;/a&gt;第 11 讲 分类问题（逻辑回归 &amp;#x2F; 线性分类器 &amp;#x2F; 多分类 &amp;#x2F; 三个实例 &amp;#x2F; PyTorch 实现）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;11.1 逻辑回归 → 11.2 实例：实现一元逻辑回归 → 11.3 线性分类器 → 11.4 实例：实现多元逻辑回归 → 11.5 多分类问题 → 11.6 实例：实现多分类&lt;/strong&gt;，以及 &lt;strong&gt;11.7.x 的 PyTorch 实现&lt;/strong&gt;。&lt;br&gt;第 9、10 讲解决”预测连续值”（回归），本讲转向&lt;strong&gt;预测离散类别&lt;/strong&gt;（分类）。核心三步：&lt;strong&gt;用 sigmoid&amp;#x2F;softmax 把线性输出变成概率 → 用交叉熵衡量误差 → 用梯度下降更新参数&lt;/strong&gt;。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;11.1 逻辑回归&lt;/td&gt;
+&lt;td&gt;广义线性模型、分类器与阶跃函数、logistic 函数、平方损失 vs 交叉熵、准确率&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.2 一元逻辑回归实例&lt;/td&gt;
+&lt;td&gt;sigmoid、交叉熵、准确率、&lt;code&gt;tf.where&lt;/code&gt;、中心化、训练与可视化、预测&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.3 线性分类器&lt;/td&gt;
+&lt;td&gt;决策边界、超平面、线性可分与不可分、逻辑运算（与&amp;#x2F;或&amp;#x2F;非&amp;#x2F;异或）&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.4 多元逻辑回归实例&lt;/td&gt;
+&lt;td&gt;Iris 数据集、属性中心化、增广矩阵、训练、决策边界绘制、网格与等高线&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.5 多分类问题&lt;/td&gt;
+&lt;td&gt;独热编码、softmax、多分类交叉熵、互斥&amp;#x2F;非互斥&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.6 多分类实例&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;tf.one_hot&lt;/code&gt;、&lt;code&gt;argmax&lt;/code&gt; 算准确率、softmax 训练、分区着色&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;11.7 PyTorch 实现&lt;/td&gt;
+&lt;td&gt;一元&amp;#x2F;多元逻辑回归、鸢尾花多分类&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="逻辑回归" scheme="http://example.com/tags/%E9%80%BB%E8%BE%91%E5%9B%9E%E5%BD%92/"/>
+    
+  </entry>
   
   <entry>
     <title>第9讲 回归问题（线性回归）</title>
@@ -700,54 +808,6 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     
     
     <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>概述</title>
-    <link href="http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/"/>
-    <id>http://example.com/2025/02/22/%E6%A6%82%E8%BF%B0/</id>
-    <published>2025-02-22T09:40:30.000Z</published>
-    <updated>2026-10-06T15:42:56.625Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;因特网概述&quot;&gt;&lt;a href=&quot;#因特网概述&quot; class=&quot;headerlink&quot; title=&quot; 因特网概述&quot;&gt;&lt;/a&gt;&lt;center&gt; 因特网概述&lt;/h1&gt;&lt;h2 id=&quot;网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot;&gt;&lt;a href=&quot;#网络-Network-：由若干个节点-node-和链接这些节点的链路-Link-组成。&quot; class=&quot;headerlink&quot; title=&quot;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&quot;&gt;&lt;/a&gt;网络(Network)：由若干个节点(node)和链接这些节点的链路(Link)组成。&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;多个网络通过路由器互联，构成互联网。
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id=&quot;internet-与-Internet&quot;&gt;&lt;a href=&quot;#internet-与-Internet&quot; class=&quot;headerlink&quot; title=&quot;internet 与 Internet&quot;&gt;&lt;/a&gt;internet 与 Internet&lt;/h4&gt;&lt;pre&gt;&lt;code&gt;internet泛指计算机网络，这些网络的通信协议可以是任意的；Internet为专用名词，特指当前全球最大的、最开放的、由众多网络互相连接而成的特定计算机网络，采用TCP/IP协议族作为通信规则，其前身为美国的ARPANET。
-&lt;/code&gt;&lt;/pre&gt;</summary>
-    
-    
-    
-    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-    
-    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>NUKITASHI</title>
-    <link href="http://example.com/2025/02/21/NUKITASHI/"/>
-    <id>http://example.com/2025/02/21/NUKITASHI/</id>
-    <published>2025-02-20T16:02:29.000Z</published>
-    <updated>2026-10-06T15:43:11.359Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;NUKITASHI-拔作岛-——并非拔作的剧情向&quot;&gt;&lt;a href=&quot;#NUKITASHI-拔作岛-——并非拔作的剧情向&quot; class=&quot;headerlink&quot; title=&quot; NUKITASHI(拔作岛)——并非拔作的剧情向&quot;&gt;&lt;/a&gt;&lt;center&gt; NUKITASHI(拔作岛)——并非拔作的剧情向&lt;/h1&gt;&lt;p&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; 以我个人来说，比起甜甜的废萌，有一定深度剧情的作品更能吸引我。而本作拔作岛，如其名，初见可能以为是为了搞颜色而搞颜色，但游玩下来你会发现，这是一个面对社会舆论的压力，一个普通人如何抉择的故事。&lt;/p&gt;
-&lt;p&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;本作的故事背景为一个远离日本本土的岛屿青蓝岛上，这个岛屿实施了名为“变态条例”的法律来振兴经济，以可以自由进行性产活动来吸引本土的居民来岛游览或定居。由于多年的实施，岛上的居民已将性产行为视为一件日常活动，并设有监督组织 SHO 及其下属学生组织 FS 监督条例的实施，若有人违反条例会被实施强制 play（。而本作的主角橘淳之介和妹妹麻沙音，就是在这样的条件下回到了故乡的岛屿。在选择支之前，故事前期基本围绕主角作为一个“少数派”，如何躲避变态条例并在此过程中逐渐增加同伴，此间频繁暗示主角拥有可以“征服”岛屿的能力，而这个能力也让他有一个不愿回首的过去。&lt;br&gt;&lt;img src=&quot;/../images/QQ20250203-233512.png&quot; alt=&quot;NUKITASHI&quot;&gt;&lt;/p&gt;</summary>
-    
-    
-    
-    <category term="娱乐" scheme="http://example.com/categories/%E5%A8%B1%E4%B9%90/"/>
-    
-    <category term="galgame" scheme="http://example.com/categories/%E5%A8%B1%E4%B9%90/galgame/"/>
-    
-    
-    <category term="galgame" scheme="http://example.com/tags/galgame/"/>
-    
-    <category term="游戏评测" scheme="http://example.com/tags/%E6%B8%B8%E6%88%8F%E8%AF%84%E6%B5%8B/"/>
     
   </entry>
   
