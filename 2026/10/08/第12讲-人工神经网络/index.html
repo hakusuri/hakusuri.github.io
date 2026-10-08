@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/blog_icon_194621.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/blog_icon_194621-16x6.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":"enable","show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"manual","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例） 本讲对应课件：12.1 神经元与感知机 → 12.2 实例：实现单层神经网络 → 12.3.1 多层神经网络 → 12.3.2 超参数和验证集 → 12.4 误差反向传播算法 → 12.5 激活函数 → 12.6 实例：实现多层神经网络。第 11 讲用 s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第12讲 人工神经网络">
+<meta property="og:url" content="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/index.html">
+<meta property="og:site_name" content="HakusuriのBlog">
+<meta property="og:description" content="第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例） 本讲对应课件：12.1 神经元与感知机 → 12.2 实例：实现单层神经网络 → 12.3.1 多层神经网络 → 12.3.2 超参数和验证集 → 12.4 误差反向传播算法 → 12.5 激活函数 → 12.6 实例：实现多层神经网络。第 11 讲用 s">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p07-01_977x470.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p06-02_678x104.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p14-01_779x140.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p16-01_920x394.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p04-01_528x273.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p09-01_318x174.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p13-01_1350x591.jpg">
+<meta property="og:image" content="http://example.com/images/dl/dl12-ann/p14-01_864x141.jpg">
+<meta property="article:published_time" content="2026-10-08T13:21:36.000Z">
+<meta property="article:modified_time" content="2026-10-08T13:33:34.647Z">
+<meta property="article:author" content="hakusuri">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="人工神经网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/dl/dl12-ann/p07-01_977x470.jpg">
+
+<link rel="canonical" href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第12讲 人工神经网络 | HakusuriのBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="HakusuriのBlog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HakusuriのBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-resources">
+
+    <a href="/resources/" rel="section"><i class="far fa-save fa-fw"></i>资源</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第12讲 人工神经网络
+        </h1>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-08 21:21:36 / 修改时间：21:33:34" itemprop="dateCreated datePublished" datetime="2026-10-08T21:21:36+08:00">2026-10-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）"><a href="#第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）" class="headerlink" title="第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例）"></a>第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例）</h1><blockquote>
+<p>本讲对应课件：<strong>12.1 神经元与感知机 → 12.2 实例：实现单层神经网络 → 12.3.1 多层神经网络 → 12.3.2 超参数和验证集 → 12.4 误差反向传播算法 → 12.5 激活函数 → 12.6 实例：实现多层神经网络</strong>。<br>第 11 讲用 softmax 解决了线性多分类；本讲进入<strong>神经网络</strong>：从 M-P 神经元、感知机，到<strong>用隐含层解决异或这种线性不可分问题</strong>，再到<strong>误差反向传播（BP）<strong>和</strong>激活函数</strong>的选择——这是深度学习最核心的机制。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12.1 神经元与感知机</td>
+<td>生物神经元、M-P 神经元、Hebb 学习律、感知机与感知机训练法则</td>
+</tr>
+<tr>
+<td>12.2 单层神经网络实例</td>
+<td>单层网络 &#x3D; softmax 线性分类器；鸢尾花 4 属性 3 分类全流程</td>
+</tr>
+<tr>
+<td>12.3.1 多层神经网络</td>
+<td>异或问题、隐含层的作用、前馈神经网络、全连接网络</td>
+</tr>
+<tr>
+<td>12.3.2 超参数和验证集</td>
+<td>训练&#x2F;验证&#x2F;测试集的分工、隐含层设计、万能近似定理</td>
+</tr>
+<tr>
+<td>12.4 误差反向传播算法</td>
+<td>链式法则、1-1-1 网络逐步手算、多个隐含层神经元、训练流程</td>
+</tr>
+<tr>
+<td>12.5 激活函数</td>
+<td>线性 vs 非线性、梯度消失、logistic&#x2F;tanh&#x2F;ReLU&#x2F;Leaky-ReLU&#x2F;PReLU&#x2F;RReLU</td>
+</tr>
+<tr>
+<td>12.6 多层神经网络实例</td>
+<td>16 个隐含神经元 + ReLU + softmax；单层 vs 两层效果对比</td>
+</tr>
+</tbody></table>
+<hr>
+<span id="more"></span>
+
+<h2 id="12-1-神经元与感知机"><a href="#12-1-神经元与感知机" class="headerlink" title="12.1 神经元与感知机"></a>12.1 神经元与感知机</h2><h3 id="12-1-1-生物神经元与人工神经元"><a href="#12-1-1-生物神经元与人工神经元" class="headerlink" title="12.1.1 生物神经元与人工神经元"></a>12.1.1 生物神经元与人工神经元</h3><p><img src="/images/dl/dl12-ann/p07-01_977x470.jpg" alt="第7页 神经元与突触（兴奋&#x2F;抑制）"></p>
+<ul>
+<li><strong>神经网络</strong>：人脑智慧的物质基础；由<strong>神经元&#x2F;神经细胞</strong>（生物神经系统的基本单元）和它们之间的连接构成。</li>
+<li>生物神经元的结构：<strong>细胞体、细胞突起（树突、轴突）</strong>；神经元之间的连接点叫<strong>突触</strong>，有<strong>兴奋状态</strong>与<strong>抑制状态</strong>。</li>
+</ul>
+<p><strong>M-P 神经元（1943，McCulloch &amp; Pitts）</strong>——第一个人工神经元模型：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">z = Σⱼ wⱼxⱼ        （所有输入的加权和）</span><br><span class="line">y = step(z)        （激活函数）</span><br><span class="line"></span><br><span class="line">令 w₀ = -θ（阈值），x₀ = 1：</span><br><span class="line">y = step(w₀x₀ + w₁x₁ + ... + wₘxm) = step(WX)   →   0/1 输出</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>权值向量 <strong>W 无法自动学习和更新，不具备学习的能力</strong>——这是 M-P 神经元的根本局限；</li>
+<li>其中 <strong>step 就是激活函数&#x2F;激励函数（activation function）</strong>。</li>
+</ul>
+<h3 id="12-1-2-Hebb-学习律（1949，Donald-Hebb）"><a href="#12-1-2-Hebb-学习律（1949，Donald-Hebb）" class="headerlink" title="12.1.2 Hebb 学习律（1949，Donald Hebb）"></a>12.1.2 Hebb 学习律（1949，Donald Hebb）</h3><p>从神经心理学角度提出：</p>
+<ul>
+<li><strong>在同一时间被激发的神经元间的联系会被强化</strong>；</li>
+<li>如果两个神经元总是<strong>不能同步激发</strong>，它们之间的联系将会<strong>越来越弱，甚至消失</strong>；</li>
+<li><strong>神经网络的学习过程发生在神经元之间的突触部位</strong>，突触的<strong>联结强度</strong>与突触连接的两个神经元的<strong>活性之和成正比</strong>。</li>
+</ul>
+<p>由此得到<strong>人工神经网络</strong>的定义：<strong>通过算法调整神经元中的权值，模拟人类神经网络的学习能力</strong>。</p>
+<h3 id="12-1-3-感知机与感知机训练法则"><a href="#12-1-3-感知机与感知机训练法则" class="headerlink" title="12.1.3 感知机与感知机训练法则"></a>12.1.3 感知机与感知机训练法则</h3><p><strong>感知机（Perceptron，1957，Frank Rosenblatt）</strong>：输入层 → 输出层的两层结构（只有一层可训练权值）。</p>
+<p><strong>感知机训练法则（Perceptron Training Rule）</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">wᵢ(k+1) = wᵢ(k) + η(y - ŷ)xᵢ</span><br><span class="line"></span><br><span class="line">y  ：训练样例的标记</span><br><span class="line">ŷ  ：感知机的输出</span><br><span class="line">η  ：学习率，η ∈ (0, 1)</span><br></pre></td></tr></table></figure>
+
+<p><strong>感知机的特点（课件原文要点）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>特点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>能自动调整权值</td>
+<td><strong>具备学习能力</strong></td>
+</tr>
+<tr>
+<td>历史地位</td>
+<td><strong>第一个用算法来精确定义的神经网络模型</strong></td>
+</tr>
+<tr>
+<td>能力边界</td>
+<td><strong>线性二分类的分类器</strong></td>
+</tr>
+<tr>
+<td>解不唯一</td>
+<td>感知机算法存在<strong>多个解</strong>，受<strong>权值向量初始值</strong>和<strong>错误样本顺序</strong>的影响</td>
+</tr>
+<tr>
+<td>致命局限</td>
+<td>对于<strong>非线性可分</strong>的数据集，感知机训练法则<strong>无法收敛</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>逻辑回归可以看做单层神经网络</strong>：<code>y = sigmoid(WX)</code>——从”感知机用 step”到”用 sigmoid”，才有了可导的学习算法（Delta 法则）。<strong>Delta 法则：使用梯度下降法，找到能够最佳拟合训练样本集的权向量。</strong></p>
+</blockquote>
+<hr>
+<h2 id="12-2-实例：实现单层神经网络（TensorFlow）"><a href="#12-2-实例：实现单层神经网络（TensorFlow）" class="headerlink" title="12.2 实例：实现单层神经网络（TensorFlow）"></a>12.2 实例：实现单层神经网络（TensorFlow）</h2><p><strong>任务</strong>：用鸢尾花的 <strong>4 个属性</strong> 做 <strong>3 分类</strong>（山鸢尾 &#x2F; 变色鸢尾 &#x2F; 维吉尼亚鸢尾）。</p>
+<blockquote>
+<p><strong>“单层”的含义</strong>：输入层直接到输出层，中间<strong>没有隐含层</strong>，输出层用 softmax——本质上就是第 11 讲的 softmax 回归。</p>
+</blockquote>
+<h3 id="12-2-1-导入库、设置-GPU-模式"><a href="#12-2-1-导入库、设置-GPU-模式" class="headerlink" title="12.2.1 导入库、设置 GPU 模式"></a>12.2.1 导入库、设置 GPU 模式</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;TensorFlow version:&quot;</span>, tf.__version__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">gpus = tf.config.experimental.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)</span><br><span class="line">tf.config.experimental.set_memory_growth(gpus[<span class="number">0</span>], <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>set_memory_growth(..., True)</code> 让 GPU 显存<strong>按需增长</strong>而不是一次性占满。课件里演示了不加这行可能遇到的错误：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">InternalError: Blas GEMM launch failed :</span><br></pre></td></tr></table></figure></blockquote>
+<h3 id="12-2-2-加载数据、转-NumPy、划分属性与标签"><a href="#12-2-2-加载数据、转-NumPy、划分属性与标签" class="headerlink" title="12.2.2 加载数据、转 NumPy、划分属性与标签"></a>12.2.2 加载数据、转 NumPy、划分属性与标签</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br><span class="line"></span><br><span class="line">TEST_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_test.csv&quot;</span></span><br><span class="line">test_path = tf.keras.utils.get_file(TEST_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TEST_URL)</span><br><span class="line"></span><br><span class="line">df_iris_train = pd.read_csv(train_path, header=<span class="number">0</span>)</span><br><span class="line">df_iris_test = pd.read_csv(test_path, header=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">iris_train = np.array(df_iris_train)</span><br><span class="line">iris_test = np.array(df_iris_test)</span><br><span class="line">iris_train.shape, iris_test.shape       <span class="comment"># ((120, 5), (30, 5))</span></span><br><span class="line"></span><br><span class="line">x_train = iris_train[:, <span class="number">0</span>:<span class="number">4</span>]            <span class="comment"># 前 4 列是属性</span></span><br><span class="line">y_train = iris_train[:, <span class="number">4</span>]              <span class="comment"># 第 5 列是标签</span></span><br><span class="line">x_test = iris_test[:, <span class="number">0</span>:<span class="number">4</span>]</span><br><span class="line">y_test = iris_test[:, <span class="number">4</span>]</span><br><span class="line">x_train.shape, y_train.shape            <span class="comment"># ((120, 4), (120,))</span></span><br><span class="line">x_test.shape, y_test.shape              <span class="comment"># ((30, 4), (30,))</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 中心化</span></span><br><span class="line">x_train = x_train - np.mean(x_train, axis=<span class="number">0</span>)</span><br><span class="line">x_test = x_test - np.mean(x_test, axis=<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-2-3-数据类型转换与独热编码"><a href="#12-2-3-数据类型转换与独热编码" class="headerlink" title="12.2.3 数据类型转换与独热编码"></a>12.2.3 数据类型转换与独热编码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">x_train.dtype, y_train.dtype            <span class="comment"># (dtype(&#x27;float64&#x27;), dtype(&#x27;float64&#x27;))</span></span><br><span class="line"></span><br><span class="line">X_train = tf.cast(x_train, tf.float32)</span><br><span class="line">Y_train = tf.one_hot(tf.constant(y_train, dtype=tf.int32), <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">X_test = tf.cast(x_test, tf.float32)</span><br><span class="line">Y_test = tf.one_hot(tf.constant(y_test, dtype=tf.int32), <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">X_train.shape, Y_train.shape            <span class="comment"># (TensorShape([120, 4]), TensorShape([120, 3]))</span></span><br><span class="line">X_test.shape, Y_test.shape              <span class="comment"># (TensorShape([30, 4]), TensorShape([30, 3]))</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>为什么要 one_hot</strong>：标签是自然顺序码（0&#x2F;1&#x2F;2），必须转成独热向量才能与 softmax 输出做交叉熵（复习 11.5）。</p>
+</blockquote>
+<h3 id="12-2-4-超参数与参数初值"><a href="#12-2-4-超参数与参数初值" class="headerlink" title="12.2.4 超参数与参数初值"></a>12.2.4 超参数与参数初值</h3><p><img src="/images/dl/dl12-ann/p06-02_678x104.jpg" alt="第6页 单层网络参数初值 W(4,3) 与 B(3,)"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.5</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">50</span></span><br><span class="line">display_step = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">W = tf.Variable(np.random.randn(<span class="number">4</span>, <span class="number">3</span>), dtype=tf.float32)   <span class="comment"># 4 个属性 → 3 个类别</span></span><br><span class="line">B = tf.Variable(tf.zeros([<span class="number">3</span>]), dtype=tf.float32)           <span class="comment"># 偏置初始化为 0</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>形状关系</strong>：<code>W</code> 为 <code>(4, 3)</code>（输入维数 × 类别数），<code>B</code> 为 <code>(3,)</code>，所以 <code>X_train(120,4) @ W(4,3) + B(3,) = (120,3)</code>。</p>
+<h3 id="12-2-5-训练循环"><a href="#12-2-5-训练循环" class="headerlink" title="12.2.5 训练循环"></a>12.2.5 训练循环</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">acc_train = []; acc_test = []</span><br><span class="line">cce_train = []; cce_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        PRED_train = tf.nn.softmax(tf.matmul(X_train, W) + B)</span><br><span class="line">        Loss_train = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=Y_train, y_pred=PRED_train))</span><br><span class="line"></span><br><span class="line">    PRED_test = tf.nn.softmax(tf.matmul(X_test, W) + B)</span><br><span class="line">    Loss_test = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=Y_test, y_pred=PRED_test))</span><br><span class="line"></span><br><span class="line">    accuracy_train = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(PRED_train.numpy(), axis=<span class="number">1</span>), y_train), tf.float32))</span><br><span class="line">    accuracy_test = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(PRED_test.numpy(), axis=<span class="number">1</span>), y_test), tf.float32))</span><br><span class="line"></span><br><span class="line">    acc_train.append(accuracy_train); acc_test.append(accuracy_test)</span><br><span class="line">    cce_train.append(Loss_train); cce_test.append(Loss_test)</span><br><span class="line"></span><br><span class="line">    grads = tape.gradient(Loss_train, [W, B])</span><br><span class="line">    W.assign_sub(learn_rate*grads[<span class="number">0</span>])</span><br><span class="line">    B.assign_sub(learn_rate*grads[<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, TrainAcc:%f, TrainLoss: %f ,TestAcc:%f, TestLoss: %f&quot;</span> % (i, accuracy_train, Loss_train, accuracy_test, Loss_test))</span><br></pre></td></tr></table></figure>
+
+<p><strong>三个新东西</strong>（与第 11 讲相比）：</p>
+<ol>
+<li><strong>用 <code>tf.keras.losses.categorical_crossentropy</code></strong> 代替手写交叉熵（多分类交叉熵）；</li>
+<li><strong><code>tape.gradient(Loss_train, [W, B])</code> 返回列表</strong>，所以更新时要写 <code>grades[0]</code>、<code>grads[1]</code>；</li>
+<li><strong>训练&#x2F;测试集的损失与准确率分开记录</strong>（测试集只记录、不参与梯度）。</li>
+</ol>
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">i: 0,  TrainAcc:0.333333, TrainLoss: 2.066978 ,TestAcc:0.266667, TestLoss: 1.880856</span><br><span class="line">i: 10, TrainAcc:0.875000, TrainLoss: 0.339410 ,TestAcc:0.866667, TestLoss: 0.461705</span><br><span class="line">i: 20, TrainAcc:0.875000, TrainLoss: 0.279647 ,TestAcc:0.866667, TestLoss: 0.368414</span><br><span class="line">i: 30, TrainAcc:0.916667, TrainLoss: 0.245924 ,TestAcc:0.933333, TestLoss: 0.314814</span><br><span class="line">i: 40, TrainAcc:0.933333, TrainLoss: 0.222922 ,TestAcc:0.933333, TestLoss: 0.278643</span><br><span class="line">i: 50, TrainAcc:0.933333, TrainLoss: 0.205636 ,TestAcc:0.966667, TestLoss: 0.251937</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/dl/dl12-ann/p14-01_779x140.jpg" alt="第14页 单层网络训练结果"></p>
+<p><strong>可视化</strong>（损失与准确率双图）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">3</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">121</span>)</span><br><span class="line">plt.plot(cce_train, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot(cce_test, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Loss&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">122</span>)</span><br><span class="line">plt.plot(acc_train, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot(acc_test, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>)</span><br><span class="line">plt.ylabel(<span class="string">&quot;Accuracy&quot;</span>)</span><br><span class="line">plt.legend()</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>单层网络的局限</strong>：它只能在特征空间里画<strong>线性决策边界</strong>。课件用两张图对比：取 2 个属性时可分（一条直线分开），但换成另外 2 个属性时，3 个类别<strong>犬牙交错，单层网络分不开</strong>——这正是引入隐含层的动机。</p>
+</blockquote>
+<hr>
+<h2 id="12-3-1-多层神经网络"><a href="#12-3-1-多层神经网络" class="headerlink" title="12.3.1 多层神经网络"></a>12.3.1 多层神经网络</h2><h3 id="12-3-1-1-从异或问题看隐含层的必要性"><a href="#12-3-1-1-从异或问题看隐含层的必要性" class="headerlink" title="12.3.1.1 从异或问题看隐含层的必要性"></a>12.3.1.1 从异或问题看隐含层的必要性</h3><p><strong>异或（XOR）问题</strong>：<code>(0,0)→0、(0,1)→1、(1,0)→1、(1,1)→0</code>——<strong>线性不可分</strong>（复习 11.3），单层感知机无法解决。</p>
+<p><strong>课件给出的解决思路</strong>：用<strong>两个神经元 + 一个输出神经元</strong>做”与&#x2F;或”组合：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">h₁ = x₁ AND x₂          （与运算）</span><br><span class="line">h₂ = x₁ OR  x₂          （或运算）</span><br><span class="line">y  = h₁ NAND h₂         （&quot;与非&quot;再组合）</span><br><span class="line"></span><br><span class="line">代入四个点：</span><br><span class="line">x₁ x₂ | h₁ h₂ | y</span><br><span class="line">0  0  | 0  1  | 0</span><br><span class="line">0  1  | 0  1  | 1</span><br><span class="line">1  0  | 0  1  | 1</span><br><span class="line">1  1  | 1  1  | 0     ← 异或</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>本质</strong>：隐含层把原始空间<strong>映射到新的特征空间</strong>，在<strong>新空间里问题变成线性可分</strong>的。课件用 <code>h₁ = x₁ AND x₂</code>、<code>h₂ = x₁ OR x₂</code> 的散点图演示了这一”坐标变换”。</p>
+</blockquote>
+<h3 id="12-3-1-2-多层网络的结构"><a href="#12-3-1-2-多层网络的结构" class="headerlink" title="12.3.1.2 多层网络的结构"></a>12.3.1.2 多层网络的结构</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入层  →  隐含层  →  输出层</span><br><span class="line">   x          h          y</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>课件示例中，隐含层<strong>每个神经元有 3 个模型参数</strong>（2 个权值 + 1 个偏置），<strong>3 个神经元共 9 个参数</strong>；</li>
+<li><strong>如果神经网络中有足够的隐含层，每个隐含层中有足够多的神经元，神经网络就可以表示任意复杂函数或空间分布</strong>（这就引出了 12.3.2 的万能近似定理）。</li>
+</ul>
+<p><strong>前馈神经网络（Feedforward Neural Network）</strong>：</p>
+<ul>
+<li>每层神经元<strong>只与前一层的神经元相连</strong>；</li>
+<li>处于同一层的神经元之间<strong>没有连接</strong>；</li>
+<li>各层间<strong>没有反馈</strong>，<strong>不存在跨层连接</strong>。</li>
+</ul>
+<p><strong>全连接网络（Fully Connected Network）</strong>：相邻层之间<strong>所有神经元两两相连</strong>。</p>
+<hr>
+<h2 id="12-3-2-超参数和验证集"><a href="#12-3-2-超参数和验证集" class="headerlink" title="12.3.2 超参数和验证集"></a>12.3.2 超参数和验证集</h2><h3 id="12-3-2-1-三个数据集的明确分工（务必分清）"><a href="#12-3-2-1-三个数据集的明确分工（务必分清）" class="headerlink" title="12.3.2.1 三个数据集的明确分工（务必分清）"></a>12.3.2.1 三个数据集的明确分工（务必分清）</h3><table>
+<thead>
+<tr>
+<th>数据集</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>训练集</strong></td>
+<td><strong>训练模型，确定模型参数</strong>（W、B）</td>
+</tr>
+<tr>
+<td><strong>验证集</strong></td>
+<td><strong>确定超参数</strong>（学习率、隐含层数、每层神经元数、迭代次数…）</td>
+</tr>
+<tr>
+<td><strong>测试集</strong></td>
+<td><strong>评估模型的泛化能力</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>关键区别：<strong>模型参数</strong>由训练集学习；<strong>超参数</strong>由验证集选择；<strong>测试集只在最后用一次</strong>，用来近似泛化误差。</p>
+</blockquote>
+<h3 id="12-3-2-2-隐含层的设计：用实验确定超参数"><a href="#12-3-2-2-隐含层的设计：用实验确定超参数" class="headerlink" title="12.3.2.2 隐含层的设计：用实验确定超参数"></a>12.3.2.2 隐含层的设计：用实验确定超参数</h3><p>课件用一个小例子说明”搜索超参数”：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">隐含层数  ∈ (1, 2, 3)</span><br><span class="line">每层神经元数 ∈ (4, 16, 32, 64)</span><br><span class="line">可能的组合：3 × 4 = 12 种</span><br></pre></td></tr></table></figure>
+
+<p><strong>做法</strong>：</p>
+<ol>
+<li>使用<strong>训练集</strong>训练好所有模型；</li>
+<li>使用<strong>同一个验证集</strong>，得到不同模型上的误差；</li>
+<li><strong>选出误差最小的模型</strong>。</li>
+</ol>
+<h3 id="12-3-2-3-万能近似定理"><a href="#12-3-2-3-万能近似定理" class="headerlink" title="12.3.2.3 万能近似定理"></a>12.3.2.3 万能近似定理</h3><blockquote>
+<p>在<strong>前馈型神经网络</strong>中，只要有<strong>一个隐含层</strong>，并且这个隐含层中有<strong>足够多的神经元</strong>，就可以<strong>逼近任意一个连续的函数或空间分布</strong>。</p>
+</blockquote>
+<p>注意定理的边界（课件同时列出）：</p>
+<ul>
+<li>它能表示<strong>连续的</strong>函数&#x2F;空间区域，但<strong>不能表示不连续的函数或空间区域</strong>；</li>
+<li><strong>多隐含层</strong>神经网络的好处：<strong>减少泛化误差</strong>、<strong>减少每层神经元的数量</strong>。</li>
+</ul>
+<hr>
+<h2 id="12-4-误差反向传播算法（BP）"><a href="#12-4-误差反向传播算法（BP）" class="headerlink" title="12.4 误差反向传播算法（BP）"></a>12.4 误差反向传播算法（BP）</h2><h3 id="12-4-1-算法思想"><a href="#12-4-1-算法思想" class="headerlink" title="12.4.1 算法思想"></a>12.4.1 算法思想</h3><p><strong>误差反向传播算法（Back propagation，BP）</strong>：</p>
+<ul>
+<li><strong>利用链式法则，反向传播损失函数的梯度信息</strong>；</li>
+<li>计算出损失函数对网络中<strong>所有模型参数的梯度</strong>。</li>
+</ul>
+<p><strong>神经网络的训练（两件事配合）</strong>：</p>
+<ol>
+<li>使用<strong>误差反向传播算法计算梯度</strong>；</li>
+<li>使用<strong>梯度下降法学习模型参数</strong>。</li>
+</ol>
+<p>参数更新公式（把所有权重和偏置统一记作 W、B）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">W(k+1) = W(k) - η · ∂Loss(W, B)/∂W</span><br><span class="line">B(k+1) = B(k) - η · ∂Loss(W, B)/∂B</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-4-2-1-1-1-网络的完整手算（本讲最值得反复看的一段）"><a href="#12-4-2-1-1-1-网络的完整手算（本讲最值得反复看的一段）" class="headerlink" title="12.4.2 1-1-1 网络的完整手算（本讲最值得反复看的一段）"></a>12.4.2 1-1-1 网络的完整手算（本讲最值得反复看的一段）</h3><p><img src="/images/dl/dl12-ann/p16-01_920x394.jpg" alt="第16页 正向传递信号、反向传递误差"></p>
+<p><strong>网络结构</strong>：输入层（1 个）→ 隐含层（1 个，sigmoid）→ 输出层（1 个，sigmoid）。</p>
+<p><strong>Step 1：设置模型参数初始值</strong></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">w_h = 0.2    b_h = 0.1        （输入→隐含）</span><br><span class="line">w_o = 0.3    b_o = 0.2        （隐含→输出）</span><br><span class="line">学习率 η = 0.5</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 2：正向计算预测值</strong>（已知 x &#x3D; 1，真实值 y &#x3D; 0.8）</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">z_h = w_h·x + b_h = 0.2×1 + 0.1 = 0.3</span><br><span class="line">h   = 1/(1+e^(-z_h)) = 1/(1+e^(-0.3)) ≈ 0.5744</span><br><span class="line"></span><br><span class="line">z_o = w_o·h + b_o = 0.3×0.5744 + 0.2 ≈ 0.3723</span><br><span class="line">ŷ   = 1/(1+e^(-z_o)) ≈ 0.59</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 3：计算误差</strong></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss = 0.5(y - ŷ)² = 0.5×(0.8 - 0.59)² = 0.02205</span><br></pre></td></tr></table></figure>
+
+<p><strong>Step 4：误差反向传播（链式法则）</strong></p>
+<p>先算输出层的两个梯度：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">∂Loss/∂w_o = ∂Loss/∂ŷ · ∂ŷ/∂z_o · ∂z_o/∂w_o</span><br><span class="line">            = -(y - ŷ) · ŷ(1-ŷ) · h</span><br><span class="line">            = -0.21 × 0.2419 × 0.57 ≈ -0.02895543</span><br><span class="line"></span><br><span class="line">∂Loss/∂b_o = -(y - ŷ) · ŷ(1-ŷ) · 1</span><br><span class="line">            = -0.21 × 0.2419 ≈ -0.050799</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>三段相乘的含义</strong>：<code>-(y-ŷ)</code> 是误差项的导数；<code>ŷ(1-ŷ)</code> 是 <strong>sigmoid 的导数</strong>（这正是要记住 <code>σ&#39;(z) = σ(z)(1-σ(z))</code> 的原因）；<code>h</code> 是”上游输入”。</p>
+</blockquote>
+<p>更新输出层参数（<code>η = 0.5</code>）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">w_o(k+1) = 0.3 - 0.5 × (-0.02895543) = 0.31447771</span><br><span class="line">b_o(k+1) = 0.2 - 0.5 × (-0.050799)   = 0.2253995</span><br></pre></td></tr></table></figure>
+
+<p>误差继续往隐含层传（<strong>这一步是 BP 的精髓：把输出层的误差”乘上权重”传回去</strong>）：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">∂Loss/∂w_h = ∂Loss/∂ŷ · ∂ŷ/∂z_o · ∂z_o/∂h · ∂h/∂z_h · ∂z_h/∂w_h</span><br><span class="line">            = -0.21 × 0.2419 × 0.3 × 0.2451 × 1 ≈ -0.00373525</span><br><span class="line"></span><br><span class="line">其中 h(1-h) = 0.5744×0.4256 ≈ 0.2451（隐含层 sigmoid 的导数），∂z_h/∂w_h = x = 1</span><br><span class="line"></span><br><span class="line">w_h(k+1) = 0.2 - 0.5 × (-0.00373525) = 0.201867625</span><br><span class="line">b_h(k+1) = 0.1 - 0.5 × (-0.00373525) = 0.101867625</span><br></pre></td></tr></table></figure>
+
+<p><strong>一次迭代后的全部参数</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>初值</th>
+<th>更新后</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>w_o</td>
+<td>0.3</td>
+<td>0.31447771</td>
+</tr>
+<tr>
+<td>b_o</td>
+<td>0.2</td>
+<td>0.2253995</td>
+</tr>
+<tr>
+<td>w_h</td>
+<td>0.2</td>
+<td>0.201867625</td>
+</tr>
+<tr>
+<td>b_h</td>
+<td>0.1</td>
+<td>0.101867625</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>注意梯度”衰减”</strong>：输出层梯度量级是 <code>10⁻²</code>，传播到隐含层就变成 <code>10⁻³</code>。层数越深，梯度衰减越严重——这就是 12.5 讲的<strong>梯度消失问题</strong>的直观来源。</p>
+</blockquote>
+<h3 id="12-4-3-隐含层有多个神经元的情形"><a href="#12-4-3-隐含层有多个神经元的情形" class="headerlink" title="12.4.3 隐含层有多个神经元的情形"></a>12.4.3 隐含层有多个神经元的情形</h3><p>当隐含层有多个神经元时，<strong>每个隐含层神经元都要”收集”来自其所有下游连接的误差</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">∂Loss/∂(隐含层某参数) = Σ（所有下游路径的误差贡献）</span><br></pre></td></tr></table></figure>
+
+<p>课件用示意图说明：</p>
+<ul>
+<li><strong>单条路径</strong>：误差按链式法则逐层相乘传递；</li>
+<li><strong>多分支汇聚</strong>：一个隐含层神经元的梯度 &#x3D; <strong>各条下游分支梯度之和</strong>（例如它同时连到输出层两个神经元，两路误差都要加进来）。</li>
+</ul>
+<h3 id="12-4-4-训练流程总结"><a href="#12-4-4-训练流程总结" class="headerlink" title="12.4.4 训练流程总结"></a>12.4.4 训练流程总结</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">正向传递信号  →  反向传递误差  →  用梯度下降法更新参数</span><br><span class="line">（由输入到输出）   （由输出到输入，用链式法则）</span><br></pre></td></tr></table></figure>
+
+<p><strong>多层神经网络的训练 &#x3D; 梯度下降法（更新参数）+ 误差反向传播法（计算梯度）</strong>。</p>
+<hr>
+<h2 id="12-5-激活函数"><a href="#12-5-激活函数" class="headerlink" title="12.5 激活函数"></a>12.5 激活函数</h2><h3 id="12-5-1-为什么必须用非线性激活函数"><a href="#12-5-1-为什么必须用非线性激活函数" class="headerlink" title="12.5.1 为什么必须用非线性激活函数"></a>12.5.1 为什么必须用非线性激活函数</h3><p>课件先用一个关键对比说明**”线性激活函数等于没有隐含层”**：</p>
+<ul>
+<li>如果隐含层用<strong>线性函数</strong>：<code>hₖ = Σ wⱼₖxⱼ</code>，输出层也是线性，那么</li>
+</ul>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">y = Σ wₒₖhₖ = Σ wₒₖ(Σ wⱼₖxⱼ) = WₒᵀWₕᵀX</span><br></pre></td></tr></table></figure>
+
+<p><strong>无论有多少层隐含层，输出都是输入特征的线性组合</strong>——深层网络退化成单层线性模型。</p>
+<ul>
+<li>如果允许<strong>任意函数</strong>：灵活、功能强大，但<strong>过于复杂、难于训练、通用性差</strong>。</li>
+<li>折中方案：<strong>用简单的非线性函数（激活函数）</strong>。</li>
+</ul>
+<p><strong>激活函数的性质</strong>：</p>
+<ol>
+<li><strong>简单的非线性函数</strong>；</li>
+<li><strong>连续并可导</strong>；</li>
+<li><strong>单调函数</strong>。</li>
+</ol>
+<h3 id="12-5-2-梯度消失问题与两个经典激活函数的导数"><a href="#12-5-2-梯度消失问题与两个经典激活函数的导数" class="headerlink" title="12.5.2 梯度消失问题与两个经典激活函数的导数"></a>12.5.2 梯度消失问题与两个经典激活函数的导数</h3><p>多层神经网络用误差反向传播时<strong>使用链式法则，误差经过每一层会不断衰减</strong>；<strong>网络层数较深时，梯度值趋近于 0，参数更新几乎停滞</strong>——这就是<strong>梯度消失问题</strong>。</p>
+<p><strong>logistic 函数的导函数</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">σ&#x27;(z) = σ(z)·(1 - σ(z))</span><br></pre></td></tr></table></figure>
+
+<p><strong>Tanh 函数的导函数</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tanh&#x27;(z) = 1 - tanh²(z)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这两个函数的导数<strong>最大都只有 1（甚至 0.25）</strong>，多层连乘后迅速趋近于 0——这就是它们在深层网络里被 ReLU 取代的原因。</p>
+</blockquote>
+<h3 id="12-5-3-神经元与激活函数的关系"><a href="#12-5-3-神经元与激活函数的关系" class="headerlink" title="12.5.3 神经元与激活函数的关系"></a>12.5.3 神经元与激活函数的关系</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">z = Σⱼ wⱼxⱼ                    （所有输入的线性组合）</span><br><span class="line">y = f(z) = f(WX)               （经过非线性激活函数）</span><br></pre></td></tr></table></figure>
+
+<p><strong>线性函数 + 非线性激活函数 &#x3D; 神经元</strong>。</p>
+<h3 id="12-5-4-常用激活函数对比（本讲核心表）"><a href="#12-5-4-常用激活函数对比（本讲核心表）" class="headerlink" title="12.5.4 常用激活函数对比（本讲核心表）"></a>12.5.4 常用激活函数对比（本讲核心表）</h3><p><img src="/images/dl/dl12-ann/p04-01_528x273.jpg" alt="第4页 logistic 与 tanh 函数"></p>
+<table>
+<thead>
+<tr>
+<th>激活函数</th>
+<th>表达式</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>阶跃函数</strong></td>
+<td><code>1 (z≥0), 0 (z&lt;0)</code></td>
+<td>最简单</td>
+<td><strong>不连续、不可导</strong></td>
+</tr>
+<tr>
+<td><strong>Logistic（sigmoid）</strong></td>
+<td><code>1/(1+e^(-z))</code></td>
+<td>光滑可导、输出 (0,1) 可当概率</td>
+<td><strong>饱和区梯度接近 0 → 梯度消失</strong>；输出不以 0 为均值</td>
+</tr>
+<tr>
+<td><strong>Tanh（双曲正切）</strong></td>
+<td><code>tanh(z) = (e^z - e^(-z))/(e^z + e^(-z))</code></td>
+<td>输出以 <strong>0 为均值</strong>，比 logistic 收敛更快</td>
+<td>仍<strong>饱和</strong>，层数多时仍会梯度消失</td>
+</tr>
+<tr>
+<td><strong>ReLU（修正线性单元）</strong></td>
+<td><code>max(0, z)</code></td>
+<td>z&gt;0 时<strong>导数恒等于 1，缓解梯度消失</strong>；<strong>无幂运算、计算快</strong>；<strong>收敛快</strong></td>
+<td>z&lt;0 时<strong>梯度为 0 → 神经元死亡</strong>；输出不以 0 为均值，影响收敛速度</td>
+</tr>
+<tr>
+<td><strong>Leaky-ReLU</strong></td>
+<td><code>z (z≥0), az (z&lt;0)</code>，a ∈ (1, +∞)</td>
+<td><strong>避免了 ReLU 神经元死亡</strong>；计算和训练速度快</td>
+<td><strong>超参数 a 需要人工调整</strong></td>
+</tr>
+<tr>
+<td><strong>PReLU</strong></td>
+<td>参数化修正线性单元</td>
+<td>a 可训练</td>
+<td>增加参数量</td>
+</tr>
+<tr>
+<td><strong>RReLU</strong></td>
+<td>随机纠正线性单元</td>
+<td><strong>训练阶段</strong>负值部分的斜率<strong>随机分配</strong>（均匀分布）；<strong>测试阶段</strong>用<strong>训练阶段所有斜率的平均值</strong>（固定）</td>
+<td>引入随机性</td>
+</tr>
+</tbody></table>
+<p><strong>激活函数应具备的特点（课件总结）</strong>：</p>
+<ol>
+<li><strong>包含充分的梯度信息</strong>（避免梯度消失）；</li>
+<li><strong>能够识别阈值</strong>（具备非线性判别能力）。</li>
+</ol>
+<p><strong>四种激活函数曲线的对比</strong></p>
+<p><strong>四种激活函数曲线的对比</strong>：阶跃函数 → Logistic 函数 → Tanh 函数 → ReLU 函数（课件给出四联图对比）。</p>
+<p><img src="/images/dl/dl12-ann/p09-01_318x174.jpg" alt="第9页 四种激活函数对比"></p>
+<hr>
+<h2 id="12-6-实例：实现多层神经网络（TensorFlow）"><a href="#12-6-实例：实现多层神经网络（TensorFlow）" class="headerlink" title="12.6 实例：实现多层神经网络（TensorFlow）"></a>12.6 实例：实现多层神经网络（TensorFlow）</h2><p><strong>任务</strong>：在鸢尾花 4 属性 3 分类上，把 12.2 的<strong>单层网络</strong>升级为<strong>带一个隐含层的两层网络</strong>，对比效果。</p>
+<h3 id="12-6-1-网络结构设计"><a href="#12-6-1-网络结构设计" class="headerlink" title="12.6.1 网络结构设计"></a>12.6.1 网络结构设计</h3><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">输入层(4)  →  隐含层(16，激活函数 relu)  →  输出层(3，激活函数 softmax)</span><br><span class="line">损失函数：交叉熵损失函数</span><br><span class="line"></span><br><span class="line">H = X·W1 + B1        X(120,4) @ W1(4,16) + B1(16,)   → H(120,16)</span><br><span class="line">Y = H·W2 + B2        H(120,16) @ W2(16,3) + B2(3,)   → Y(120,3)</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>形状</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>W1</td>
+<td>(4, 16)</td>
+<td>输入层 → 隐含层</td>
+</tr>
+<tr>
+<td>B1</td>
+<td>(16,)</td>
+<td>隐含层偏置</td>
+</tr>
+<tr>
+<td>W2</td>
+<td>(16, 3)</td>
+<td>隐含层 → 输出层</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>(3,)</td>
+<td>输出层偏置</td>
+</tr>
+</tbody></table>
+<p>课件还演示了<strong>用 keras 高层损失函数的写法</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loss_test = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=Y_test, y_pred=PRED_test))</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-6-2-完整程序"><a href="#12-6-2-完整程序" class="headerlink" title="12.6.2 完整程序"></a>12.6.2 完整程序</h3><p><strong>① 导入库、设置 GPU</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;TensorFlow version:&quot;</span>, tf.__version__)</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"></span><br><span class="line">gpus = tf.config.experimental.list_physical_devices(<span class="string">&#x27;GPU&#x27;</span>)</span><br><span class="line">tf.config.experimental.set_memory_growth(gpus[<span class="number">0</span>], <span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 加载数据、转换为 NumPy 数组</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">TRAIN_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_training.csv&quot;</span></span><br><span class="line">train_path = tf.keras.utils.get_file(TRAIN_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TRAIN_URL)</span><br><span class="line"></span><br><span class="line">TEST_URL = <span class="string">&quot;http://download.tensorflow.org/data/iris_test.csv&quot;</span></span><br><span class="line">test_path = tf.keras.utils.get_file(TEST_URL.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>], TEST_URL)</span><br><span class="line"></span><br><span class="line">df_iris_train = pd.read_csv(train_path, header=<span class="number">0</span>)</span><br><span class="line">df_iris_test = pd.read_csv(test_path, header=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">iris_train = np.array(df_iris_train)</span><br><span class="line">iris_test = np.array(df_iris_test)</span><br><span class="line">iris_train.shape, iris_test.shape       <span class="comment"># ((120, 5), (30, 5))</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>③ 数据预处理</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">x_train = iris_train[:, <span class="number">0</span>:<span class="number">4</span>]; y_train = iris_train[:, <span class="number">4</span>]</span><br><span class="line">x_test = iris_test[:, <span class="number">0</span>:<span class="number">4</span>];   y_test = iris_test[:, <span class="number">4</span>]</span><br><span class="line"></span><br><span class="line">x_train = x_train - np.mean(x_train, axis=<span class="number">0</span>)</span><br><span class="line">x_test = x_test - np.mean(x_test, axis=<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">X_train = tf.cast(x_train, tf.float32)</span><br><span class="line">Y_train = tf.one_hot(tf.constant(y_train, dtype=tf.int32), <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">X_test = tf.cast(x_test, tf.float32)</span><br><span class="line">Y_test = tf.one_hot(tf.constant(y_test, dtype=tf.int32), <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">X_train.shape, Y_train.shape    <span class="comment"># (TensorShape([120, 4]), TensorShape([120, 3]))</span></span><br><span class="line">X_test.shape, Y_test.shape      <span class="comment"># (TensorShape([30, 4]), TensorShape([30, 3]))</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>④ 超参数与模型参数初值</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">learn_rate = <span class="number">0.5</span></span><br><span class="line"><span class="built_in">iter</span> = <span class="number">50</span></span><br><span class="line">display_step = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">np.random.seed(<span class="number">612</span>)</span><br><span class="line">W1 = tf.Variable(np.random.randn(<span class="number">4</span>, <span class="number">16</span>), dtype=tf.float32)</span><br><span class="line">B1 = tf.Variable(tf.zeros([<span class="number">16</span>]), dtype=tf.float32)</span><br><span class="line">W2 = tf.Variable(np.random.randn(<span class="number">16</span>, <span class="number">3</span>), dtype=tf.float32)</span><br><span class="line">B2 = tf.Variable(tf.zeros([<span class="number">3</span>]), dtype=tf.float32)</span><br></pre></td></tr></table></figure>
+
+<p><strong>⑤ 训练模型</strong></p>
+<p><img src="/images/dl/dl12-ann/p13-01_1350x591.jpg" alt="第13页 两层网络训练循环（ReLU + softmax + 4 组梯度）"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">acc_train = []; acc_test = []</span><br><span class="line">cce_train = []; cce_test = []</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="built_in">iter</span>+<span class="number">1</span>):</span><br><span class="line">    <span class="keyword">with</span> tf.GradientTape() <span class="keyword">as</span> tape:</span><br><span class="line">        Hidden_train = tf.nn.relu(tf.matmul(X_train, W1) + B1)</span><br><span class="line">        PRED_train = tf.nn.softmax(tf.matmul(Hidden_train, W2) + B2)</span><br><span class="line">        Loss_train = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=Y_train, y_pred=PRED_train))</span><br><span class="line"></span><br><span class="line">        Hidden_test = tf.nn.relu(tf.matmul(X_test, W1) + B1)</span><br><span class="line">        PRED_test = tf.nn.softmax(tf.matmul(Hidden_test, W2) + B2)</span><br><span class="line">        Loss_test = tf.reduce_mean(tf.keras.losses.categorical_crossentropy(y_true=Y_test, y_pred=PRED_test))</span><br><span class="line"></span><br><span class="line">    accuracy_train = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(PRED_train.numpy(), axis=<span class="number">1</span>), y_train), tf.float32))</span><br><span class="line">    accuracy_test = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(PRED_test.numpy(), axis=<span class="number">1</span>), y_test), tf.float32))</span><br><span class="line"></span><br><span class="line">    acc_train.append(accuracy_train); acc_test.append(accuracy_test)</span><br><span class="line">    cce_train.append(Loss_train); cce_test.append(Loss_test)</span><br><span class="line"></span><br><span class="line">    grads = tape.gradient(Loss_train, [W1, B1, W2, B2])</span><br><span class="line">    W1.assign_sub(learn_rate*grads[<span class="number">0</span>])</span><br><span class="line">    B1.assign_sub(learn_rate*grads[<span class="number">1</span>])</span><br><span class="line">    W2.assign_sub(learn_rate*grads[<span class="number">2</span>])</span><br><span class="line">    B2.assign_sub(learn_rate*grads[<span class="number">3</span>])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> i % display_step == <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;i: %i, TrainAcc:%f, TrainLoss: %f ,TestAcc:%f, TestLoss: %f&quot;</span> % (i, accuracy_train, Loss_train, accuracy_test, Loss_test))</span><br></pre></td></tr></table></figure>
+
+<p><strong>运行结果</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">i: 0,  TrainAcc:0.433333, TrainLoss: 2.205641 ,TestAcc:0.400000, TestLoss: 1.721138</span><br><span class="line">i: 10, TrainAcc:0.941667, TrainLoss: 0.205314 ,TestAcc:0.966667, TestLoss: 0.249661</span><br><span class="line">i: 20, TrainAcc:0.950000, TrainLoss: 0.149540 ,TestAcc:1.000000, TestLoss: 0.167103</span><br><span class="line">i: 30, TrainAcc:0.958333, TrainLoss: 0.122346 ,TestAcc:1.000000, TestLoss: 0.124693</span><br><span class="line">i: 40, TrainAcc:0.958333, TrainLoss: 0.105099 ,TestAcc:1.000000, TestLoss: 0.099869</span><br><span class="line">i: 50, TrainAcc:0.958333, TrainLoss: 0.092934 ,TestAcc:1.000000, TestLoss: 0.084885</span><br></pre></td></tr></table></figure>
+
+<p><strong>⑥ 结果可视化</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">plt.figure(figsize=(<span class="number">10</span>, <span class="number">3</span>))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">121</span>)</span><br><span class="line">plt.plot(cce_train, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot(cce_test, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>); plt.ylabel(<span class="string">&quot;Loss&quot;</span>); plt.legend()</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">122</span>)</span><br><span class="line">plt.plot(acc_train, color=<span class="string">&quot;blue&quot;</span>, label=<span class="string">&quot;train&quot;</span>)</span><br><span class="line">plt.plot(acc_test, color=<span class="string">&quot;red&quot;</span>, label=<span class="string">&quot;test&quot;</span>)</span><br><span class="line">plt.xlabel(<span class="string">&quot;Iteration&quot;</span>); plt.ylabel(<span class="string">&quot;Accuracy&quot;</span>); plt.legend()</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-6-3-单层-vs-两层的效果对比（本讲结论）"><a href="#12-6-3-单层-vs-两层的效果对比（本讲结论）" class="headerlink" title="12.6.3 单层 vs 两层的效果对比（本讲结论）"></a>12.6.3 单层 vs 两层的效果对比（本讲结论）</h3><p><img src="/images/dl/dl12-ann/p14-01_864x141.jpg" alt="第14页 两层网络训练结果"></p>
+<table>
+<thead>
+<tr>
+<th>指标（第 50 轮）</th>
+<th>单层神经网络（12.2）</th>
+<th>两层神经网络（12.6，16 个隐含神经元 + ReLU）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>训练准确率</td>
+<td>0.933333</td>
+<td>0.958333</td>
+</tr>
+<tr>
+<td>训练损失</td>
+<td>0.205636</td>
+<td><strong>0.092934</strong></td>
+</tr>
+<tr>
+<td>测试准确率</td>
+<td>0.966667</td>
+<td><strong>1.000000</strong></td>
+</tr>
+<tr>
+<td>测试损失</td>
+<td>0.251937</td>
+<td><strong>0.084885</strong></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>结论</strong>：加了 16 个 ReLU 隐含神经元之后，测试准确率从 96.7% 提到 <strong>100%</strong>、测试损失从 0.252 降到 <strong>0.085</strong>——<strong>隐含层带来的非线性映射能力，是单层线性分类器做不到的</strong>，也直观印证了 12.3.1 “隐含层把问题映射到线性可分的空间”。</p>
+</blockquote>
+<hr>
+<h2 id="本讲易错点清单"><a href="#本讲易错点清单" class="headerlink" title="本讲易错点清单"></a>本讲易错点清单</h2><ol>
+<li><strong>M-P 神经元不会学习</strong>：权值是固定的；感知机才有训练法则能自动调整权值。</li>
+<li><strong>感知机的边界</strong>：只能做<strong>线性二分类</strong>，对<strong>非线性可分数据不收敛</strong>；且解不唯一，受初值与样本顺序影响。</li>
+<li><strong>感知机 vs 逻辑回归</strong>：感知机用 step（不可导），逻辑回归用 sigmoid（可导），后者才能用梯度下降（Delta 法则）。</li>
+<li><strong>单层网络 &#x3D; 线性分类器</strong>：不管输入多少属性，输出只有一层线性变换 + softmax，只能画线性决策边界。</li>
+<li><strong>激活函数必须是非线性的</strong>：线性激活函数下，多层网络等价于单层线性模型（<code>WₒᵀWₕᵀX</code>）。</li>
+<li><strong>sigmoid&#x2F;tanh 的导数要记住</strong>：<code>σ&#39; = σ(1-σ)</code>、<code>tanh&#39; = 1-tanh²</code>；两者导数上限都不超过 1，多层连乘导致<strong>梯度消失</strong>。</li>
+<li><strong>ReLU 的”神经元死亡”</strong>：z&lt;0 时梯度为 0，该神经元可能永远不再更新；用 Leaky-ReLU&#x2F;PReLU&#x2F;RReLU 缓解。</li>
+<li><strong>RReLU 的斜率在训练&#x2F;测试不同</strong>：训练时随机、测试时用平均值固定——别以为它是固定超参数。</li>
+<li><strong>BP 的三段相乘</strong>：<code>-(y-ŷ) × ŷ(1-ŷ) × 上游输入</code>；传播到上一层时还要<strong>乘上权重</strong>并<strong>加上所有下游分支的贡献</strong>。</li>
+<li><strong>梯度逐层衰减</strong>：1-1-1 例子里输出层梯度是 <code>10⁻²</code>，到隐含层就变成 <code>10⁻³</code>——层数越深越明显。</li>
+<li><strong>三个数据集分工不能混</strong>：参数用<strong>训练集</strong>学、超参数用<strong>验证集</strong>选、<strong>测试集</strong>只在最后评估泛化能力。</li>
+<li><strong>万能近似定理的边界</strong>：一个隐含层 + 足够多神经元可逼近<strong>任意连续函数</strong>，但<strong>不能表示不连续的函数&#x2F;区域</strong>；多隐含层能减少泛化误差、减少每层神经元数。</li>
+<li><strong><code>tape.gradient</code> 传列表时返回列表</strong>：更新时别忘 <code>grads[0]</code> … <code>grads[3]</code>；两层网络有 4 组参数。</li>
+<li><strong>形状要对齐</strong>：<code>X(120,4) @ W1(4,16) → (120,16)</code>；<code>W1</code> 的第一个维度永远是<strong>输入维数</strong>，<code>W2</code> 的第二个维度永远是<strong>类别数</strong>。</li>
+<li><strong>中心化&#x2F;独热一个都不能少</strong>：<code>x - mean(x, axis=0)</code>、<code>tf.one_hot(y, 3)</code>；否则训练慢甚至不收敛。</li>
+</ol>
+<hr>
+<h2 id="本讲知识地图"><a href="#本讲知识地图" class="headerlink" title="本讲知识地图"></a>本讲知识地图</h2><figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">12.1 神经元与感知机</span><br><span class="line">      ├── 生物神经元（细胞体/树突/轴突/突触）→ M-P 神经元（权值固定，不会学习）</span><br><span class="line">      ├── Hebb 学习律（同步激发的连接被强化）</span><br><span class="line">      └── 感知机（1957）+ 训练法则 W(k+1)=W(k)+η(y-ŷ)x</span><br><span class="line">            └── 局限：线性二分类、非线性可分不收敛</span><br><span class="line">                  │</span><br><span class="line">12.2 单层神经网络实例（= softmax 线性分类器）</span><br><span class="line">      └── 鸢尾花 4 属性 3 分类：中心化 → one_hot → softmax + CCE → 训练/测试双记录</span><br><span class="line">            └── 局限：只能画线性决策边界</span><br><span class="line">                  │</span><br><span class="line">12.3.1 多层神经网络</span><br><span class="line">      ├── 异或问题 → 用 h₁=x₁ANDx₂、h₂=x₁ORx₂ 组合出 XOR</span><br><span class="line">      ├── 隐含层 = 映射到新特征空间，使问题线性可分</span><br><span class="line">      ├── 前馈神经网络（只连前一层、同层不连、无跨层/反馈）</span><br><span class="line">      └── 全连接网络</span><br><span class="line">            │</span><br><span class="line">12.3.2 超参数和验证集</span><br><span class="line">      ├── 训练集（参数）/ 验证集（超参数）/ 测试集（泛化能力）</span><br><span class="line">      ├── 隐含层设计：层数 × 神经元数的组合搜索</span><br><span class="line">      └── 万能近似定理（一个隐含层足够多神经元 → 逼近任意连续函数）</span><br><span class="line">            │</span><br><span class="line">12.4 误差反向传播算法</span><br><span class="line">      ├── 链式法则反向传播梯度 + 梯度下降更新参数</span><br><span class="line">      ├── 1-1-1 网络完整手算（w_h/b_h/w_o/b_o：0.2/0.1/0.3/0.2 → 0.2019/0.1019/0.3145/0.2254）</span><br><span class="line">      └── 多神经元时：梯度 = 所有下游分支之和</span><br><span class="line">            │</span><br><span class="line">12.5 激活函数</span><br><span class="line">      ├── 线性激活 → 退化成单层线性模型；必须用简单非线性函数</span><br><span class="line">      ├── 梯度消失：σ&#x27;=σ(1-σ)、tanh&#x27;=1-tanh²（导数≤1，连乘趋 0）</span><br><span class="line">      └── 对比：阶跃 / logistic / tanh / ReLU / Leaky-ReLU / PReLU / RReLU</span><br><span class="line">            │</span><br><span class="line">12.6 多层神经网络实例</span><br><span class="line">      └── 4 → 16(ReLU) → 3(softmax)：测试准确率 96.7% → 100%，损失 0.252 → 0.085</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>原始课件位置：<code>课件/第12讲/</code>（12.1 神经元与感知机、12.2 实例：实现单层神经网络、12.3.1 多层神经网络、12.3.2 超参数和验证集、12.4 误差反向传播算法、12.5 激活函数、12.6 实例：实现多层神经网络）。<br>说明：12.4 的公式在 PDF 抽取时严重错乱（如 <code>yyLoss</code>、<code>314477715</code>），笔记中的推导按课件给出的数值逐步重建并<strong>与截图逐项核对</strong>（0.02205、-0.02895543、0.2253995、0.001867625 等数值均来自课件）。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+ 
+   <div>
+     <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:24px;">-------------本文结束<i class="far fa-power-off"></i>感谢您的阅读-------------</div>
+    
+</div>
+   </div>
+ 
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>hakusuri
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" title="第12讲 人工神经网络">http://example.com/2026/10/08/第12讲-人工神经网络/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"># 深度学习</a>
+              <a href="/tags/%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="tag"># 人工神经网络</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/" rel="prev" title="第11讲 PyTorch分类实现（子篇）">
+      <i class="fa fa-chevron-left"></i> 第11讲 PyTorch分类实现（子篇）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC-12-%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88%E7%A5%9E%E7%BB%8F%E5%85%83%E4%B8%8E%E6%84%9F%E7%9F%A5%E6%9C%BA-%E5%8D%95%E5%B1%82%E4%B8%8E%E5%A4%9A%E5%B1%82-%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD-%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0-%E4%B8%A4%E4%B8%AA%E5%AE%9E%E4%BE%8B%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#12-1-%E7%A5%9E%E7%BB%8F%E5%85%83%E4%B8%8E%E6%84%9F%E7%9F%A5%E6%9C%BA"><span class="nav-number">1.1.</span> <span class="nav-text">12.1 神经元与感知机</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-1-1-%E7%94%9F%E7%89%A9%E7%A5%9E%E7%BB%8F%E5%85%83%E4%B8%8E%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E5%85%83"><span class="nav-number">1.1.1.</span> <span class="nav-text">12.1.1 生物神经元与人工神经元</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-1-2-Hebb-%E5%AD%A6%E4%B9%A0%E5%BE%8B%EF%BC%881949%EF%BC%8CDonald-Hebb%EF%BC%89"><span class="nav-number">1.1.2.</span> <span class="nav-text">12.1.2 Hebb 学习律（1949，Donald Hebb）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-1-3-%E6%84%9F%E7%9F%A5%E6%9C%BA%E4%B8%8E%E6%84%9F%E7%9F%A5%E6%9C%BA%E8%AE%AD%E7%BB%83%E6%B3%95%E5%88%99"><span class="nav-number">1.1.3.</span> <span class="nav-text">12.1.3 感知机与感知机训练法则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-2-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0%E5%8D%95%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88TensorFlow%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">12.2 实例：实现单层神经网络（TensorFlow）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-1-%E5%AF%BC%E5%85%A5%E5%BA%93%E3%80%81%E8%AE%BE%E7%BD%AE-GPU-%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.2.1.</span> <span class="nav-text">12.2.1 导入库、设置 GPU 模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-2-%E5%8A%A0%E8%BD%BD%E6%95%B0%E6%8D%AE%E3%80%81%E8%BD%AC-NumPy%E3%80%81%E5%88%92%E5%88%86%E5%B1%9E%E6%80%A7%E4%B8%8E%E6%A0%87%E7%AD%BE"><span class="nav-number">1.2.2.</span> <span class="nav-text">12.2.2 加载数据、转 NumPy、划分属性与标签</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-3-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2%E4%B8%8E%E7%8B%AC%E7%83%AD%E7%BC%96%E7%A0%81"><span class="nav-number">1.2.3.</span> <span class="nav-text">12.2.3 数据类型转换与独热编码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-4-%E8%B6%85%E5%8F%82%E6%95%B0%E4%B8%8E%E5%8F%82%E6%95%B0%E5%88%9D%E5%80%BC"><span class="nav-number">1.2.4.</span> <span class="nav-text">12.2.4 超参数与参数初值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-2-5-%E8%AE%AD%E7%BB%83%E5%BE%AA%E7%8E%AF"><span class="nav-number">1.2.5.</span> <span class="nav-text">12.2.5 训练循环</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-3-1-%E5%A4%9A%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-number">1.3.</span> <span class="nav-text">12.3.1 多层神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-3-1-1-%E4%BB%8E%E5%BC%82%E6%88%96%E9%97%AE%E9%A2%98%E7%9C%8B%E9%9A%90%E5%90%AB%E5%B1%82%E7%9A%84%E5%BF%85%E8%A6%81%E6%80%A7"><span class="nav-number">1.3.1.</span> <span class="nav-text">12.3.1.1 从异或问题看隐含层的必要性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-3-1-2-%E5%A4%9A%E5%B1%82%E7%BD%91%E7%BB%9C%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.3.2.</span> <span class="nav-text">12.3.1.2 多层网络的结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-3-2-%E8%B6%85%E5%8F%82%E6%95%B0%E5%92%8C%E9%AA%8C%E8%AF%81%E9%9B%86"><span class="nav-number">1.4.</span> <span class="nav-text">12.3.2 超参数和验证集</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-3-2-1-%E4%B8%89%E4%B8%AA%E6%95%B0%E6%8D%AE%E9%9B%86%E7%9A%84%E6%98%8E%E7%A1%AE%E5%88%86%E5%B7%A5%EF%BC%88%E5%8A%A1%E5%BF%85%E5%88%86%E6%B8%85%EF%BC%89"><span class="nav-number">1.4.1.</span> <span class="nav-text">12.3.2.1 三个数据集的明确分工（务必分清）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-3-2-2-%E9%9A%90%E5%90%AB%E5%B1%82%E7%9A%84%E8%AE%BE%E8%AE%A1%EF%BC%9A%E7%94%A8%E5%AE%9E%E9%AA%8C%E7%A1%AE%E5%AE%9A%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-number">1.4.2.</span> <span class="nav-text">12.3.2.2 隐含层的设计：用实验确定超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-3-2-3-%E4%B8%87%E8%83%BD%E8%BF%91%E4%BC%BC%E5%AE%9A%E7%90%86"><span class="nav-number">1.4.3.</span> <span class="nav-text">12.3.2.3 万能近似定理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-4-%E8%AF%AF%E5%B7%AE%E5%8F%8D%E5%90%91%E4%BC%A0%E6%92%AD%E7%AE%97%E6%B3%95%EF%BC%88BP%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">12.4 误差反向传播算法（BP）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-4-1-%E7%AE%97%E6%B3%95%E6%80%9D%E6%83%B3"><span class="nav-number">1.5.1.</span> <span class="nav-text">12.4.1 算法思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-4-2-1-1-1-%E7%BD%91%E7%BB%9C%E7%9A%84%E5%AE%8C%E6%95%B4%E6%89%8B%E7%AE%97%EF%BC%88%E6%9C%AC%E8%AE%B2%E6%9C%80%E5%80%BC%E5%BE%97%E5%8F%8D%E5%A4%8D%E7%9C%8B%E7%9A%84%E4%B8%80%E6%AE%B5%EF%BC%89"><span class="nav-number">1.5.2.</span> <span class="nav-text">12.4.2 1-1-1 网络的完整手算（本讲最值得反复看的一段）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-4-3-%E9%9A%90%E5%90%AB%E5%B1%82%E6%9C%89%E5%A4%9A%E4%B8%AA%E7%A5%9E%E7%BB%8F%E5%85%83%E7%9A%84%E6%83%85%E5%BD%A2"><span class="nav-number">1.5.3.</span> <span class="nav-text">12.4.3 隐含层有多个神经元的情形</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-4-4-%E8%AE%AD%E7%BB%83%E6%B5%81%E7%A8%8B%E6%80%BB%E7%BB%93"><span class="nav-number">1.5.4.</span> <span class="nav-text">12.4.4 训练流程总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-5-%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-number">1.6.</span> <span class="nav-text">12.5 激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-5-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E7%94%A8%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-number">1.6.1.</span> <span class="nav-text">12.5.1 为什么必须用非线性激活函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-5-2-%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E9%97%AE%E9%A2%98%E4%B8%8E%E4%B8%A4%E4%B8%AA%E7%BB%8F%E5%85%B8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E5%AF%BC%E6%95%B0"><span class="nav-number">1.6.2.</span> <span class="nav-text">12.5.2 梯度消失问题与两个经典激活函数的导数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-5-3-%E7%A5%9E%E7%BB%8F%E5%85%83%E4%B8%8E%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.6.3.</span> <span class="nav-text">12.5.3 神经元与激活函数的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-5-4-%E5%B8%B8%E7%94%A8%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0%E5%AF%B9%E6%AF%94%EF%BC%88%E6%9C%AC%E8%AE%B2%E6%A0%B8%E5%BF%83%E8%A1%A8%EF%BC%89"><span class="nav-number">1.6.4.</span> <span class="nav-text">12.5.4 常用激活函数对比（本讲核心表）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-6-%E5%AE%9E%E4%BE%8B%EF%BC%9A%E5%AE%9E%E7%8E%B0%E5%A4%9A%E5%B1%82%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88TensorFlow%EF%BC%89"><span class="nav-number">1.7.</span> <span class="nav-text">12.6 实例：实现多层神经网络（TensorFlow）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#12-6-1-%E7%BD%91%E7%BB%9C%E7%BB%93%E6%9E%84%E8%AE%BE%E8%AE%A1"><span class="nav-number">1.7.1.</span> <span class="nav-text">12.6.1 网络结构设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-6-2-%E5%AE%8C%E6%95%B4%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.7.2.</span> <span class="nav-text">12.6.2 完整程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-6-3-%E5%8D%95%E5%B1%82-vs-%E4%B8%A4%E5%B1%82%E7%9A%84%E6%95%88%E6%9E%9C%E5%AF%B9%E6%AF%94%EF%BC%88%E6%9C%AC%E8%AE%B2%E7%BB%93%E8%AE%BA%EF%BC%89"><span class="nav-number">1.7.3.</span> <span class="nav-text">12.6.3 单层 vs 两层的效果对比（本讲结论）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E6%98%93%E9%94%99%E7%82%B9%E6%B8%85%E5%8D%95"><span class="nav-number">1.8.</span> <span class="nav-text">本讲易错点清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E8%AE%B2%E7%9F%A5%E8%AF%86%E5%9C%B0%E5%9B%BE"><span class="nav-number">1.9.</span> <span class="nav-text">本讲知识地图</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="hakusuri"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">hakusuri</p>
+  <div class="site-description" itemprop="description">Hakusuri的个人生活</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/hakusuri" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;hakusuri" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/244305717?spm_id_from=333.1007.0.0" title="bilibili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;244305717?spm_id_from&#x3D;333.1007.0.0" rel="noopener" target="_blank"><i class="far fa-tv fa-fw"></i>bilibili</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">hakusuri</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">408k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">6:11</span>
+</div>
+  <div class="powered-by">
+<!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+-->
+  </div>
+
+
+    <script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+    <span id="busuanzi_container_site_pv">总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+    <span class="post-meta-divider">|</span>
+    <span id="busuanzi_container_site_uv">总访客数<span id="busuanzi_value_site_uv"></span>人</span>
+    <span class="post-meta-divider">|</span>
+<!-- 不蒜子计数初始值纠正 -->
+<script>
+$(document).ready(function() {
+
+    var int = setInterval(fixCount, 50);  // 50ms周期检测函数
+    var countOffset = 20000;  // 初始化首次数据
+
+    function fixCount() {            
+       if (document.getElementById("busuanzi_container_site_pv").style.display != "none")
+        {
+            $("#busuanzi_value_site_pv").html(parseInt($("#busuanzi_value_site_pv").html()) + countOffset); 
+            clearInterval(int);
+        }                  
+        if ($("#busuanzi_container_site_pv").css("display") != "none")
+        {
+            $("#busuanzi_value_site_uv").html(parseInt($("#busuanzi_value_site_uv").html()) + countOffset); // 加上初始数据 
+            clearInterval(int); // 停止检测
+        }  
+    }
+       	
+});
+</script> 
+
+
+<!-- 网站运行时间的设置 -->
+<span id="timeDate">载入天数...</span>
+<span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("02/02/2025 22:00:00"); //此处修改你的建站时间或者网站上线时间
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒.";
+    }
+setInterval("createtime()",250);
+</script>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+  
+
+    </div>
+
+<!--音乐-->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/meting@1.2/dist/Meting.min.js"></script>
+  <div id="player" class="aplayer aplayer-withlist aplayer-fixed" data-id="7545855392" data-server="tencent" data-type="playlist" data-order="random" data-fixed="true" data-listfolded="true" data-theme="#2D8CF0"></div>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/assets/haru01.model.json"},"display":{"position":"right","width":200,"height":400},"mobile":{"show":true}});</script></body>
+</html>

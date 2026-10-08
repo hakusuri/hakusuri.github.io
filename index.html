@@ -302,6 +302,142 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="post-title-link" itemprop="url">第12讲 人工神经网络</a>
+        </h2>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-08 21:21:36 / 修改时间：21:33:34" itemprop="dateCreated datePublished" datetime="2026-10-08T21:21:36+08:00">2026-10-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）"><a href="#第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）" class="headerlink" title="第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例）"></a>第 12 讲 人工神经网络（神经元与感知机 &#x2F; 单层与多层 &#x2F; 反向传播 &#x2F; 激活函数 &#x2F; 两个实例）</h1><blockquote>
+<p>本讲对应课件：<strong>12.1 神经元与感知机 → 12.2 实例：实现单层神经网络 → 12.3.1 多层神经网络 → 12.3.2 超参数和验证集 → 12.4 误差反向传播算法 → 12.5 激活函数 → 12.6 实例：实现多层神经网络</strong>。<br>第 11 讲用 softmax 解决了线性多分类；本讲进入<strong>神经网络</strong>：从 M-P 神经元、感知机，到<strong>用隐含层解决异或这种线性不可分问题</strong>，再到<strong>误差反向传播（BP）<strong>和</strong>激活函数</strong>的选择——这是深度学习最核心的机制。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12.1 神经元与感知机</td>
+<td>生物神经元、M-P 神经元、Hebb 学习律、感知机与感知机训练法则</td>
+</tr>
+<tr>
+<td>12.2 单层神经网络实例</td>
+<td>单层网络 &#x3D; softmax 线性分类器；鸢尾花 4 属性 3 分类全流程</td>
+</tr>
+<tr>
+<td>12.3.1 多层神经网络</td>
+<td>异或问题、隐含层的作用、前馈神经网络、全连接网络</td>
+</tr>
+<tr>
+<td>12.3.2 超参数和验证集</td>
+<td>训练&#x2F;验证&#x2F;测试集的分工、隐含层设计、万能近似定理</td>
+</tr>
+<tr>
+<td>12.4 误差反向传播算法</td>
+<td>链式法则、1-1-1 网络逐步手算、多个隐含层神经元、训练流程</td>
+</tr>
+<tr>
+<td>12.5 激活函数</td>
+<td>线性 vs 非线性、梯度消失、logistic&#x2F;tanh&#x2F;ReLU&#x2F;Leaky-ReLU&#x2F;PReLU&#x2F;RReLU</td>
+</tr>
+<tr>
+<td>12.6 多层神经网络实例</td>
+<td>16 个隐含神经元 + ReLU + softmax；单层 vs 两层效果对比</td>
+</tr>
+</tbody></table>
+<hr>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+ 
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/07/%E7%AC%AC11%E8%AE%B2-PyTorch%E5%88%86%E7%B1%BB%E5%AE%9E%E7%8E%B0%EF%BC%88%E5%AD%90%E7%AF%87%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1330,144 +1466,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="hakusuri">
-      <meta itemprop="description" content="Hakusuri的个人生活">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HakusuriのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/" class="post-title-link" itemprop="url">第3讲 Python语言基础（1）</a>
-        </h2>
-
-        <div class="post-meta">
-	  
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-10-04 16:04:23" itemprop="dateCreated datePublished" datetime="2026-10-04T16:04:23+08:00">2026-10-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-10-06 23:43:49" itemprop="dateModified" datetime="2026-10-06T23:43:49+08:00">2026-10-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>10k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>9 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="第3讲-Python-语言基础（1）"><a href="#第3讲-Python-语言基础（1）" class="headerlink" title="第3讲 Python 语言基础（1）"></a>第3讲 Python 语言基础（1）</h1><blockquote>
-<p>本讲对应课件：<strong>3.1 初识 Python → 3.2 第一个 Python 程序 → 3.3 输入和输出 → 3.4 常量、变量和表达式（3.4.1 &#x2F; 3.4.2）→ 3.5 程序控制语句（3.5.1 条件分支 &#x2F; 3.5.2 循环）</strong>，外加补充课件 <em>format 格式化输出</em>。<br>笔记按课件小节顺序整理：先讲 Python 是什么、怎么跑起来，再讲变量与数据类型、运算符，最后讲条件与循环这两类程序控制结构。</p>
-</blockquote>
-<p><strong>本讲速览</strong></p>
-<table>
-<thead>
-<tr>
-<th>小节</th>
-<th>核心内容</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>3.1 初识 Python</td>
-<td>自由软件&#x2F;开源软件、编译型与解释型语言、Python 版本与特点</td>
-</tr>
-<tr>
-<td>3.2 第一个 Python 程序</td>
-<td>注释、赋值、动态类型、缩进与语句块、PEP8、大小写敏感</td>
-</tr>
-<tr>
-<td>3.3 输入和输出</td>
-<td><code>input()</code> &#x2F; <code>print()</code>、格式化输出 <code>%</code>、转义字符、<code>end</code> 参数</td>
-</tr>
-<tr>
-<td>3.4 常量、变量和表达式</td>
-<td>6 种基本数据类型、标识符、常量与变量、类型转换、各类运算符</td>
-</tr>
-<tr>
-<td>3.5 程序控制语句</td>
-<td><code>if / if-else / if-elif-else</code>、条件表达式、<code>while / for</code>、<code>range()</code>、<code>break / continue</code></td>
-</tr>
-<tr>
-<td>补充</td>
-<td><code>%</code> 格式化与 <code>str.format()</code> 的完整用法</td>
-</tr>
-</tbody></table>
-<hr>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/10/04/%E7%AC%AC3%E8%AE%B2-Python%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%EF%BC%881%EF%BC%89/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
- 
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1539,7 +1537,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-count">23</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1552,7 +1550,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1600,13 +1598,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">392k</span>
+    <span title="站点总字数">408k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">5:57</span>
+    <span title="站点阅读时长">6:11</span>
 </div>
   <div class="powered-by">
 <!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

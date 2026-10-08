@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-10-07T14:28:46.896Z</updated>
+  <updated>2026-10-08T13:33:34.647Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,69 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>第12讲 人工神经网络</title>
+    <link href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"/>
+    <id>http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/</id>
+    <published>2026-10-08T13:21:36.000Z</published>
+    <updated>2026-10-08T13:33:34.647Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）&quot;&gt;&lt;a href=&quot;#第-12-讲-人工神经网络（神经元与感知机-单层与多层-反向传播-激活函数-两个实例）&quot; class=&quot;headerlink&quot; title=&quot;第 12 讲 人工神经网络（神经元与感知机 &amp;#x2F; 单层与多层 &amp;#x2F; 反向传播 &amp;#x2F; 激活函数 &amp;#x2F; 两个实例）&quot;&gt;&lt;/a&gt;第 12 讲 人工神经网络（神经元与感知机 &amp;#x2F; 单层与多层 &amp;#x2F; 反向传播 &amp;#x2F; 激活函数 &amp;#x2F; 两个实例）&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;12.1 神经元与感知机 → 12.2 实例：实现单层神经网络 → 12.3.1 多层神经网络 → 12.3.2 超参数和验证集 → 12.4 误差反向传播算法 → 12.5 激活函数 → 12.6 实例：实现多层神经网络&lt;/strong&gt;。&lt;br&gt;第 11 讲用 softmax 解决了线性多分类；本讲进入&lt;strong&gt;神经网络&lt;/strong&gt;：从 M-P 神经元、感知机，到&lt;strong&gt;用隐含层解决异或这种线性不可分问题&lt;/strong&gt;，再到&lt;strong&gt;误差反向传播（BP）&lt;strong&gt;和&lt;/strong&gt;激活函数&lt;/strong&gt;的选择——这是深度学习最核心的机制。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;12.1 神经元与感知机&lt;/td&gt;
+&lt;td&gt;生物神经元、M-P 神经元、Hebb 学习律、感知机与感知机训练法则&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.2 单层神经网络实例&lt;/td&gt;
+&lt;td&gt;单层网络 &amp;#x3D; softmax 线性分类器；鸢尾花 4 属性 3 分类全流程&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.3.1 多层神经网络&lt;/td&gt;
+&lt;td&gt;异或问题、隐含层的作用、前馈神经网络、全连接网络&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.3.2 超参数和验证集&lt;/td&gt;
+&lt;td&gt;训练&amp;#x2F;验证&amp;#x2F;测试集的分工、隐含层设计、万能近似定理&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.4 误差反向传播算法&lt;/td&gt;
+&lt;td&gt;链式法则、1-1-1 网络逐步手算、多个隐含层神经元、训练流程&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.5 激活函数&lt;/td&gt;
+&lt;td&gt;线性 vs 非线性、梯度消失、logistic&amp;#x2F;tanh&amp;#x2F;ReLU&amp;#x2F;Leaky-ReLU&amp;#x2F;PReLU&amp;#x2F;RReLU&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12.6 多层神经网络实例&lt;/td&gt;
+&lt;td&gt;16 个隐含神经元 + ReLU + softmax；单层 vs 两层效果对比&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="人工神经网络" scheme="http://example.com/tags/%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>第11讲 PyTorch分类实现（子篇）</title>
@@ -775,29 +838,6 @@ e、根据应用需求的不同，因特网的运输层为应用层提供了两�
     <summary type="html">&lt;h1 id=&quot;数据链路层&quot;&gt;&lt;a href=&quot;#数据链路层&quot; class=&quot;headerlink&quot; title=&quot;数据链路层&quot;&gt;&lt;/a&gt;&lt;center&gt;数据链路层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;链路(Link)：从一个结点到相邻结点的一段物理线路，中间没有其他交换结点
 数据链路(Data Link)：将实现通信协议的硬件和软件加到链路上，构成数据链路
 数据链路层以帧为单位传输和处理数据
-&lt;/code&gt;&lt;/pre&gt;</summary>
-    
-    
-    
-    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-    
-    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>物理层</title>
-    <link href="http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/"/>
-    <id>http://example.com/2025/02/22/%E7%89%A9%E7%90%86%E5%B1%82/</id>
-    <published>2025-02-22T09:40:59.000Z</published>
-    <updated>2026-10-06T15:42:57.966Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;物理层&quot;&gt;&lt;a href=&quot;#物理层&quot; class=&quot;headerlink&quot; title=&quot;物理层&quot;&gt;&lt;/a&gt;&lt;center&gt;物理层&lt;/h1&gt;&lt;h2 id=&quot;基本概念&quot;&gt;&lt;a href=&quot;#基本概念&quot; class=&quot;headerlink&quot; title=&quot;基本概念&quot;&gt;&lt;/a&gt;基本概念&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;任务：在链接各种计算机的传输媒体上传输数据比特流
-与数据链路层关系：屏蔽了各种传输媒体的差异，使数据链路层仅需考虑完成本层的协议和服务，而不必考虑具体的传输媒体
 &lt;/code&gt;&lt;/pre&gt;</summary>
     
     
