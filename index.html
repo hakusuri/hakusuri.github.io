@@ -302,6 +302,138 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/09/%E7%AC%AC13%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%882%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="hakusuri">
+      <meta itemprop="description" content="Hakusuri的个人生活">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HakusuriのBlog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2026/10/09/%E7%AC%AC13%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%882%EF%BC%89/" class="post-title-link" itemprop="url">第13讲 人工神经网络（2）</a>
+        </h2>
+
+        <div class="post-meta">
+	  
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2026-10-09 21:17:18 / 修改时间：21:54:51" itemprop="dateCreated datePublished" datetime="2026-10-09T21:17:18+08:00">2026-10-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="第-13-讲-人工神经网络（2）：小批量梯度下降-优化器-Keras-与-Sequential-MNIST-实例"><a href="#第-13-讲-人工神经网络（2）：小批量梯度下降-优化器-Keras-与-Sequential-MNIST-实例" class="headerlink" title="第 13 讲 人工神经网络（2）：小批量梯度下降 &#x2F; 优化器 &#x2F; Keras 与 Sequential &#x2F; MNIST 实例"></a>第 13 讲 人工神经网络（2）：小批量梯度下降 &#x2F; 优化器 &#x2F; Keras 与 Sequential &#x2F; MNIST 实例</h1><blockquote>
+<p>本讲对应课件：<strong>13.1 小批量梯度下降法 → 13.2 梯度下降法的优化 → 13.3 Keras与tf.keras → 13.4 Sequential模型 → 13.5 实例：Sequential模型实现手写数字识别 → 13.6 实例：模型的保存和加载</strong>。<br>第 12 讲手写了 BP 与梯度下降；本讲把它<strong>工程化</strong>：怎么选批量、怎么调学习率、怎么用动量&#x2F;自适应优化器，最后用 <strong>tf.keras 的 Sequential API</strong> 几行代码搭出多层网络，完成 MNIST 手写数字识别并保存模型。</p>
+</blockquote>
+<p><strong>本讲速览</strong></p>
+<table>
+<thead>
+<tr>
+<th>小节</th>
+<th>核心内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>13.1 小批量梯度下降法</td>
+<td>BGD &#x2F; SGD &#x2F; MBGD 的对比、一轮的定义、抽样与梯度偏差、批量大小</td>
+</tr>
+<tr>
+<td>13.2 梯度下降法的优化</td>
+<td>打乱样本、批量大小取 2 的幂、学习率衰减、AdaGrad&#x2F;RMSprop&#x2F;AdaDelta、Momentum、NAG、Adam&#x2F;Nadam</td>
+</tr>
+<tr>
+<td>13.3 Keras 与 tf.keras</td>
+<td>Keras 的定位、tf.keras、TensorFlow 2.0 + tf.keras 的关系</td>
+</tr>
+<tr>
+<td>13.4 Sequential 模型</td>
+<td>建模型 add、summary、compile（损失&#x2F;优化器&#x2F;指标）、fit 的参数与 verbose</td>
+</tr>
+<tr>
+<td>13.5 手写数字识别实例</td>
+<td>MNIST、784→128(ReLU)→10(softmax)、101770 个参数、完整代码与结果</td>
+</tr>
+<tr>
+<td>13.6 模型保存与加载</td>
+<td>save_weights &#x2F; load_weights、save &#x2F; load_model、HDF5 与 SavedModel</td>
+</tr>
+</tbody></table>
+<hr>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2026/10/09/%E7%AC%AC13%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%882%EF%BC%89/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+ 
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/08/%E7%AC%AC12%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1340,132 +1472,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.png">
-      <meta itemprop="name" content="hakusuri">
-      <meta itemprop="description" content="Hakusuri的个人生活">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HakusuriのBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/" class="post-title-link" itemprop="url">第7讲 数字图像基础</a>
-        </h2>
-
-        <div class="post-meta">
-	  
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2026-10-04 18:35:35" itemprop="dateCreated datePublished" datetime="2026-10-04T18:35:35+08:00">2026-10-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-10-06 23:43:50" itemprop="dateModified" datetime="2026-10-06T23:43:50+08:00">2026-10-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">课程笔记</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>7.4k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）"><a href="#第-7-讲-数字图像基础（图像基本概念-Pillow-手写数字数据集）" class="headerlink" title="第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集）"></a>第 7 讲 数字图像基础（图像基本概念 &#x2F; Pillow &#x2F; 手写数字数据集）</h1><blockquote>
-<p>本讲对应课件：<strong>7.1 数字图像基本概念 → 7.2 Pillow 图像处理库 → 7.3 手写数字数据集</strong>。<br>这是深度学习实战前的”图像数据”准备篇：先搞清数字图像在计算机里到底怎么存（像素、位深度、色彩模式、格式），再学会用 <strong>Pillow</strong> 把图像读进来、看属性、转色彩模式、拆通道、转成 NumPy 数组、缩放旋转裁剪，最后用经典的 <strong>MNIST 手写数字数据集</strong> 把整条链路跑通。</p>
-</blockquote>
-<p><strong>本讲速览</strong></p>
-<table>
-<thead>
-<tr>
-<th>小节</th>
-<th>核心内容</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>7.1 数字图像基本概念</td>
-<td>图像离散化、像素与位图、位深度、二值&#x2F;灰度&#x2F;RGB&#x2F;RGBA&#x2F;256 色图像、图像格式、色彩模式、序列图像、深度图像</td>
-</tr>
-<tr>
-<td>7.2 Pillow 图像处理库</td>
-<td>打开&#x2F;保存图像、图像对象属性、显示图像、转换色彩模式、通道分离与合并、转 NumPy 数组、颜色反向、缩放旋转镜像、裁剪</td>
-</tr>
-<tr>
-<td>7.3 手写数字数据集</td>
-<td>MNIST 数据集介绍、下载、训练&#x2F;测试集形状、显示单张与随机 4 张手写数字</td>
-</tr>
-</tbody></table>
-<hr>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2026/10/04/%E7%AC%AC7%E8%AE%B2-%E6%95%B0%E5%AD%97%E5%9B%BE%E5%83%8F%E5%9F%BA%E7%A1%80/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
- 
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1537,7 +1543,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-count">24</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1598,13 +1604,13 @@
       <i class="fa fa-chart-area"></i>
     </span>
       <span class="post-meta-item-text">站点总字数：</span>
-    <span title="站点总字数">408k</span>
+    <span title="站点总字数">424k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">6:11</span>
+    <span title="站点阅读时长">6:26</span>
 </div>
   <div class="powered-by">
 <!--由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动

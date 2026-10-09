@@ -6,7 +6,7 @@
   <link href="http://example.com/atom.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2026-10-08T13:33:34.647Z</updated>
+  <updated>2026-10-09T13:54:51.129Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,65 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>第13讲 人工神经网络（2）</title>
+    <link href="http://example.com/2026/10/09/%E7%AC%AC13%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%882%EF%BC%89/"/>
+    <id>http://example.com/2026/10/09/%E7%AC%AC13%E8%AE%B2-%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%882%EF%BC%89/</id>
+    <published>2026-10-09T13:17:18.000Z</published>
+    <updated>2026-10-09T13:54:51.129Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;第-13-讲-人工神经网络（2）：小批量梯度下降-优化器-Keras-与-Sequential-MNIST-实例&quot;&gt;&lt;a href=&quot;#第-13-讲-人工神经网络（2）：小批量梯度下降-优化器-Keras-与-Sequential-MNIST-实例&quot; class=&quot;headerlink&quot; title=&quot;第 13 讲 人工神经网络（2）：小批量梯度下降 &amp;#x2F; 优化器 &amp;#x2F; Keras 与 Sequential &amp;#x2F; MNIST 实例&quot;&gt;&lt;/a&gt;第 13 讲 人工神经网络（2）：小批量梯度下降 &amp;#x2F; 优化器 &amp;#x2F; Keras 与 Sequential &amp;#x2F; MNIST 实例&lt;/h1&gt;&lt;blockquote&gt;
+&lt;p&gt;本讲对应课件：&lt;strong&gt;13.1 小批量梯度下降法 → 13.2 梯度下降法的优化 → 13.3 Keras与tf.keras → 13.4 Sequential模型 → 13.5 实例：Sequential模型实现手写数字识别 → 13.6 实例：模型的保存和加载&lt;/strong&gt;。&lt;br&gt;第 12 讲手写了 BP 与梯度下降；本讲把它&lt;strong&gt;工程化&lt;/strong&gt;：怎么选批量、怎么调学习率、怎么用动量&amp;#x2F;自适应优化器，最后用 &lt;strong&gt;tf.keras 的 Sequential API&lt;/strong&gt; 几行代码搭出多层网络，完成 MNIST 手写数字识别并保存模型。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;本讲速览&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;小节&lt;/th&gt;
+&lt;th&gt;核心内容&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;13.1 小批量梯度下降法&lt;/td&gt;
+&lt;td&gt;BGD &amp;#x2F; SGD &amp;#x2F; MBGD 的对比、一轮的定义、抽样与梯度偏差、批量大小&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;13.2 梯度下降法的优化&lt;/td&gt;
+&lt;td&gt;打乱样本、批量大小取 2 的幂、学习率衰减、AdaGrad&amp;#x2F;RMSprop&amp;#x2F;AdaDelta、Momentum、NAG、Adam&amp;#x2F;Nadam&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;13.3 Keras 与 tf.keras&lt;/td&gt;
+&lt;td&gt;Keras 的定位、tf.keras、TensorFlow 2.0 + tf.keras 的关系&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;13.4 Sequential 模型&lt;/td&gt;
+&lt;td&gt;建模型 add、summary、compile（损失&amp;#x2F;优化器&amp;#x2F;指标）、fit 的参数与 verbose&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;13.5 手写数字识别实例&lt;/td&gt;
+&lt;td&gt;MNIST、784→128(ReLU)→10(softmax)、101770 个参数、完整代码与结果&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;13.6 模型保存与加载&lt;/td&gt;
+&lt;td&gt;save_weights &amp;#x2F; load_weights、save &amp;#x2F; load_model、HDF5 与 SavedModel&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;hr&gt;</summary>
+    
+    
+    
+    <category term="深度学习" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="课程笔记" scheme="http://example.com/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E8%AF%BE%E7%A8%8B%E7%AC%94%E8%AE%B0/"/>
+    
+    
+    <category term="深度学习" scheme="http://example.com/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
+    
+    <category term="人工神经网络" scheme="http://example.com/tags/%E4%BA%BA%E5%B7%A5%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
   
   <entry>
     <title>第12讲 人工神经网络</title>
@@ -814,30 +873,6 @@ b、在计算机网络中进行通信的真正实体是位于通信两端主机�
 c、运输层的任务是如何为运行在不同主机上的应用进程提供直接的通信服务，运输层协议又称为端到端协议。
 d、运输层向高层用户屏蔽了下面网络核心的细节(如网络拓扑、所采用的路由选择协议等)，它使应用进程看见的就好像是在两个运输层实体之间有一条端到端的逻辑通信信道。
 e、根据应用需求的不同，因特网的运输层为应用层提供了两种不同的运输协议，即面向连接的TCP和无连接的UDP。
-&lt;/code&gt;&lt;/pre&gt;</summary>
-    
-    
-    
-    <category term="计算机" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/"/>
-    
-    <category term="计算机网络" scheme="http://example.com/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-    
-    <category term="计算机网络" scheme="http://example.com/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>数据链路层</title>
-    <link href="http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/"/>
-    <id>http://example.com/2025/02/22/%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82/</id>
-    <published>2025-02-22T09:41:14.000Z</published>
-    <updated>2026-10-06T15:42:58.975Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;数据链路层&quot;&gt;&lt;a href=&quot;#数据链路层&quot; class=&quot;headerlink&quot; title=&quot;数据链路层&quot;&gt;&lt;/a&gt;&lt;center&gt;数据链路层&lt;/h1&gt;&lt;h2 id=&quot;概述&quot;&gt;&lt;a href=&quot;#概述&quot; class=&quot;headerlink&quot; title=&quot;概述&quot;&gt;&lt;/a&gt;概述&lt;/h2&gt;&lt;pre&gt;&lt;code&gt;链路(Link)：从一个结点到相邻结点的一段物理线路，中间没有其他交换结点
-数据链路(Data Link)：将实现通信协议的硬件和软件加到链路上，构成数据链路
-数据链路层以帧为单位传输和处理数据
 &lt;/code&gt;&lt;/pre&gt;</summary>
     
     
